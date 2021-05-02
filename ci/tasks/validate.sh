@@ -83,6 +83,8 @@ if [[ ${terraform_configuration_names} != "" ]]; then
   configuration_names=(${terraform_configuration_names//","/ })
 fi
 
+configuration_ignore_names=(${terraform_configuration_ignore_names//","/ })
+
 export ALICLOUD_ACCESS_KEY=${ALICLOUD_ACCESS_KEY}
 export ALICLOUD_SECRET_KEY=${ALICLOUD_SECRET_KEY}
 export ALICLOUD_REGION=${ALICLOUD_REGION}
@@ -90,6 +92,20 @@ export ALICLOUD_REGION=${ALICLOUD_REGION}
 start_to_record=false
 for configuration in ${configuration_names[@]};
 do
+  skip=false
+  if [[ $terraform_configuration_ignore_names != "" ]]; then
+    for ignore in ${configuration_ignore_names[@]}
+    do
+      if [[ ${configuration} == ${ignore} ]]; then
+        skip=true
+        break
+      fi
+    done
+  fi
+  if [[ $skip = true ]]; then
+    echo -e "\n\033[33mSkipping the ${configuration} because of it is ignored. \033[0m"
+    continue
+  fi
   for action in ${TF_ACTIONS[@]};
   do
     if [[ ${action} == "replace" ]]; then
@@ -126,10 +142,17 @@ do
                 echo $LINE >> plan.txt
               fi
           fi
+          if [[ $LINE == *"Error:"* ]]; then
+              if [[ ! -f "error.txt" ]]; then
+                echo $LINE > error.txt
+              else
+                echo $LINE >> error.txt
+              fi
+          fi
       done
       }
     fi
-    if [[ $? == 0 ]]; then
+    if [[ ! -a error.txt ]]; then
       echo -e "\n\033[32m--- PASS: terraform ${action} ${configuration} \033[0m"
       if [[ -a warning.txt ]]; then
         read WARNING < warning.txt
@@ -173,7 +196,13 @@ do
       fi
     else
       echo -e "\n\033[31m--- FAIL: terraform ${action} ${configuration} \033[0m"
-      RESULT="[ERROR] Running certification test ${TERRAFORM_CONFIGURATION_PATH}/${configuration} failed in the terraform version ${terraform_version} and provider version ${plugin_file_version}."
+      read ERROR < error.txt
+      rm -rf error.txt
+      RESULT="[ERROR] Running certification test ${TERRAFORM_CONFIGURATION_PATH}/${configuration} failed in the terraform version ${terraform_version} and provider version ${plugin_file_version}.\n"
+      RESULT=${RESULT}${ERROR}"\n"
+      RESULT=${RESULT}"\n--- Terraform CI Details --- \n"
+      RESULT=${RESULT}"Login：${ACCESS_URL}/teams/main/pipelines/${CONCOURSE_TARGET_TRIGGER_PIPELINE_NAME}/jobs/${CONCOURSE_TARGET_TRIGGER_PIPELINE_JOB_NAME} \n"
+      RESULT=`echo $RESULT | sed 's/\"//g'`
       curl -X POST \
           "https://oapi.dingtalk.com/robot/send?access_token=${DING_TALK_TOKEN}" \
           -H 'cache-control: no-cache' \

@@ -13,7 +13,7 @@ resource "alicloud_vswitch" "default" {
   zone_id      = data.alicloud_zones.default.zones.0.id
   vswitch_name = var.name
 }
-resource "alicloud_adb_cluster" "default" {
+resource "alicloud_adb_db_cluster" "default" {
   db_cluster_version  = var.db_cluster_version
   db_cluster_category = var.db_cluster_category
   db_node_class       = var.db_node_class
@@ -22,4 +22,5 @@ resource "alicloud_adb_cluster" "default" {
   pay_type            = "PostPaid"
   description         = var.name
   vswitch_id          = alicloud_vswitch.default.id
+  mode = var.mode
 }

@@ -1,7 +1,9 @@
 variable "creation" {
   default = "ADB"
 }
-
+variable "mode" {
+  default = "reserver"
+}
 variable "name" {
   default = "tf-adb-cluster-example"
 }
