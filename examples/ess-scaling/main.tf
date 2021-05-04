@@ -65,7 +65,7 @@ resource "alicloud_ess_scaling_configuration" "config" {
 }
 
 resource "alicloud_key_pair" "key" {
-  key_name = "my-key-pair-for-ess"
+  key_pair_name = "my-key-pair-for-ess"
 }
 
 resource "alicloud_ram_role" "role" {
@@ -94,8 +94,8 @@ EOF
 }
 
 resource "alicloud_ram_policy" "policy" {
-  name     = "EcsRamRolePolicyTest"
-  document = <<EOF
+  policy_name     = "EcsRamRolePolicyTest"
+  policy_document = <<EOF
     {
       "Statement": [
         {

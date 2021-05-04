@@ -1,33 +1,32 @@
-data "alicloud_dns_domains" "domain" {
+data "alicloud_alidns_domains" "domain" {
   domain_name_regex = "^*."
 }
 
-data "alicloud_dns_groups" "group" {
-  name_regex = "^y[A-Za-z]+"
+data "alicloud_alidns_records" "record" {
+  domain_name = data.alicloud_alidns_domains.domain.domains[0].domain_name
+  type        = "A"
+  rr_regex    = "^@"
 }
 
-data "alicloud_dns_records" "record" {
-  domain_name       = data.alicloud_dns_domains.domain.domains[0].domain_name
-  is_locked         = false
-  type              = "A"
-  host_record_regex = "^@"
-  output_file       = "records.txt"
+resource "alicloud_alidns_domain_group" "group" {
+  domain_group_name = var.group_name
 }
 
-resource "alicloud_dns_group" "group" {
-  name  = var.group_name
-  count = var.number
+resource "alicloud_alidns_domain" "dns" {
+  domain_name = var.domain_name
+  group_id    = alicloud_alidns_domain_group.group.id
 }
 
-resource "alicloud_dns" "dns" {
-  name     = var.domain_name
-  group_id = alicloud_dns_group.group.*.id[length(alicloud_dns_group.group)]
-}
-
-resource "alicloud_dns_record" "record" {
-  name        = alicloud_dns.dns.name
-  host_record = "alimailskajdh"
+resource "alicloud_alidns_record" "record" {
+  domain_name = alicloud_alidns_domain.dns.domain_name
+  rr          = "alimail"
   type        = "CNAME"
-  value       = "mail.mxhichind.com"
+  ttl         = 600
+  priority    = 0
+  value       = "mail.mxhichin.com"
+  line        = "default"
+  status      = "ENABLE"
+  remark      = "test new domain record"
 }
+
 

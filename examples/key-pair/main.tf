@@ -10,9 +10,9 @@ resource "alicloud_vpc" "main" {
 }
 
 resource "alicloud_vswitch" "main" {
-  vpc_id            = alicloud_vpc.main.id
-  cidr_block        = "10.1.1.0/24"
-  availability_zone = var.availability_zones
+  vpc_id     = alicloud_vpc.main.id
+  cidr_block = "10.1.1.0/24"
+  zone_id    = var.availability_zones
 
   depends_on = [alicloud_vpc.main]
 }
@@ -70,26 +70,26 @@ resource "alicloud_instance" "instance" {
   }
 }
 
-resource "alicloud_disk" "disk" {
-  availability_zone = alicloud_instance.instance[0].availability_zone
-  category          = var.disk_category
-  size              = var.disk_size
-  count             = var.disk_count
+resource "alicloud_ecs_disk" "disk" {
+  zone_id  = alicloud_instance.instance[0].availability_zone
+  category = var.disk_category
+  size     = var.disk_size
+  count    = var.disk_count
 }
 
-resource "alicloud_disk_attachment" "instance-attachment" {
+resource "alicloud_ecs_disk_attachment" "instance-attachment" {
   count       = var.disk_count
-  disk_id     = alicloud_disk.disk.*.id[count.index]
+  disk_id     = alicloud_ecs_disk.disk.*.id[count.index]
   instance_id = alicloud_instance.instance.*.id[count.index % var.number]
 }
 
 resource "alicloud_key_pair" "key_pair" {
-  key_name = var.key_name
-  key_file = var.private_key_file
+  key_pair_name = var.key_name
+  key_file      = var.private_key_file
 }
 
 resource "alicloud_key_pair_attachment" "key_pair_attachment" {
-  key_name     = alicloud_key_pair.key_pair.id
-  instance_ids = alicloud_instance.instance.*.id
+  key_pair_name = alicloud_key_pair.key_pair.id
+  instance_ids  = alicloud_instance.instance.*.id
 }
 

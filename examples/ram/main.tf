@@ -60,9 +60,8 @@ EOF
 }
 
 resource "alicloud_ram_policy" "policy" {
-  name = var.policy_name
-
-  document = <<EOF
+  policy_name     = var.policy_name
+  policy_document = <<EOF
     {
       "Statement": [
         {

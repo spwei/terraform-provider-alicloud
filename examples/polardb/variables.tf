@@ -1,3 +1,6 @@
+variable "name" {
+  default = "terraform-polardb-example"
+}
 variable "db_version" {
   default = "8.0"
 }

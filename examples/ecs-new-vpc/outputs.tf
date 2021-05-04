@@ -5,7 +5,7 @@ output "ecs_instance_ids" {
 
 // Output the IDs of the ECS disks created
 output "ecs_disk_ids" {
-  value = join(",", alicloud_disk.disks.*.id)
+  value = join(",", alicloud_ecs_disk.disks.*.id)
 }
 
 // Output the ID of the new VPC created

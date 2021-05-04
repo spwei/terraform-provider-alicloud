@@ -178,4 +178,4 @@ fly -t terraform-intl sp -p certify \
   -v terraform_backend_tablestore_endpoint="https://tf-oss-remote.cn-hangzhou.ots.aliyuncs.com" \
   -v terraform_backend_tablestore_table="terraform_state" \
   -v terraform_configuration_names="" \
-  -v terraform_configuration_ignore_names="adb,ddosbgp,ddoscoo"
+  -v terraform_configuration_ignore_names="dbaudit,ddosbgp,ddoscoo,edas-application,edas-application-deployment,edas-application-scale,edas-cluster,edas-deploy-group,edas-instance-cluster-attachment,edas-slb-bind,route-interface,vpn-connection,vpn-route-entry"

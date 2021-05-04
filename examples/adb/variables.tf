@@ -2,7 +2,7 @@ variable "creation" {
   default = "ADB"
 }
 variable "mode" {
-  default = "reserver"
+  default = "flexible"
 }
 variable "name" {
   default = "tf-adb-cluster-example"
@@ -13,13 +13,16 @@ variable "db_cluster_version" {
 }
 
 variable "db_cluster_category" {
-  default = "Cluster"
+  default = "MixedStorage"
 }
 
 variable "db_node_class" {
   default = "C8"
 }
 
+variable "db_compute_resource" {
+  default = "8Core32GB"
+}
 variable "db_node_count" {
   default = 2
 }

@@ -7,11 +7,11 @@ variable "vswitch_cidr" {
 }
 
 variable "zone" {
-  default = "cn-hangzhou-i"
+  default = ""
 }
 
 variable "image" {
-  default = "ubuntu_18_04_64_20G_alibase_20190624.vhd"
+  default = ""
 }
 
 variable "instance_nat_type" {

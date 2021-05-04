@@ -54,7 +54,7 @@ variable "slb_name" {
   default = "slb_worder"
 }
 
-variable "internet" {
-  default = true
+variable "address_type" {
+  default = "internet"
 }
 

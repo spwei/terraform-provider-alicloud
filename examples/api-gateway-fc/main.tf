@@ -27,9 +27,9 @@ resource "alicloud_fc_function" "foo" {
 }
 
 resource "alicloud_ram_policy" "policy" {
-  name = var.ram_policy_name
+  policy_name = var.ram_policy_name
 
-  document = <<EOF
+  policy_document = <<EOF
         {
           "Version": "1",
           "Statement": [

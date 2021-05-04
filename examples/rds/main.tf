@@ -1,7 +1,4 @@
 // Zones data source for availability_zone
-data "alicloud_zones" "default" {
-  available_resource_creation = "Rds"
-}
 data "alicloud_db_instance_classes" "this" {
   engine         = var.engine
   engine_version = var.engine_version
@@ -38,16 +35,16 @@ resource "alicloud_db_instance" "instance" {
 }
 
 resource "alicloud_db_account" "account" {
-  count       = 2
-  instance_id = alicloud_db_instance.instance.id
-  name        = "tf_account_${count.index}"
-  password    = var.password
+  count            = 2
+  db_instance_id   = alicloud_db_instance.instance.id
+  account_name     = "tf_account_${count.index}"
+  account_password = var.password
 }
 
 resource "alicloud_db_backup_policy" "backup" {
-  instance_id   = alicloud_db_instance.instance.id
-  backup_period = ["Tuesday", "Wednesday"]
-  backup_time   = "10:00Z-11:00Z"
+  instance_id             = alicloud_db_instance.instance.id
+  preferred_backup_period = ["Tuesday", "Wednesday"]
+  preferred_backup_time   = "10:00Z-11:00Z"
 }
 
 resource "alicloud_db_connection" "connection" {

@@ -1,14 +1,4 @@
 # common variables
-variable "alicloud_access_key" {
-  description = "The Alicloud Access Key ID to launch resources."
-  default     = ""
-}
-
-variable "alicloud_secret_key" {
-  description = "The Alicloud Access Secret Key to launch resources."
-  default     = ""
-}
-
 variable "region" {
   description = "The region to launch resources."
   default     = ""
@@ -222,12 +212,6 @@ variable "ram_role_ram_users" {
   default     = []
 }
 
-variable "ram_role_services" {
-  description = "The services of assuming RAM role document"
-  type        = list(string)
-  default     = ["ecs.aliyuncs.com"]
-}
-
 variable "ram_role_terminate_force" {
   description = "Whether release relationship forcibly when deleting RAM role."
   default     = true
@@ -236,23 +220,6 @@ variable "ram_role_terminate_force" {
 variable "ram_policy_name" {
   description = "The name of RAM Policy."
   default     = "TF-RAM-Policy-Name"
-}
-
-variable "ram_policy_statement_effect" {
-  description = "The statement effect of RAM policy document."
-  default     = "Allow"
-}
-
-variable "ram_policy_statement_action" {
-  description = "The statement action of RAM policy document."
-  type        = list(string)
-  default     = ["ecs:*"]
-}
-
-variable "ram_policy_statement_resource" {
-  description = "The statement resource of RAM policy document."
-  type        = list(string)
-  default     = ["acs:ecs:*:*:*"]
 }
 
 variable "ram_policy_terminate_force" {

@@ -63,7 +63,7 @@ resource "alicloud_instance" "instance" {
 resource "alicloud_slb" "instance" {
   name                 = var.slb_name
   internet_charge_type = var.slb_internet_charge_type
-  internet             = var.internet
+  address_type         = var.address_type
 }
 
 resource "alicloud_slb_listener" "listener" {

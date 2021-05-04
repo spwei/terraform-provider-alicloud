@@ -49,8 +49,8 @@ resource "alicloud_security_group_rule" "allow_https_22" {
 }
 
 resource "alicloud_key_pair" "key_pair" {
-  key_name = var.key_name
-  key_file = var.private_key_file
+  key_pair_name = var.key_name
+  key_file      = var.private_key_file
 }
 
 resource "alicloud_instance" "instance" {
@@ -77,16 +77,16 @@ resource "alicloud_instance" "instance" {
   }
 }
 
-resource "alicloud_disk" "disk" {
-  availability_zone = alicloud_instance.instance[0].availability_zone
-  category          = var.disk_category
-  size              = var.disk_size
-  count             = var.disk_count
+resource "alicloud_ecs_disk" "disk" {
+  zone_id  = alicloud_instance.instance[0].availability_zone
+  category = var.disk_category
+  size     = var.disk_size
+  count    = var.disk_count
 }
 
 resource "alicloud_disk_attachment" "instance-attachment" {
   count       = var.disk_count
-  disk_id     = alicloud_disk.disk.*.id[count.index]
+  disk_id     = alicloud_ecs_disk.disk.*.id[count.index]
   instance_id = alicloud_instance.instance.*.id[count.index % var.number]
 }
 

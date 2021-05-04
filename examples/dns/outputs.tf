@@ -1,12 +1,12 @@
 output "domain" {
-  value = alicloud_dns.dns.*.id
+  value = alicloud_alidns_domain.dns.*.id
 }
 
 output "group" {
-  value = alicloud_dns_group.group.*.id
+  value = alicloud_alidns_domain_group.group.*.id
 }
 
 output "record" {
-  value = alicloud_dns_record.record.*.id
+  value = alicloud_alidns_record.record.*.id
 }
 

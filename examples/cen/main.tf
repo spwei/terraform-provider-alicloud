@@ -29,8 +29,8 @@ data "alicloud_images" "default" {
 }
 
 resource "alicloud_cen_instance" "cen" {
-  name        = var.name
-  description = var.description
+  cen_instance_name = var.name
+  description       = var.description
 }
 
 resource "alicloud_vpc" "vpc_1" {
@@ -46,12 +46,9 @@ resource "alicloud_vpc" "vpc_2" {
 }
 
 resource "alicloud_cen_bandwidth_package" "bwp" {
-  bandwidth = 2
-
-  geographic_region_ids = [
-    "China",
-    "China",
-  ]
+  bandwidth              = 2
+  geographic_region_a_id = "China"
+  geographic_region_b_id = "China"
 }
 
 resource "alicloud_vswitch" "default" {

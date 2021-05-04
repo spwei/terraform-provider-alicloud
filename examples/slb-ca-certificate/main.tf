@@ -8,6 +8,4 @@ resource "alicloud_slb_ca_certificate" "foo-file" {
   ca_certificate = file("${path.module}/ca_certificate.pem")
 }
 
-data "alicloud_slb_ca_certificates" "data_sample" {
-  output_file = "${path.module}/slb_ca_certificates.json"
-}
+data "alicloud_slb_ca_certificates" "data_sample" {}

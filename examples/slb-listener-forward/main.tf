@@ -1,7 +1,7 @@
 resource "alicloud_slb" "instance" {
   name                 = "tf-testAccSlbListenerHttp"
   internet_charge_type = "PayByTraffic"
-  internet             = true
+  address_type         = "internet"
 }
 
 resource "alicloud_slb_listener" "http_listener_forward" {
@@ -27,7 +27,7 @@ resource "alicloud_slb_listener" "https_listener_forward" {
   health_check_interval     = 5
   health_check_http_code    = "http_2xx,http_3xx"
   bandwidth                 = 10
-  ssl_certificate_id        = alicloud_slb_server_certificate.foo.id
+  server_certificate_id     = alicloud_slb_server_certificate.foo.id
 }
 
 variable "name" {

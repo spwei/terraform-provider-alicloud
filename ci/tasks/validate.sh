@@ -152,7 +152,7 @@ do
       done
       }
     fi
-    if [[ ! -a error.txt ]]; then
+    if [[ ! -a error.txt && $? = 0 ]]; then
       echo -e "\n\033[32m--- PASS: terraform ${action} ${configuration} \033[0m"
       if [[ -a warning.txt ]]; then
         read WARNING < warning.txt

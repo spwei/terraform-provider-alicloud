@@ -1,7 +1,5 @@
 // Zones data source for availability_zone
-data "alicloud_zones" "default" {
-  available_resource_creation = var.creation
-}
+data "alicloud_polardb_zones" "default" {}
 
 resource "alicloud_vpc" "default" {
   vpc_name   = var.name
@@ -10,7 +8,7 @@ resource "alicloud_vpc" "default" {
 resource "alicloud_vswitch" "default" {
   vpc_id       = alicloud_vpc.default.id
   cidr_block   = "172.16.0.0/24"
-  zone_id      = data.alicloud_zones.default.zones.0.id
+  zone_id      = data.alicloud_polardb_zones.default.zones.0.id
   vswitch_name = var.name
 }
 resource "alicloud_polardb_cluster" "default" {

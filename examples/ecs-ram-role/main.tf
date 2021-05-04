@@ -1,8 +1,6 @@
 // Provider specific configs
 provider "alicloud" {
-  access_key = var.alicloud_access_key
-  secret_key = var.alicloud_secret_key
-  region     = var.region
+  region = var.region
 }
 
 // Images data source for image_id
@@ -104,11 +102,11 @@ resource "alicloud_instance" "instances" {
 }
 
 // ECS Disk Resource for Module
-resource "alicloud_disk" "disks" {
+resource "alicloud_ecs_disk" "disks" {
   count = var.number_of_disks
 
-  availability_zone = var.availability_zone == "" ? data.alicloud_zones.default.zones[0].id : var.availability_zone
-  name = var.number_of_disks < 2 ? var.disk_name : format(
+  zone_id = var.availability_zone == "" ? data.alicloud_zones.default.zones[0].id : var.availability_zone
+  disk_name = var.number_of_disks < 2 ? var.disk_name : format(
     "%s-%s",
     var.disk_name,
     format(var.number_format, count.index + 1),
@@ -123,9 +121,9 @@ resource "alicloud_disk" "disks" {
 }
 
 // Attach ECS disks to instances for Module
-resource "alicloud_disk_attachment" "disk_attach" {
+resource "alicloud_ecs_disk_attachment" "disk_attach" {
   count       = var.number_of_instances > 0 && var.number_of_disks > 0 ? var.number_of_disks : 0
-  disk_id     = alicloud_disk.disks.*.id[count.index]
+  disk_id     = alicloud_ecs_disk.disks.*.id[count.index]
   instance_id = alicloud_instance.instances.*.id[count.index % var.number_of_instances]
 }
 
@@ -133,26 +131,51 @@ resource "alicloud_disk_attachment" "disk_attach" {
 resource "alicloud_key_pair_attachment" "default" {
   count = var.number_of_instances > 0 && var.key_name != "" ? 1 : 0
 
-  key_name     = var.key_name
-  instance_ids = alicloud_instance.instances.*.id
+  key_pair_name = var.key_name
+  instance_ids  = alicloud_instance.instances.*.id
 }
 
 // RAM Role for the module
 resource "alicloud_ram_role" "role" {
   name     = var.ram_role_name
-  services = var.ram_role_services
+  document = <<EOF
+  {
+    "Statement": [
+      {
+        "Action": "sts:AssumeRole",
+        "Effect": "Allow",
+        "Principal": {
+          "Service": [
+            "ecs.aliyuncs.com"
+          ]
+        }
+      }
+    ],
+    "Version": "1"
+  }
+EOF
   force    = var.ram_role_terminate_force
 }
 
 // RAM Policy for the Role
 resource "alicloud_ram_policy" "policy" {
-  name = var.ram_policy_name
-
-  statement {
-    effect   = var.ram_policy_statement_effect
-    action   = var.ram_policy_statement_action
-    resource = var.ram_policy_statement_resource
-  }
+  policy_name     = var.ram_policy_name
+  policy_document = <<EOF
+    {
+      "Statement": [
+        {
+          "Action": [
+            "ecs:*"
+          ],
+          "Effect": "Allow",
+          "Resource": [
+            "acs:ecs:*:*:*"
+          ]
+        }
+      ],
+        "Version": "1"
+    }
+EOF
 
   force = var.ram_policy_terminate_force
 }

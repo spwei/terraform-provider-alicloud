@@ -46,5 +46,5 @@ resource "alicloud_slb_domain_extension" "default" {
   frontend_port         = "443"
   domain                = "www.test.com"
   server_certificate_id = alicloud_slb_server_certificate.foo.id
-  depends_on            = ["alicloud_slb_listener.https"]
+  depends_on            = [alicloud_slb_listener.https]
 }

@@ -1,62 +1,43 @@
-resource "alicloud_cdn_domain" "domain" {
+#####################
+# Cdn
+#####################
+resource "alicloud_cdn_domain_new" "domain" {
   domain_name = var.domain_name
   cdn_type    = var.cdn_type
-  source_type = var.source_type
-  sources     = var.sources
-
-  // configs
-  optimize_enable      = var.enable
-  page_compress_enable = var.enable
-  range_enable         = var.enable
-  video_seek_enable    = var.enable
-  block_ips            = var.block_ips
-
-  parameter_filter_config {
-    enable        = var.enable
-    hash_key_args = var.hash_key_args
+  scope       = var.scope
+  dynamic "sources" {
+    for_each = var.sources
+    content {
+      content  = lookup(sources.value, "content", null)
+      type     = lookup(sources.value, "type", "ipaddr")
+      port     = lookup(sources.value, "port", 80)
+      priority = lookup(sources.value, "priority", 20)
+      weight   = lookup(sources.value, "weight", 10)
+    }
   }
-
-  page_404_config {
-    page_type       = var.page_type
-    custom_page_url = "http://${var.domain_name}/notfound/"
+  certificate_config {
+    server_certificate = lookup(var.certificate_config[0], "server_certificate")
+    private_key        = lookup(var.certificate_config[0], "private_key")
   }
-
-  refer_config {
-    refer_type  = var.refer_type
-    refer_list  = var.refer_list
-    allow_empty = var.enable
-  }
-
-  auth_config {
-    auth_type  = var.auth_type
-    master_key = "helloworld1"
-    slave_key  = "helloworld2"
-  }
-
-  http_header_config {
-    header_key   = "Content-Type"
-    header_value = "text/plain"
-  }
-
-  http_header_config {
-    header_key   = "Access-Control-Allow-Origin"
-    header_value = "*"
-  }
-
-  cache_config {
-    cache_content = "/hello/world"
-    ttl           = 1000
-    cache_type    = "path"
-  }
-  cache_config {
-    cache_content = "/hello/world/youyou"
-    ttl           = 1000
-    cache_type    = "path"
-  }
-  cache_config {
-    cache_content = "txt,jpg,png"
-    ttl           = 2000
-    cache_type    = "suffix"
-  }
+  tags = merge({
+    Name = var.domain_name
+    }, var.tags
+  )
 }
 
+#####################
+# Cdn_config
+#####################
+
+resource "alicloud_cdn_domain_config" "this" {
+  domain_name   = alicloud_cdn_domain_new.domain.domain_name
+  function_name = var.function_name
+
+  dynamic "function_args" {
+    for_each = var.function_arg
+    content {
+      arg_name  = lookup(function_args.value, "arg_name", null)
+      arg_value = lookup(function_args.value, "arg_value", null)
+    }
+  }
+}

@@ -2,8 +2,9 @@
 data "alicloud_instance_types" "default" {
   cpu_core_count    = 1
   memory_size       = 2
-  availability_zone = var.zone
+  availability_zone = var.zone != "" ? var.zone : data.alicloud_zones.zone.ids.0
 }
+data "alicloud_zones" "zone" {}
 
 resource "alicloud_vpc" "main" {
   cidr_block = var.vpc_cidr

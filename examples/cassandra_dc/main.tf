@@ -1,11 +1,9 @@
 // Zones data source for availability_zone
-data "alicloud_zones" "default" {
-  available_resource_creation = "Cassandra"
-}
+data "alicloud_cassandra_zones" "default" {}
 
 resource "alicloud_cassandra_cluster" "default" {
   cluster_name        = "tf-cassandra-cluster-example"
-  zone_id             = var.zone_id_1 == "" ? data.alicloud_zones.default.zones[length(data.alicloud_zones.default.ids) - 1].id : var.zone_id_1
+  zone_id             = var.zone_id_1 == "" ? data.alicloud_cassandra_zones.default.zones[length(data.alicloud_cassandra_zones.default.ids) - 1].id : var.zone_id_1
   auto_renew          = var.auto_renew
   auto_renew_period   = var.auto_renew_period
   data_center_name    = var.dc_name_1
@@ -25,7 +23,7 @@ resource "alicloud_cassandra_cluster" "default" {
 
 resource "alicloud_cassandra_data_center" "dc_2" {
   cluster_id        = alicloud_cassandra_cluster.default.id
-  zone_id           = var.zone_id_2 == "" ? data.alicloud_zones.default.zones[length(data.alicloud_zones.default.ids) - 2].id : var.zone_id_2
+  zone_id           = var.zone_id_2 == "" ? data.alicloud_cassandra_zones.default.zones[length(data.alicloud_cassandra_zones.default.ids) - 2].id : var.zone_id_2
   auto_renew        = var.auto_renew
   auto_renew_period = var.auto_renew_period
   data_center_name  = var.dc_name_2

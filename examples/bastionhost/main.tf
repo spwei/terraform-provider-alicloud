@@ -30,5 +30,5 @@ resource "alicloud_yundun_bastionhost_instance" "instance" {
   license_code       = var.license_code
   period             = var.period
   vswitch_id         = alicloud_vswitch.default.id
-  security_group_ids = ["${alicloud_security_group.default.id}"]
+  security_group_ids = [alicloud_security_group.default.id]
 }

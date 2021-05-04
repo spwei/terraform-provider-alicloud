@@ -6,7 +6,7 @@ resource "alicloud_vpc" "default" {
 resource "alicloud_vswitch" "default" {
   vpc_id     = alicloud_vpc.default.id
   cidr_block = var.cidr_blocks
-  zone-id    = var.availability_zones
+  zone_id    = var.availability_zones
 }
 
 resource "alicloud_vpn_gateway" "default" {

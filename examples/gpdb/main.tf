@@ -11,10 +11,10 @@ resource "alicloud_vpc" "default" {
 
 // VSwitch Resource for Module
 resource "alicloud_vswitch" "default" {
-  vpc_id            = alicloud_vpc.default.id
-  cidr_block        = var.vswitch_cidr
-  availability_zone = var.availability_zone == "" ? data.alicloud_zones.default.zones[0].id : var.availability_zone
-  name              = var.vswitch_name
+  vpc_id       = alicloud_vpc.default.id
+  cidr_block   = var.vswitch_cidr
+  zone_id      = var.availability_zone == "" ? data.alicloud_zones.default.zones[0].id : var.availability_zone
+  vswitch_name = var.vswitch_name
 }
 
 resource "alicloud_gpdb_instance" "example" {

@@ -32,11 +32,11 @@ resource "alicloud_security_group_rule" "allow_https_443" {
   cidr_ip           = "0.0.0.0/0"
 }
 
-resource "alicloud_disk" "disk" {
-  availability_zone = alicloud_instance.instance[0].availability_zone
-  category          = var.disk_category
-  size              = var.disk_size
-  count             = var.number
+resource "alicloud_ecs_disk" "disk" {
+  zone_id  = alicloud_instance.instance[0].availability_zone
+  category = var.disk_category
+  size     = var.disk_size
+  count    = var.number
 }
 
 resource "alicloud_vpc" "vpc" {
@@ -94,7 +94,7 @@ resource "alicloud_instance" "instance" {
 
 resource "alicloud_disk_attachment" "instance-attachment" {
   count       = var.number
-  disk_id     = alicloud_disk.disk.*.id[count.index]
+  disk_id     = alicloud_ecs_disk.disk.*.id[count.index]
   instance_id = alicloud_instance.instance.*.id[count.index]
 }
 
