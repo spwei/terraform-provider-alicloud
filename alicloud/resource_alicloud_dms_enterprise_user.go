@@ -86,7 +86,7 @@ func resourceAlicloudDmsEnterpriseUserCreate(d *schema.ResourceData, meta interf
 		request["Mobile"] = v
 	}
 
-	if v, ok := d.GetOk("role_names"); ok {
+	if v, ok := d.GetOk("role_names"); ok && v != nil {
 		request["RoleNames"] = convertListToCommaSeparate(v.(*schema.Set).List())
 	}
 
@@ -124,11 +124,11 @@ func resourceAlicloudDmsEnterpriseUserCreate(d *schema.ResourceData, meta interf
 }
 func resourceAlicloudDmsEnterpriseUserRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AliyunClient)
-	dms_enterpriseService := Dms_enterpriseService{client}
-	object, err := dms_enterpriseService.DescribeDmsEnterpriseUser(d.Id())
+	dmsEnterpriseService := DmsEnterpriseService{client}
+	object, err := dmsEnterpriseService.DescribeDmsEnterpriseUser(d.Id())
 	if err != nil {
 		if NotFoundError(err) {
-			log.Printf("[DEBUG] Resource alicloud_dms_enterprise_user dms_enterpriseService.DescribeDmsEnterpriseUser Failed!!! %s", err)
+			log.Printf("[DEBUG] Resource alicloud_dms_enterprise_user dmsEnterpriseService.DescribeDmsEnterpriseUser Failed!!! %s", err)
 			d.SetId("")
 			return nil
 		}
@@ -145,7 +145,11 @@ func resourceAlicloudDmsEnterpriseUserRead(d *schema.ResourceData, meta interfac
 }
 func resourceAlicloudDmsEnterpriseUserUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AliyunClient)
-	dms_enterpriseService := Dms_enterpriseService{client}
+	dmsEnterpriseService := DmsEnterpriseService{client}
+	conn, err := client.NewDmsenterpriseClient()
+	if err != nil {
+		return WrapError(err)
+	}
 	var response map[string]interface{}
 	d.Partial(true)
 
@@ -180,10 +184,6 @@ func resourceAlicloudDmsEnterpriseUserUpdate(d *schema.ResourceData, meta interf
 			request["Tid"] = d.Get("tid")
 		}
 		action := "UpdateUser"
-		conn, err := client.NewDmsenterpriseClient()
-		if err != nil {
-			return WrapError(err)
-		}
 		wait := incrementalWait(3*time.Second, 3*time.Second)
 		err = resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
 			response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2018-11-01"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
@@ -206,7 +206,7 @@ func resourceAlicloudDmsEnterpriseUserUpdate(d *schema.ResourceData, meta interf
 		d.SetPartial("user_name")
 	}
 	if d.HasChange("status") {
-		object, err := dms_enterpriseService.DescribeDmsEnterpriseUser(d.Id())
+		object, err := dmsEnterpriseService.DescribeDmsEnterpriseUser(d.Id())
 		if err != nil {
 			return WrapError(err)
 		}
@@ -220,10 +220,6 @@ func resourceAlicloudDmsEnterpriseUserUpdate(d *schema.ResourceData, meta interf
 					request["Tid"] = v
 				}
 				action := "DisableUser"
-				conn, err := client.NewDmsenterpriseClient()
-				if err != nil {
-					return WrapError(err)
-				}
 				wait := incrementalWait(3*time.Second, 3*time.Second)
 				err = resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
 					response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2018-11-01"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
@@ -249,10 +245,6 @@ func resourceAlicloudDmsEnterpriseUserUpdate(d *schema.ResourceData, meta interf
 					request["Tid"] = v
 				}
 				action := "EnableUser"
-				conn, err := client.NewDmsenterpriseClient()
-				if err != nil {
-					return WrapError(err)
-				}
 				wait := incrementalWait(3*time.Second, 3*time.Second)
 				err = resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
 					response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2018-11-01"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})

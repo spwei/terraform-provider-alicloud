@@ -33,7 +33,6 @@ func TestAccAlicloudPolarDBAccount_update(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckWithNoDefaultVpc(t)
 		},
 
 		// module name
@@ -117,7 +116,6 @@ func TestAccAlicloudPolarDBAccount_update_forSuper(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckWithNoDefaultVpc(t)
 		},
 
 		// module name
@@ -191,6 +189,7 @@ func resourcePolarDBAccountConfigDependence(name string) string {
 	  db_version = "8.0"
       pay_type   = "PostPaid"
 	  zone_id    = local.zone_id
+      category   = "Normal"
 	}
 
 	resource "alicloud_polardb_cluster" "cluster" {

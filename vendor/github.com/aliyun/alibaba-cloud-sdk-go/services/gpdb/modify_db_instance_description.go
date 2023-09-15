@@ -21,7 +21,6 @@ import (
 )
 
 // ModifyDBInstanceDescription invokes the gpdb.ModifyDBInstanceDescription API synchronously
-// api document: https://help.aliyun.com/api/gpdb/modifydbinstancedescription.html
 func (client *Client) ModifyDBInstanceDescription(request *ModifyDBInstanceDescriptionRequest) (response *ModifyDBInstanceDescriptionResponse, err error) {
 	response = CreateModifyDBInstanceDescriptionResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ModifyDBInstanceDescription(request *ModifyDBInstanceDescr
 }
 
 // ModifyDBInstanceDescriptionWithChan invokes the gpdb.ModifyDBInstanceDescription API asynchronously
-// api document: https://help.aliyun.com/api/gpdb/modifydbinstancedescription.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyDBInstanceDescriptionWithChan(request *ModifyDBInstanceDescriptionRequest) (<-chan *ModifyDBInstanceDescriptionResponse, <-chan error) {
 	responseChan := make(chan *ModifyDBInstanceDescriptionResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ModifyDBInstanceDescriptionWithChan(request *ModifyDBInsta
 }
 
 // ModifyDBInstanceDescriptionWithCallback invokes the gpdb.ModifyDBInstanceDescription API asynchronously
-// api document: https://help.aliyun.com/api/gpdb/modifydbinstancedescription.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyDBInstanceDescriptionWithCallback(request *ModifyDBInstanceDescriptionRequest, callback func(response *ModifyDBInstanceDescriptionResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,6 +71,7 @@ func (client *Client) ModifyDBInstanceDescriptionWithCallback(request *ModifyDBI
 // ModifyDBInstanceDescriptionRequest is the request struct for api ModifyDBInstanceDescription
 type ModifyDBInstanceDescriptionRequest struct {
 	*requests.RpcRequest
+	ResourceGroupId       string `position:"Query" name:"ResourceGroupId"`
 	DBInstanceId          string `position:"Query" name:"DBInstanceId"`
 	DBInstanceDescription string `position:"Query" name:"DBInstanceDescription"`
 }
@@ -91,7 +87,8 @@ func CreateModifyDBInstanceDescriptionRequest() (request *ModifyDBInstanceDescri
 	request = &ModifyDBInstanceDescriptionRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("gpdb", "2016-05-03", "ModifyDBInstanceDescription", "gpdb", "openAPI")
+	request.InitWithApiInfo("gpdb", "2016-05-03", "ModifyDBInstanceDescription", "", "")
+	request.Method = requests.POST
 	return
 }
 

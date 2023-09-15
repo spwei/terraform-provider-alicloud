@@ -1,5 +1,5 @@
 ---
-subcategory: "Message Notification Service (MNS)"
+subcategory: "Message Service"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_mns_queue"
 sidebar_current: "docs-alicloud-resource-mns-queue"
@@ -13,11 +13,13 @@ Provides a MNS queue resource.
 
 -> **NOTE:** Terraform will auto build a mns queue  while it uses `alicloud_mns_queue` to build a mns queue resource.
 
+-> **DEPRECATED:**  This resource has been deprecated from version `1.188.0`. Please use new resource [message_service_queue](https://www.terraform.io/docs/providers/alicloud/r/message_service_queue).
+
 ## Example Usage
 
 Basic Usage
 
-```
+```terraform
 resource "alicloud_mns_queue" "queue" {
   name                     = "tf-example-mnsqueue"
   delay_seconds            = 0
@@ -49,6 +51,6 @@ The following attributes are exported:
 
 MNS QUEUE can be imported using the id or name, e.g.
 
-```
+```shell
 $ terraform import alicloud_mns_queue.queue queuename
 ```

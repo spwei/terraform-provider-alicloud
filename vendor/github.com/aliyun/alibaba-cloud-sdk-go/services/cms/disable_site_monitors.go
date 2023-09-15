@@ -79,8 +79,8 @@ type DisableSiteMonitorsResponse struct {
 	*responses.BaseResponse
 	Code      string `json:"Code" xml:"Code"`
 	Message   string `json:"Message" xml:"Message"`
-	Success   string `json:"Success" xml:"Success"`
 	RequestId string `json:"RequestId" xml:"RequestId"`
+	Success   string `json:"Success" xml:"Success"`
 	Data      Data   `json:"Data" xml:"Data"`
 }
 

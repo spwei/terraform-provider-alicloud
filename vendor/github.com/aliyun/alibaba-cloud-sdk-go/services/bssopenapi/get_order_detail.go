@@ -78,11 +78,11 @@ type GetOrderDetailRequest struct {
 // GetOrderDetailResponse is the response struct for api GetOrderDetail
 type GetOrderDetailResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
-	Message   string `json:"Message" xml:"Message"`
-	Code      string `json:"Code" xml:"Code"`
-	Success   bool   `json:"Success" xml:"Success"`
-	Data      Data   `json:"Data" xml:"Data"`
+	Code      string               `json:"Code" xml:"Code"`
+	Message   string               `json:"Message" xml:"Message"`
+	RequestId string               `json:"RequestId" xml:"RequestId"`
+	Success   bool                 `json:"Success" xml:"Success"`
+	Data      DataInGetOrderDetail `json:"Data" xml:"Data"`
 }
 
 // CreateGetOrderDetailRequest creates a request to invoke GetOrderDetail API
@@ -90,7 +90,7 @@ func CreateGetOrderDetailRequest() (request *GetOrderDetailRequest) {
 	request = &GetOrderDetailRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "GetOrderDetail", "", "")
+	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "GetOrderDetail", "bssopenapi", "openAPI")
 	request.Method = requests.POST
 	return
 }

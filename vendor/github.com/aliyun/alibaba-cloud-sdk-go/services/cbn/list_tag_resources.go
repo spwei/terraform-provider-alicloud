@@ -80,6 +80,7 @@ type ListTagResourcesRequest struct {
 	OwnerAccount         string                 `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer       `position:"Query" name:"OwnerId"`
 	ResourceType         string                 `position:"Query" name:"ResourceType"`
+	Version              string                 `position:"Query" name:"Version"`
 }
 
 // ListTagResourcesTag is a repeated param struct in ListTagResourcesRequest
@@ -91,8 +92,8 @@ type ListTagResourcesTag struct {
 // ListTagResourcesResponse is the response struct for api ListTagResources
 type ListTagResourcesResponse struct {
 	*responses.BaseResponse
-	RequestId    string       `json:"RequestId" xml:"RequestId"`
 	NextToken    string       `json:"NextToken" xml:"NextToken"`
+	RequestId    string       `json:"RequestId" xml:"RequestId"`
 	TagResources TagResources `json:"TagResources" xml:"TagResources"`
 }
 
@@ -101,7 +102,7 @@ func CreateListTagResourcesRequest() (request *ListTagResourcesRequest) {
 	request = &ListTagResourcesRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("Cbn", "2017-09-12", "ListTagResources", "cbn", "openAPI")
+	request.InitWithApiInfo("Cbn", "2017-09-12", "ListTagResources", "", "")
 	request.Method = requests.POST
 	return
 }

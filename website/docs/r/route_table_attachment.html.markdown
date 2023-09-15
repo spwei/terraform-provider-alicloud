@@ -19,7 +19,7 @@ For information about route table and how to use it, see [What is Route Table](h
 
 Basic Usage
 
-```
+```terraform
 variable "name" {
   default = "route-table-attachment-example-name"
 }
@@ -34,10 +34,10 @@ data "alicloud_zones" "default" {
 }
 
 resource "alicloud_vswitch" "foo" {
-  vpc_id            = alicloud_vpc.foo.id
-  cidr_block        = "172.16.0.0/21"
-  zone_id           = data.alicloud_zones.default.zones[0].id
-  name              = var.name
+  vpc_id     = alicloud_vpc.foo.id
+  cidr_block = "172.16.0.0/21"
+  zone_id    = data.alicloud_zones.default.zones[0].id
+  name       = var.name
 }
 
 resource "alicloud_route_table" "foo" {
@@ -66,9 +66,9 @@ The following attributes are exported:
 
 ## Import
 
-The route table attachemnt can be imported using the id, e.g.
+The route table attachment can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_route_table_attachment.foo vtb-abc123456:vsw-abc123456
 ```
 

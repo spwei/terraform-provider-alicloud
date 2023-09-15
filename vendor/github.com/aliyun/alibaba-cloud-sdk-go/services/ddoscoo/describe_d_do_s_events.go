@@ -83,8 +83,8 @@ type DescribeDDoSEventsRequest struct {
 // DescribeDDoSEventsResponse is the response struct for api DescribeDDoSEvents
 type DescribeDDoSEventsResponse struct {
 	*responses.BaseResponse
-	RequestId  string `json:"RequestId" xml:"RequestId"`
 	Total      int64  `json:"Total" xml:"Total"`
+	RequestId  string `json:"RequestId" xml:"RequestId"`
 	DDoSEvents []Data `json:"DDoSEvents" xml:"DDoSEvents"`
 }
 

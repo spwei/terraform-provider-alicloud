@@ -1,5 +1,5 @@
 ---
-subcategory: "Server Load Balancer (SLB)"
+subcategory: "Classic Load Balancer (SLB)"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_slb"
 sidebar_current: "docs-alicloud-resource-slb"
@@ -8,6 +8,8 @@ description: |-
 ---
 
 # alicloud\_slb
+
+-> **DEPRECATED:** This resource has been renamed to [alicloud_slb_load_balancer](https://www.terraform.io/docs/providers/alicloud/r/slb_load_balancer) from version 1.123.1.
 
 Provides an Application Load Balancer resource.
 
@@ -18,7 +20,7 @@ For more details about guaranteed-performance instance, see [Guaranteed-performa
 
 ## Example Usage
 
-```
+```terraform
 variable "name" {
   default = "terraformtestslbconfig"
 }
@@ -33,10 +35,10 @@ resource "alicloud_vpc" "default" {
 }
 
 resource "alicloud_vswitch" "default" {
-  vpc_id            = alicloud_vpc.default.id
-  cidr_block        = "172.16.0.0/21"
-  zone_id           = data.alicloud_zones.default.zones[0].id
-  vswitch_name      = var.name
+  vpc_id       = alicloud_vpc.default.id
+  cidr_block   = "172.16.0.0/21"
+  zone_id      = data.alicloud_zones.default.zones[0].id
+  vswitch_name = var.name
 }
 
 resource "alicloud_slb" "default" {
@@ -65,7 +67,7 @@ The following arguments are supported:
 * `name` - (Optional) The name of the SLB. This name must be unique within your AliCloud account, can have a maximum of 80 characters,
 must contain only alphanumeric characters or hyphens, such as "-","/",".","_", and must not begin or end with a hyphen. If not specified,
 Terraform will autogenerate a name beginning with `tf-lb`.
-* `internet` - (Deprecated) Field 'internet' has been deprecated from provider version 1.55.3. Use 'address_type' replaces it.
+* `internet` - (Deprecated from v1.55.3+) Field 'internet' has been deprecated from provider version 1.55.3. Use 'address_type' replaces it.
 * `address_type` - (Optional, ForceNew, Available in 1.55.3+) The network type of the SLB instance. Valid values: ["internet", "intranet"]. If load balancer launched in VPC, this value must be "intranet".
     - internet: After an Internet SLB instance is created, the system allocates a public IP address so that the instance can forward requests from the Internet.
     - intranet: After an intranet SLB instance is created, the system allocates an intranet IP address so that the instance can only forward intranet requests.
@@ -106,6 +108,6 @@ The following attributes are exported:
 
 Load balancer can be imported using the id, e.g.
 
-```
-$ terraform import alicloud_slb.example lb-abc123456
+```shell
+$ terraform import alicloud_slb_load_balancer.example lb-abc123456
 ```

@@ -7,63 +7,74 @@ description: |-
   Provides an RDS instance read write splitting connection resource.
 ---
 
-# alicloud\_db\_read\_write\_splitting\_connection
+# alicloud_db_read_write_splitting_connection
 
-Provides an RDS read write splitting connection resource to allocate an Intranet connection string for RDS instance.
+Provides an RDS read write splitting connection resource to allocate an Intranet connection string for RDS instance, see [What is DB Read Write Splitting Connection](https://www.alibabacloud.com/help/en/apsaradb-for-rds/latest/api-rds-2014-08-15-allocatereadwritesplittingconnection).
+
+-> **NOTE:** Available since v1.48.0.
 
 ## Example Usage
 
-```
-variable "creation" {
-  default = "Rds"
-}
-
+```terraform
 variable "name" {
-  default = "dbInstancevpc"
+  default = "tf-example"
 }
-
-data "alicloud_zones" "default" {
-  available_resource_creation = var.creation
+data "alicloud_db_zones" "example" {
+  engine                   = "MySQL"
+  engine_version           = "5.7"
+  category                 = "HighAvailability"
+  db_instance_storage_type = "local_ssd"
 }
-
-resource "alicloud_vpc" "default" {
-  vpc_name       = var.name
+data "alicloud_db_instance_classes" "example" {
+  zone_id                  = data.alicloud_db_zones.example.ids.0
+  engine                   = "MySQL"
+  engine_version           = "5.7"
+  category                 = "HighAvailability"
+  db_instance_storage_type = "local_ssd"
+}
+resource "alicloud_vpc" "example" {
+  vpc_name   = var.name
   cidr_block = "172.16.0.0/16"
 }
-
-resource "alicloud_vswitch" "default" {
-  vpc_id            = alicloud_vpc.default.id
-  cidr_block        = "172.16.0.0/24"
-  zone_id           = data.alicloud_zones.default.zones[0].id
-  vswitch_name      = var.name
+resource "alicloud_vswitch" "example" {
+  vpc_id       = alicloud_vpc.example.id
+  cidr_block   = "172.16.0.0/24"
+  zone_id      = data.alicloud_db_zones.example.zones.0.id
+  vswitch_name = var.name
 }
 
-resource "alicloud_db_instance" "default" {
-  engine               = "MySQL"
-  engine_version       = "5.6"
-  instance_type        = "rds.mysql.t1.small"
-  instance_storage     = "20"
-  instance_charge_type = "Postpaid"
-  instance_name        = var.name
-  vswitch_id           = alicloud_vswitch.default.id
-  security_ips         = ["10.168.1.12", "100.69.7.112"]
+resource "alicloud_security_group" "example" {
+  name   = var.name
+  vpc_id = alicloud_vpc.example.id
 }
 
-resource "alicloud_db_readonly_instance" "default" {
-  master_db_instance_id = alicloud_db_instance.default.id
-  zone_id               = alicloud_db_instance.default.zone_id
-  engine_version        = alicloud_db_instance.default.engine_version
-  instance_type         = alicloud_db_instance.default.instance_type
-  instance_storage      = "30"
-  instance_name         = "${var.name}ro"
-  vswitch_id            = alicloud_vswitch.default.id
+resource "alicloud_db_instance" "example" {
+  engine                   = "MySQL"
+  engine_version           = "5.7"
+  category                 = "HighAvailability"
+  instance_type            = data.alicloud_db_instance_classes.example.instance_classes.0.instance_class
+  instance_storage         = data.alicloud_db_instance_classes.example.instance_classes.0.storage_range.min
+  instance_charge_type     = "Postpaid"
+  db_instance_storage_type = "local_ssd"
+  instance_name            = var.name
+  vswitch_id               = alicloud_vswitch.example.id
+  security_ips             = ["10.168.1.12", "100.69.7.112"]
 }
 
-resource "alicloud_db_read_write_splitting_connection" "default" {
-  instance_id       = alicloud_db_instance.default.id
-  connection_prefix = "t-con-123"
+resource "alicloud_db_readonly_instance" "example" {
+  zone_id               = alicloud_db_instance.example.zone_id
+  master_db_instance_id = alicloud_db_instance.example.id
+  engine_version        = alicloud_db_instance.example.engine_version
+  instance_storage      = alicloud_db_instance.example.instance_storage
+  instance_type         = alicloud_db_instance.example.instance_type
+  instance_name         = "${var.name}readonly"
+  vswitch_id            = alicloud_vswitch.example.id
+}
+
+resource "alicloud_db_read_write_splitting_connection" "example" {
+  instance_id       = alicloud_db_readonly_instance.example.master_db_instance_id
+  connection_prefix = "example-con-123"
   distribution_type = "Standard"
-  depends_on = [alicloud_db_readonly_instance.default]
 }
 ```
 
@@ -91,6 +102,6 @@ The following attributes are exported:
 
 RDS read write splitting connection can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_db_read_write_splitting_connection.example abc12345678
 ```

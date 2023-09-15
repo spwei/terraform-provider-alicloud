@@ -17,7 +17,7 @@ package ddoscoo
 
 // PortMaxConnsItem is a nested struct in ddoscoo response
 type PortMaxConnsItem struct {
-	Port string `json:"Port" xml:"Port"`
 	Ip   string `json:"Ip" xml:"Ip"`
+	Port string `json:"Port" xml:"Port"`
 	Cps  int64  `json:"Cps" xml:"Cps"`
 }

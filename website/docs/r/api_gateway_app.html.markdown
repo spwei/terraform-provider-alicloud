@@ -1,5 +1,5 @@
 ---
-subcategory: "API Gateway"
+subcategory: "Api Gateway"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_api_gateway_app"
 sidebar_current: "docs-alicloud-resource-api-gateway-app"
@@ -11,7 +11,9 @@ description: |-
 
 Provides an app resource.It must create an app before calling a third-party API because the app is the identity used to call the third-party API.
 
-For information about Api Gateway App and how to use it, see [Create An APP](https://www.alibabacloud.com/help/doc-detail/43663.html)
+For information about Api Gateway App and how to use it, see [Create An APP](https://www.alibabacloud.com/help/en/api-gateway/latest/api-cloudapi-2016-07-14-createapp)
+
+-> **NOTE:** Available since v1.22.0.
 
 -> **NOTE:** Terraform will auto build api app while it uses `alicloud_api_gateway_app` to build api app.
 
@@ -19,10 +21,10 @@ For information about Api Gateway App and how to use it, see [Create An APP](htt
 
 Basic Usage
 
-```
-resource "alicloud_api_gateway_app" "apiTest" {
-  name        = "ApiGatewayAPp"
-  description = "description of the app"
+```terraform
+resource "alicloud_api_gateway_app" "example" {
+  name        = "tf_example"
+  description = "tf_example"
 }
 ```
 ## Argument Reference
@@ -43,6 +45,6 @@ The following attributes are exported:
 
 Api gateway app can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_api_gateway_app.example "7379660"
 ```

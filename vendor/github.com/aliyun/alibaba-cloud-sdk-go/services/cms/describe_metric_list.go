@@ -85,13 +85,13 @@ type DescribeMetricListRequest struct {
 // DescribeMetricListResponse is the response struct for api DescribeMetricList
 type DescribeMetricListResponse struct {
 	*responses.BaseResponse
+	NextToken  string `json:"NextToken" xml:"NextToken"`
+	RequestId  string `json:"RequestId" xml:"RequestId"`
+	Success    bool   `json:"Success" xml:"Success"`
+	Datapoints string `json:"Datapoints" xml:"Datapoints"`
 	Code       string `json:"Code" xml:"Code"`
 	Message    string `json:"Message" xml:"Message"`
-	RequestId  string `json:"RequestId" xml:"RequestId"`
-	NextToken  string `json:"NextToken" xml:"NextToken"`
-	Datapoints string `json:"Datapoints" xml:"Datapoints"`
 	Period     string `json:"Period" xml:"Period"`
-	Success    bool   `json:"Success" xml:"Success"`
 }
 
 // CreateDescribeMetricListRequest creates a request to invoke DescribeMetricList API

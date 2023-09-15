@@ -18,6 +18,6 @@ package ddoscoo
 // CnameReuse is a nested struct in ddoscoo response
 type CnameReuse struct {
 	Domain string `json:"Domain" xml:"Domain"`
-	Enable int    `json:"Enable" xml:"Enable"`
 	Cname  string `json:"Cname" xml:"Cname"`
+	Enable int    `json:"Enable" xml:"Enable"`
 }

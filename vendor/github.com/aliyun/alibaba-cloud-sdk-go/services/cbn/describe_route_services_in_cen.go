@@ -82,15 +82,16 @@ type DescribeRouteServicesInCenRequest struct {
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	Version              string           `position:"Query" name:"Version"`
 }
 
 // DescribeRouteServicesInCenResponse is the response struct for api DescribeRouteServicesInCen
 type DescribeRouteServicesInCenResponse struct {
 	*responses.BaseResponse
-	RequestId           string              `json:"RequestId" xml:"RequestId"`
-	TotalCount          int                 `json:"TotalCount" xml:"TotalCount"`
-	PageNumber          int                 `json:"PageNumber" xml:"PageNumber"`
 	PageSize            int                 `json:"PageSize" xml:"PageSize"`
+	RequestId           string              `json:"RequestId" xml:"RequestId"`
+	PageNumber          int                 `json:"PageNumber" xml:"PageNumber"`
+	TotalCount          int                 `json:"TotalCount" xml:"TotalCount"`
 	RouteServiceEntries RouteServiceEntries `json:"RouteServiceEntries" xml:"RouteServiceEntries"`
 }
 
@@ -99,7 +100,7 @@ func CreateDescribeRouteServicesInCenRequest() (request *DescribeRouteServicesIn
 	request = &DescribeRouteServicesInCenRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("Cbn", "2017-09-12", "DescribeRouteServicesInCen", "cbn", "openAPI")
+	request.InitWithApiInfo("Cbn", "2017-09-12", "DescribeRouteServicesInCen", "", "")
 	request.Method = requests.POST
 	return
 }

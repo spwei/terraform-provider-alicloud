@@ -1,5 +1,5 @@
 ---
-subcategory: "DNS"
+subcategory: "Alidns"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_dns_domain_attachment"
 sidebar_current: "docs-alicloud-resource-dns-domain-attachment"
@@ -13,14 +13,14 @@ Provides bind the domain name to the DNS instance resource.
 
 -> **NOTE:** Available in v1.80.0+.
 
--> **DEPRECATED:**  This resource has been deprecated from version `1.99.0`. Please use new resource [alicloud_alidns_domain_attachment](https://www.terraform.io/docs/providers/alicloud/r/alidns_domain_attachment.html).
+-> **DEPRECATED:**  This resource has been deprecated from version `1.99.0`. Please use new resource [alicloud_alidns_domain_attachment](https://www.terraform.io/docs/providers/alicloud/r/alidns_domain_attachment).
 
 ## Example Usage
 
-```
+```terraform
 resource "alicloud_dns_domain_attachment" "dns" {
-  instance_id     = "dns-cn-mp91lyq9xxxx"
-  domain_names    = ["test111.abc", "test222.abc"]
+  instance_id  = "dns-cn-mp91lyq9xxxx"
+  domain_names = ["test111.abc", "test222.abc"]
 }
 ```
 ## Argument Reference
@@ -41,6 +41,6 @@ The following attributes are exported:
 
 DNS domain attachment can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_dns_domain_attachment.example dns-cn-v0h1ldjhxxx
 ```

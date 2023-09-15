@@ -79,8 +79,8 @@ type DescribeSlsAuthStatusRequest struct {
 // DescribeSlsAuthStatusResponse is the response struct for api DescribeSlsAuthStatus
 type DescribeSlsAuthStatusResponse struct {
 	*responses.BaseResponse
-	RequestId     string `json:"RequestId" xml:"RequestId"`
 	SlsAuthStatus bool   `json:"SlsAuthStatus" xml:"SlsAuthStatus"`
+	RequestId     string `json:"RequestId" xml:"RequestId"`
 }
 
 // CreateDescribeSlsAuthStatusRequest creates a request to invoke DescribeSlsAuthStatus API

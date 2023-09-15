@@ -3,7 +3,6 @@ package alicloud
 import (
 	"fmt"
 	"log"
-	"os"
 	"strings"
 	"testing"
 
@@ -79,7 +78,7 @@ func testSweepDcdnDomain(region string) error {
 	return nil
 }
 
-func TestAccAlicloudDcdnDomain_basic(t *testing.T) {
+func TestAccAlicloudDCDNDomain_basic0(t *testing.T) {
 	var v dcdn.DomainDetail
 	resourceId := "alicloud_dcdn_domain.default"
 	ra := resourceAttrInit(resourceId, DcdnDomainMap)
@@ -89,7 +88,7 @@ func TestAccAlicloudDcdnDomain_basic(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := acctest.RandIntRange(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc%s%d.xiaozhu.com", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, DcdnDomainBasicdependence)
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -123,12 +122,6 @@ func TestAccAlicloudDcdnDomain_basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"top_level_domain", "security_token", "cert_type", "check_url", "force_set", "ssl_pri"},
-			},
-			{
 				Config: testAccConfig(map[string]interface{}{
 					"ssl_protocol": "on",
 					"ssl_pub":      testDcdnPublicKey,
@@ -144,7 +137,7 @@ func TestAccAlicloudDcdnDomain_basic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"resource_group_id": os.Getenv("ALICLOUD_RESOURCE_GROUP_ID"),
+					"resource_group_id": "${data.alicloud_resource_manager_resource_groups.update.ids.0}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -194,6 +187,88 @@ func TestAccAlicloudDcdnDomain_basic(t *testing.T) {
 					}),
 				),
 			},
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"top_level_domain", "security_token", "cert_type", "check_url", "force_set", "ssl_pri"},
+			},
+		},
+	})
+}
+
+func TestAccAlicloudDCDNDomain_basic1(t *testing.T) {
+	var v dcdn.DomainDetail
+	resourceId := "alicloud_dcdn_domain.default"
+	ra := resourceAttrInit(resourceId, DcdnDomainMap)
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
+		return &DcdnService{testAccProvider.Meta().(*connectivity.AliyunClient)}
+	}, "DescribeDcdnDomain")
+	rac := resourceAttrCheckInit(rc, ra)
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := acctest.RandIntRange(1000000, 9999999)
+	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, DcdnDomainBasicdependence)
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
+		CheckDestroy:  rac.checkResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"domain_name":       name,
+					"scope":             "overseas",
+					"status":            "online",
+					"resource_group_id": "${data.alicloud_resource_manager_resource_groups.default.ids.0}",
+					"sources": []map[string]interface{}{
+						{
+							"content":  "1.1.1.1",
+							"port":     "80",
+							"priority": "20",
+							"type":     "ipaddr",
+							"weight":   "10",
+						},
+					},
+					"tags": map[string]string{
+						"Created": "TF",
+						"For":     "Domain",
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"domain_name":       name,
+						"sources.#":         "1",
+						"resource_group_id": CHECKSET,
+						"tags.%":            "2",
+						"tags.Created":      "TF",
+						"tags.For":          "Domain",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"tags": map[string]string{
+						"Created": "TF_Update",
+						"For":     "Domain_Update",
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"tags.%":       "2",
+						"tags.Created": "TF_Update",
+						"tags.For":     "Domain_Update",
+					}),
+				),
+			},
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"top_level_domain", "security_token", "cert_type", "check_url", "force_set", "ssl_pri"},
+			},
 		},
 	})
 }
@@ -203,10 +278,23 @@ var DcdnDomainMap = map[string]string{
 	"ssl_protocol":      "off",
 	"scope":             "overseas",
 	"status":            "online",
+	"cname":             CHECKSET,
 }
 
 func DcdnDomainBasicdependence(name string) string {
-	return ""
+	return fmt.Sprintf(`
+	
+variable "name" {
+	default = "%s"
+}
+
+data "alicloud_resource_manager_resource_groups" "default" {
+  name_regex = "default"
+}
+data "alicloud_resource_manager_resource_groups" "update" {
+  name_regex = "terraformci"
+}
+`, name)
 }
 
 const testDcdnPrivateKey = `-----BEGIN RSA PRIVATE KEY-----\nMIICXAIBAAKBgQC+7dgpkQifIqzOU6KNkFRjZtMZOoN7/ihNf/BrYcPhLQSkcPOf\nUsTP/qvH0u965GnYFiAoK3uWGQo9aCBuoawRFKNBa9ZpJVyVbamBWTBQ/Fxsforq\n9jJNR7OWA3fxvDxgwyEkv0qsnh1zaOkjyUlxFYwDiFxZ1/RHAj/SABCubQIDAQAB\nAoGADiobBUprN1MdOtldj98LQ6yXMKH0qzg5yTYaofzIyWXLmF+A02sSitO77sEp\nXxae+5b4n8JKEuKcrd2RumNoHmN47iLQ0M2eodjUQ96kzm5Esq6nln62/NF5KLuK\nJDw63nTsg6K0O+gQZv4SYjZAL3cswSmeQmvmcoNgArfcaoECQQDgYy6S91ZIUsLx\n6BB3tW+x7APYnvKysYbcKUEP8AutZSo4hdMfPQkOD0LwP5dWsrNippDWjNDiPZmt\nVKuZDoDdAkEA2dPxy1eQeJsRYTZmTWIuh3UY9xlL3G9skcSOM4LbFidroHWW9UDJ\nJDSSEMH2+/4quYTdPr28cj7RCjqL0brC0QJABXDCL1QJ5oUDLwRWaeCfTawQR89K\nySRexbXGWxGR5uleBbLQ9J/xOUMLd3HDRJnemZS6TElrwyCFOlukMXjVjQJBALr5\nQC0opmu/vzVQepOl2QaQrrM7VXCLfAfLTbxNcD0d7TY4eTFfQMgBD/euZpB65LWF\npFs8hcsSvGApTObjhmECQEydB1zzjU6kH171XlXCtRFnbORu2IB7rMsDP2CBPHyR\ntYBjBNVHIUGcmrMVFX4LeMuvvmUyzwfgLmLchHxbDP8=\n-----END RSA PRIVATE KEY-----\n`

@@ -75,8 +75,8 @@ type DescribePortConnsListRequest struct {
 	ResourceGroupId string           `position:"Query" name:"ResourceGroupId"`
 	SourceIp        string           `position:"Query" name:"SourceIp"`
 	EndTime         requests.Integer `position:"Query" name:"EndTime"`
-	InstanceIds     *[]string        `position:"Query" name:"InstanceIds"  type:"Repeated"`
 	Port            string           `position:"Query" name:"Port"`
+	InstanceIds     *[]string        `position:"Query" name:"InstanceIds"  type:"Repeated"`
 	Interval        requests.Integer `position:"Query" name:"Interval"`
 }
 

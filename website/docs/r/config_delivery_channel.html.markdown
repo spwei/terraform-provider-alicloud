@@ -1,5 +1,5 @@
 ---
-subcategory: "Cloud Config"
+subcategory: "Cloud Config (Config)"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_config_delivery_channel"
 sidebar_current: "docs-alicloud-resource-config-delivery-channel"
@@ -9,12 +9,15 @@ description: |-
 
 # alicloud\_config\_delivery\_channel
 
-Provides a a Alicloud Config Delivery Channel resource. You can receive configuration audit event changes by configuring OSS, MNS and SLS services provided by Alibaba Cloud.
-For information about Alicloud Config Delivery Channel and how to use it, see [What is Delivery Channel](https://www.alibabacloud.com/help/en/doc-detail/156854.htm).
+-> **DEPRECATED:**  This resource is based on Config's old version OpenAPI, and it has been deprecated from version `1.171.0`.
+Please use new resource [alicloud_config_delivery](https://registry.terraform.io/providers/aliyun/alicloud/latest/docs/resources/config_delivery) instead.
+
+Provides an Alicloud Config Delivery Channel resource. You can receive configuration audit event changes by configuring OSS, MNS and SLS services provided by Alibaba Cloud.
+For information about Alicloud Config Delivery Channel and how to use it, see [What is Delivery Channel](https://www.alibabacloud.com/help/en/doc-detail/307022.html).
 
 -> **NOTE:** Available in v1.99.0+.
 
--> **NOTE:** The Cloud Config region only support `cn-shanghai` and `ap-northeast-1`.
+-> **NOTE:** The Cloud Config region only support `cn-shanghai` and `ap-southeast-1`.
 
 -> **NOTE:** Once each type of delivery channel is created, it does not support destroyed by terraform. Only support through the `status` attribute control enable and disable.
 
@@ -84,6 +87,6 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/d
 
 Alicloud Config Delivery Channel can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_config_delivery_channel.example cdc-49a2ad756057********
 ```

@@ -1,5 +1,5 @@
 ---
-subcategory: "Cloud DBAudit"
+subcategory: "Cloud DBAudit (DBAudit)"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_yundun_dbaudit_instance"
 sidebar_current: "docs-alicloud-resource-yundun-dbaudit-instance"
@@ -21,7 +21,7 @@ Cloud DBaudit instance resource ("Yundun_dbaudit" is the short term of this prod
 
 Basic Usage
 
-```
+```terraform
 provider "alicloud" {
   endpoints {
     bssopenapi = "business.aliyuncs.com"
@@ -29,12 +29,21 @@ provider "alicloud" {
 }
 
 resource "alicloud_yundun_dbaudit_instance" "default" {
-  description       = "Terraform-test"
-  plan_code         = "alpha.professional"
-  period            = "1"
-  vswitch_id        = "v-testVswitch"
+  description = "Terraform-test"
+  plan_code   = "alpha.professional"
+  period      = "1"
+  vswitch_id  = "v-testVswitch"
 }
 ```
+
+### Deleting `alicloud_yundun_dbaudit_instance` or removing it from your configuration
+
+The `alicloud_yundun_dbaudit_instance` resource allows you to manage yundun dbaudit instance, but Terraform cannot destroy it.
+Deleting the subscription resource or removing it from your configuration
+will remove it from your state file and management, but will not destroy the `yundun_dbaudit_instance`.
+You can resume managing the subscription yundun_dbaudit_instance via the AlibabaCloud Console.
+
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -57,6 +66,6 @@ The following attributes are exported:
 
 Yundun_dbaudit instance can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_yundun_dbaudit_instance.example dbaudit-exampe123456
 ```

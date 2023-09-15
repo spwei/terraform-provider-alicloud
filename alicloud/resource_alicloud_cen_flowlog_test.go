@@ -30,8 +30,8 @@ func testSweepCenFlowlog(region string) error {
 	client := rawClient.(*connectivity.AliyunClient)
 
 	prefixes := []string{
-		fmt.Sprintf("tf-testAcc%s", region),
-		fmt.Sprintf("tf_testAcc%s", region),
+		"tf-testAcc",
+		"tf_testAcc",
 	}
 
 	var insts []cbn.FlowLog
@@ -80,15 +80,17 @@ func testSweepCenFlowlog(region string) error {
 		name := v.FlowLogName
 		id := v.FlowLogId
 		skip := true
-		for _, prefix := range prefixes {
-			if strings.HasPrefix(strings.ToLower(name), strings.ToLower(prefix)) {
-				skip = false
-				break
+		if !sweepAll() {
+			for _, prefix := range prefixes {
+				if strings.HasPrefix(strings.ToLower(name), strings.ToLower(prefix)) {
+					skip = false
+					break
+				}
 			}
-		}
-		if skip {
-			log.Printf("[INFO] Skipping CEN flowlog: %s (%s)", name, id)
-			continue
+			if skip {
+				log.Printf("[INFO] Skipping CEN flowlog: %s (%s)", name, id)
+				continue
+			}
 		}
 		sweeped = true
 		log.Printf("[INFO] Deleting CEN flowlog: %s (%s)", name, id)
@@ -108,7 +110,9 @@ func testSweepCenFlowlog(region string) error {
 	return nil
 }
 
-func TestAccAlicloudCenFlowlog_basic(t *testing.T) {
+func SkipTestAccAlicloudCenFlowlog_basic(t *testing.T) {
+	// flow log has been offline
+	t.Skip("From January 30, 2022, the cloud enterprise network will take the old console flow log function offline. If you need to continue to use the flow log function, you can enter the new version console to use the flow log function of the enterprise version forwarding router. The Enterprise Edition Forwarding Router Flow Log feature provides the same capabilities as the Legacy Console Flow Log feature")
 	var cbnFlowlog cbn.FlowLog
 
 	resourceId := "alicloud_cen_flowlog.default"

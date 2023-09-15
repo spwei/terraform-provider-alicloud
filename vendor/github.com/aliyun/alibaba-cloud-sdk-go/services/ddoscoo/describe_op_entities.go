@@ -84,8 +84,8 @@ type DescribeOpEntitiesRequest struct {
 // DescribeOpEntitiesResponse is the response struct for api DescribeOpEntities
 type DescribeOpEntitiesResponse struct {
 	*responses.BaseResponse
-	RequestId  string     `json:"RequestId" xml:"RequestId"`
 	TotalCount int64      `json:"TotalCount" xml:"TotalCount"`
+	RequestId  string     `json:"RequestId" xml:"RequestId"`
 	OpEntities []OpEntity `json:"OpEntities" xml:"OpEntities"`
 }
 

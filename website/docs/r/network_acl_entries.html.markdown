@@ -17,13 +17,13 @@ Provides a network acl entries resource to create ingress and egress entries.
 
 -> **NOTE:** Using this resource need to open a whitelist.
 
--> **DEPRECATED:**  This resource  has been deprecated from version `1.122.0`. Replace by `ingress_acl_entries` and `egress_acl_entries` with the resource [alicloud_network_acl](https://www.terraform.io/docs/providers/alicloud/r/network_acl.html).
+-> **DEPRECATED:**  This resource  has been deprecated from version `1.122.0`. Replace by `ingress_acl_entries` and `egress_acl_entries` with the resource [alicloud_network_acl](https://www.terraform.io/docs/providers/alicloud/r/network_acl).
 
 ## Example Usage
 
 Basic Usage
 
-```
+```terraform
 variable "name" {
   default = "NetworkAclEntries"
 }
@@ -43,10 +43,10 @@ resource "alicloud_network_acl" "default" {
 }
 
 resource "alicloud_vswitch" "default" {
-  vpc_id            = alicloud_vpc.default.id
-  cidr_block        = "172.16.0.0/21"
-  zone_id           = data.alicloud_zones.default.zones[0].id
-  name              = var.name
+  vpc_id     = alicloud_vpc.default.id
+  cidr_block = "172.16.0.0/21"
+  zone_id    = data.alicloud_zones.default.zones[0].id
+  name       = var.name
 }
 
 resource "alicloud_network_acl_attachment" "default" {

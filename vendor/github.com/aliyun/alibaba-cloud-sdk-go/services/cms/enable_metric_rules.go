@@ -77,10 +77,10 @@ type EnableMetricRulesRequest struct {
 // EnableMetricRulesResponse is the response struct for api EnableMetricRules
 type EnableMetricRulesResponse struct {
 	*responses.BaseResponse
-	Success   bool   `json:"Success" xml:"Success"`
 	Code      string `json:"Code" xml:"Code"`
 	Message   string `json:"Message" xml:"Message"`
 	RequestId string `json:"RequestId" xml:"RequestId"`
+	Success   bool   `json:"Success" xml:"Success"`
 }
 
 // CreateEnableMetricRulesRequest creates a request to invoke EnableMetricRules API

@@ -75,18 +75,19 @@ type DescribeHostAvailabilityListRequest struct {
 	TaskName   string           `position:"Query" name:"TaskName"`
 	PageNumber requests.Integer `position:"Query" name:"PageNumber"`
 	PageSize   requests.Integer `position:"Query" name:"PageSize"`
+	Ids        string           `position:"Query" name:"Ids"`
 	Id         requests.Integer `position:"Query" name:"Id"`
 }
 
 // DescribeHostAvailabilityListResponse is the response struct for api DescribeHostAvailabilityList
 type DescribeHostAvailabilityListResponse struct {
 	*responses.BaseResponse
-	Code      string   `json:"Code" xml:"Code"`
-	Message   string   `json:"Message" xml:"Message"`
-	Success   bool     `json:"Success" xml:"Success"`
-	RequestId string   `json:"RequestId" xml:"RequestId"`
-	Total     int      `json:"Total" xml:"Total"`
-	TaskList  TaskList `json:"TaskList" xml:"TaskList"`
+	Code      string                                 `json:"Code" xml:"Code"`
+	Message   string                                 `json:"Message" xml:"Message"`
+	RequestId string                                 `json:"RequestId" xml:"RequestId"`
+	Total     int                                    `json:"Total" xml:"Total"`
+	Success   bool                                   `json:"Success" xml:"Success"`
+	TaskList  TaskListInDescribeHostAvailabilityList `json:"TaskList" xml:"TaskList"`
 }
 
 // CreateDescribeHostAvailabilityListRequest creates a request to invoke DescribeHostAvailabilityList API

@@ -83,9 +83,9 @@ type DescribeProjectMetaResponse struct {
 	Success    bool                           `json:"Success" xml:"Success"`
 	Code       string                         `json:"Code" xml:"Code"`
 	Message    string                         `json:"Message" xml:"Message"`
-	Total      string                         `json:"Total" xml:"Total"`
-	PageNumber string                         `json:"PageNumber" xml:"PageNumber"`
 	PageSize   string                         `json:"PageSize" xml:"PageSize"`
+	PageNumber string                         `json:"PageNumber" xml:"PageNumber"`
+	Total      string                         `json:"Total" xml:"Total"`
 	Resources  ResourcesInDescribeProjectMeta `json:"Resources" xml:"Resources"`
 }
 

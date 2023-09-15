@@ -86,11 +86,11 @@ type QueryOrdersRequest struct {
 // QueryOrdersResponse is the response struct for api QueryOrders
 type QueryOrdersResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
-	Success   bool   `json:"Success" xml:"Success"`
-	Code      string `json:"Code" xml:"Code"`
-	Message   string `json:"Message" xml:"Message"`
-	Data      Data   `json:"Data" xml:"Data"`
+	Code      string            `json:"Code" xml:"Code"`
+	Message   string            `json:"Message" xml:"Message"`
+	RequestId string            `json:"RequestId" xml:"RequestId"`
+	Success   bool              `json:"Success" xml:"Success"`
+	Data      DataInQueryOrders `json:"Data" xml:"Data"`
 }
 
 // CreateQueryOrdersRequest creates a request to invoke QueryOrders API
@@ -98,7 +98,7 @@ func CreateQueryOrdersRequest() (request *QueryOrdersRequest) {
 	request = &QueryOrdersRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "QueryOrders", "", "")
+	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "QueryOrders", "bssopenapi", "openAPI")
 	request.Method = requests.POST
 	return
 }

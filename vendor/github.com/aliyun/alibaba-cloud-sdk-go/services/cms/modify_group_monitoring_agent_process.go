@@ -79,15 +79,24 @@ type ModifyGroupMonitoringAgentProcessRequest struct {
 
 // ModifyGroupMonitoringAgentProcessAlertConfig is a repeated param struct in ModifyGroupMonitoringAgentProcessRequest
 type ModifyGroupMonitoringAgentProcessAlertConfig struct {
-	Times               string `name:"Times"`
-	NoEffectiveInterval string `name:"NoEffectiveInterval"`
-	Webhook             string `name:"Webhook"`
-	SilenceTime         string `name:"SilenceTime"`
-	Threshold           string `name:"Threshold"`
-	EffectiveInterval   string `name:"EffectiveInterval"`
-	ComparisonOperator  string `name:"ComparisonOperator"`
-	EscalationsLevel    string `name:"EscalationsLevel"`
-	Statistics          string `name:"Statistics"`
+	Times               string                                                        `name:"Times"`
+	Webhook             string                                                        `name:"Webhook"`
+	NoEffectiveInterval string                                                        `name:"NoEffectiveInterval"`
+	TargetList          *[]ModifyGroupMonitoringAgentProcessAlertConfigTargetListItem `name:"TargetList" type:"Repeated"`
+	SilenceTime         string                                                        `name:"SilenceTime"`
+	Threshold           string                                                        `name:"Threshold"`
+	ComparisonOperator  string                                                        `name:"ComparisonOperator"`
+	EffectiveInterval   string                                                        `name:"EffectiveInterval"`
+	EscalationsLevel    string                                                        `name:"EscalationsLevel"`
+	Statistics          string                                                        `name:"Statistics"`
+}
+
+// ModifyGroupMonitoringAgentProcessAlertConfigTargetListItem is a repeated param struct in ModifyGroupMonitoringAgentProcessRequest
+type ModifyGroupMonitoringAgentProcessAlertConfigTargetListItem struct {
+	Level      string `name:"Level"`
+	Id         string `name:"Id"`
+	Arn        string `name:"Arn"`
+	JsonParams string `name:"JsonParams"`
 }
 
 // ModifyGroupMonitoringAgentProcessResponse is the response struct for api ModifyGroupMonitoringAgentProcess
@@ -95,8 +104,8 @@ type ModifyGroupMonitoringAgentProcessResponse struct {
 	*responses.BaseResponse
 	Code      string `json:"Code" xml:"Code"`
 	Message   string `json:"Message" xml:"Message"`
-	Success   bool   `json:"Success" xml:"Success"`
 	RequestId string `json:"RequestId" xml:"RequestId"`
+	Success   bool   `json:"Success" xml:"Success"`
 }
 
 // CreateModifyGroupMonitoringAgentProcessRequest creates a request to invoke ModifyGroupMonitoringAgentProcess API

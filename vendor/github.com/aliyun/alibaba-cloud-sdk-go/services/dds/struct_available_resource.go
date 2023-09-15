@@ -17,6 +17,7 @@ package dds
 
 // AvailableResource is a nested struct in dds response
 type AvailableResource struct {
-	InstanceClass       string `json:"InstanceClass" xml:"InstanceClass"`
-	InstanceClassRemark string `json:"InstanceClassRemark" xml:"InstanceClassRemark"`
+	InstanceClassRemark    string                 `json:"InstanceClassRemark" xml:"InstanceClassRemark"`
+	InstanceClass          string                 `json:"InstanceClass" xml:"InstanceClass"`
+	DBInstanceStorageRange DBInstanceStorageRange `json:"DBInstanceStorageRange" xml:"DBInstanceStorageRange"`
 }

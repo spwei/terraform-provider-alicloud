@@ -10,8 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
-func TestAccAlicloudRamGroupPolicyAttachment_basic(t *testing.T) {
-	var v *ram.PolicyInListPoliciesForGroup
+func TestAccAlicloudRAMGroupPolicyAttachment_basic(t *testing.T) {
+	var v *ram.Policy
 	resourceId := "alicloud_ram_group_policy_attachment.default"
 	ra := resourceAttrInit(resourceId, ramGroupMap)
 	serviceFunc := func() interface{} {

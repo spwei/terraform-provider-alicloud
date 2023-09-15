@@ -79,8 +79,8 @@ type DescribeSceneDefenseObjectsRequest struct {
 // DescribeSceneDefenseObjectsResponse is the response struct for api DescribeSceneDefenseObjects
 type DescribeSceneDefenseObjectsResponse struct {
 	*responses.BaseResponse
-	RequestId string   `json:"RequestId" xml:"RequestId"`
 	Success   bool     `json:"Success" xml:"Success"`
+	RequestId string   `json:"RequestId" xml:"RequestId"`
 	Objects   []Object `json:"Objects" xml:"Objects"`
 }
 

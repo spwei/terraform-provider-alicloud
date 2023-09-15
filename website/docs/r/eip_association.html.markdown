@@ -7,7 +7,7 @@ description: |-
   Provides a ECS EIP Association resource.
 ---
 
-# alicloud\_eip\_association
+# alicloud_eip_association
 
 Provides an Alicloud EIP Association resource for associating Elastic IP to ECS Instance, SLB Instance or Nat Gateway.
 
@@ -18,59 +18,66 @@ Provides an Alicloud EIP Association resource for associating Elastic IP to ECS 
 
 -> **NOTE:** One EIP can only be associated with ECS or SLB instance which in the VPC.
 
+-> **NOTE:** Available since v1.117.0.
+
 ## Example Usage
 
-```
-# Create a new EIP association and use it to associate a EIP form a instance.
-data "alicloud_zones" "default" {
+```terraform
+variable "name" {
+  default = "tf-example"
+}
+data "alicloud_zones" "example" {
+  available_resource_creation = "Instance"
 }
 
-resource "alicloud_vpc" "vpc" {
-  cidr_block = "10.1.0.0/21"
+data "alicloud_instance_types" "example" {
+  availability_zone = data.alicloud_zones.example.zones.0.id
+  cpu_core_count    = 1
+  memory_size       = 2
 }
 
-resource "alicloud_vswitch" "vsw" {
-  vpc_id            = alicloud_vpc.vpc.id
-  cidr_block        = "10.1.1.0/24"
-  zone_id           = data.alicloud_zones.default.zones[0].id
-
-  depends_on = [alicloud_vpc.vpc]
+data "alicloud_images" "example" {
+  name_regex = "^ubuntu_[0-9]+_[0-9]+_x64*"
+  owners     = "system"
 }
 
-data "alicloud_instance_types" "default" {
-  availability_zone = data.alicloud_zones.default.zones[0].id
+resource "alicloud_vpc" "example" {
+  vpc_name   = var.name
+  cidr_block = "10.4.0.0/16"
 }
 
-data "alicloud_images" "default" {
-  name_regex  = "^ubuntu_18.*64"
-  most_recent = true
-  owners      = "system"
+resource "alicloud_vswitch" "example" {
+  vswitch_name = var.name
+  cidr_block   = "10.4.0.0/24"
+  vpc_id       = alicloud_vpc.example.id
+  zone_id      = data.alicloud_zones.example.zones.0.id
 }
 
-resource "alicloud_instance" "ecs_instance" {
-  image_id          = data.alicloud_images.default.images[0].id
-  instance_type     = data.alicloud_instance_types.default.instance_types[0].id
-  availability_zone = data.alicloud_zones.default.zones[0].id
-  security_groups   = [alicloud_security_group.group.id]
-  vswitch_id        = alicloud_vswitch.vsw.id
-  instance_name     = "hello"
+resource "alicloud_security_group" "example" {
+  name   = var.name
+  vpc_id = alicloud_vpc.example.id
+}
+
+resource "alicloud_instance" "example" {
+  availability_zone = data.alicloud_zones.example.zones.0.id
+  instance_name     = var.name
+  image_id          = data.alicloud_images.example.images.0.id
+  instance_type     = data.alicloud_instance_types.example.instance_types.0.id
+  security_groups   = [alicloud_security_group.example.id]
+  vswitch_id        = alicloud_vswitch.example.id
   tags = {
-    Name = "TerraformTest-instance"
+    Created = "TF",
+    For     = "example",
   }
 }
 
-resource "alicloud_eip" "eip" {
+resource "alicloud_eip_address" "example" {
+  address_name = var.name
 }
 
-resource "alicloud_eip_association" "eip_asso" {
-  allocation_id = alicloud_eip.eip.id
-  instance_id   = alicloud_instance.ecs_instance.id
-}
-
-resource "alicloud_security_group" "group" {
-  name        = "terraform-test-group"
-  description = "New security group"
-  vpc_id      = alicloud_vpc.vpc.id
+resource "alicloud_eip_association" "example" {
+  allocation_id = alicloud_eip_address.example.id
+  instance_id   = alicloud_instance.example.id
 }
 ```
 
@@ -83,12 +90,12 @@ to create several EIP instances and associate them with other resources one-clic
 
 The following arguments are supported:
 
-* `allocation_id` - (Required, ForcesNew) The allocation EIP ID.
-* `instance_id` - (Required, ForcesNew) The ID of the ECS or SLB instance or Nat Gateway or NetworkInterface or HaVip.
-* `instance_type` - (Optional, ForceNew, Available in 1.46.0+) The type of cloud product that the eip instance to bind. Valid values: `EcsInstance`, `SlbInstance`, `Nat`, `NetworkInterface` and `HaVip`.
-* `private_ip_address` - (Optional, ForceNew, Available in 1.52.2+) The private IP address in the network segment of the vswitch which has been assigned.
-* `force` - (Optional, Available in 1.95.0+) When EIP is bound to a NAT gateway, and the NAT gateway adds a DNAT or SNAT entry, set it for `true` can unassociation any way. Default to `false`.
-
+* `allocation_id` - (Required, ForceNew) The allocation EIP ID.
+* `instance_id` - (Required, ForceNew) The ID of the ECS or SLB instance or Nat Gateway or NetworkInterface or HaVip.
+* `instance_type` - (Optional, ForceNew, Available since v1.46.0) The type of cloud product that the eip instance to bind. Valid values: `EcsInstance`, `SlbInstance`, `Nat`, `NetworkInterface`, `HaVip` and `IpAddress`.
+* `private_ip_address` - (Optional, ForceNew, Available since v1.52.2) The private IP address in the network segment of the vswitch which has been assigned.
+* `force` - (Optional, Available since v1.95.0) When EIP is bound to a NAT gateway, and the NAT gateway adds a DNAT or SNAT entry, set it for `true` can unassociation any way. Default to `false`.
+* `vpc_id` - (Optional, ForceNew, Available since v1.203.0) The ID of the VPC that has IPv4 gateways enabled and that is deployed in the same region as the EIP. When you associate an EIP with an IP address, the system can enable the IP address to access the Internet based on VPC route configurations. **Note:** This parameter is required if `instance_type` is set to IpAddress. In this case, the EIP is associated with an IP address.
 
 ## Attributes Reference
 
@@ -96,12 +103,21 @@ The following attributes are exported:
 
 * `id` - The EIP Association ID and it formats as `<allocation_id>:<instance_id>`.
 
+## Timeouts
+
+-> **NOTE:** Available since 1.194.1+.
+
+The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
+
+* `create` - (Defaults to 10 mins) Used when create the Elastic IP address association.
+* `delete` - (Defaults to 10 mins) Used when delete the Elastic IP address association.
+
 ## Import
 
--> **NOTE:** Available in 1.117.0+.
+-> **NOTE:** Available since 1.117.0+.
 
 Elastic IP address association can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_eip_association.example eip-abc12345678:i-abc12355
 ```

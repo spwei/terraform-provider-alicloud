@@ -78,10 +78,12 @@ type CreateDynamicTagGroupRequest struct {
 	ContactGroupList           *[]string                            `position:"Query" name:"ContactGroupList"  type:"Repeated"`
 	TemplateIdList             *[]string                            `position:"Query" name:"TemplateIdList"  type:"Repeated"`
 	TagKey                     string                               `position:"Query" name:"TagKey"`
+	TagRegionId                string                               `position:"Query" name:"TagRegionId"`
 }
 
 // CreateDynamicTagGroupMatchExpress is a repeated param struct in CreateDynamicTagGroupRequest
 type CreateDynamicTagGroupMatchExpress struct {
+	TagName               string `name:"TagName"`
 	TagValue              string `name:"TagValue"`
 	TagValueMatchFunction string `name:"TagValueMatchFunction"`
 }
@@ -91,8 +93,9 @@ type CreateDynamicTagGroupResponse struct {
 	*responses.BaseResponse
 	Code      string `json:"Code" xml:"Code"`
 	Message   string `json:"Message" xml:"Message"`
-	Success   bool   `json:"Success" xml:"Success"`
 	RequestId string `json:"RequestId" xml:"RequestId"`
+	Success   bool   `json:"Success" xml:"Success"`
+	Id        string `json:"Id" xml:"Id"`
 }
 
 // CreateCreateDynamicTagGroupRequest creates a request to invoke CreateDynamicTagGroup API

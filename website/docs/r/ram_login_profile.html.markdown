@@ -7,27 +7,27 @@ description: |-
   Provides a RAM User Login Profile resource.
 ---
 
-# alicloud\_ram\_login\_profile
+# alicloud_ram_login_profile
 
 Provides a RAM User Login Profile resource.
 
+-> **NOTE:** Available since v1.0.0+.
 
 ## Example Usage
 
-```
-# Create a RAM login profile.
+```terraform
 resource "alicloud_ram_user" "user" {
-  name         = "user_test"
-  display_name = "user_display_name"
+  name         = "terraform_example"
+  display_name = "terraform_example"
   mobile       = "86-18688888888"
   email        = "hello.uuu@aaa.com"
-  comments     = "yoyoyo"
+  comments     = "terraform_example"
   force        = true
 }
 
 resource "alicloud_ram_login_profile" "profile" {
   user_name = alicloud_ram_user.user.name
-  password  = "Yourpassword1234"
+  password  = "Example_1234"
 }
 ```
 ## Argument Reference
@@ -44,14 +44,11 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `id` - The login profile ID.
-* `user_name` - The user name.
-* `mfa_bind_required` - The parameter which indicates whether the MFA needs to be bind when the user first logs in.
-* `password_reset_required` - The parameter which indicates whether the password needs to be reset when the user first logs in.
 
 ## Import
 
 RAM login profile can be imported using the id or user name, e.g.
 
-```
+```shell
 $ terraform import alicloud_ram_login_profile.example my-login
 ```

@@ -80,10 +80,10 @@ type DescribeWebAccessLogStatusRequest struct {
 // DescribeWebAccessLogStatusResponse is the response struct for api DescribeWebAccessLogStatus
 type DescribeWebAccessLogStatusResponse struct {
 	*responses.BaseResponse
-	RequestId   string `json:"RequestId" xml:"RequestId"`
-	SlsStatus   bool   `json:"SlsStatus" xml:"SlsStatus"`
 	SlsLogstore string `json:"SlsLogstore" xml:"SlsLogstore"`
+	SlsStatus   bool   `json:"SlsStatus" xml:"SlsStatus"`
 	SlsProject  string `json:"SlsProject" xml:"SlsProject"`
+	RequestId   string `json:"RequestId" xml:"RequestId"`
 }
 
 // CreateDescribeWebAccessLogStatusRequest creates a request to invoke DescribeWebAccessLogStatus API

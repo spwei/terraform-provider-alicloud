@@ -83,14 +83,15 @@ type TransformToPrePaidRequest struct {
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 	InstanceId           string           `position:"Query" name:"InstanceId"`
 	AutoRenew            string           `position:"Query" name:"AutoRenew"`
+	ChargeType           string           `position:"Query" name:"ChargeType"`
 }
 
 // TransformToPrePaidResponse is the response struct for api TransformToPrePaid
 type TransformToPrePaidResponse struct {
 	*responses.BaseResponse
+	EndTime   string `json:"EndTime" xml:"EndTime"`
 	RequestId string `json:"RequestId" xml:"RequestId"`
 	OrderId   string `json:"OrderId" xml:"OrderId"`
-	EndTime   string `json:"EndTime" xml:"EndTime"`
 }
 
 // CreateTransformToPrePaidRequest creates a request to invoke TransformToPrePaid API
@@ -98,7 +99,7 @@ func CreateTransformToPrePaidRequest() (request *TransformToPrePaidRequest) {
 	request = &TransformToPrePaidRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("Dds", "2015-12-01", "TransformToPrePaid", "Dds", "openAPI")
+	request.InitWithApiInfo("Dds", "2015-12-01", "TransformToPrePaid", "dds", "openAPI")
 	request.Method = requests.POST
 	return
 }

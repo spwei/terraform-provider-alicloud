@@ -77,28 +77,30 @@ func TestAccAlicloudPolarDBClustersDataSource(t *testing.T) {
 
 	var existPolarClusterMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"ids.#":                     "1",
-			"descriptions.#":            "1",
-			"clusters.#":                "1",
-			"clusters.0.id":             CHECKSET,
-			"clusters.0.description":    CHECKSET,
-			"clusters.0.charge_type":    "PostPaid",
-			"clusters.0.network_type":   "VPC",
-			"clusters.0.region_id":      CHECKSET,
-			"clusters.0.zone_id":        CHECKSET,
-			"clusters.0.expired":        "false",
-			"clusters.0.status":         "Running",
-			"clusters.0.engine":         "POLARDB",
-			"clusters.0.db_type":        "MySQL",
-			"clusters.0.db_version":     "8.0",
-			"clusters.0.lock_mode":      "Unlock",
-			"clusters.0.delete_lock":    "0",
-			"clusters.0.create_time":    CHECKSET,
-			"clusters.0.vpc_id":         CHECKSET,
-			"clusters.0.db_node_number": "2",
-			"clusters.0.db_node_class":  "polar.mysql.x4.large",
-			"clusters.0.storage_used":   CHECKSET,
-			"clusters.0.db_nodes.#":     "2",
+			"ids.#":                        "1",
+			"descriptions.#":               "1",
+			"clusters.#":                   "1",
+			"clusters.0.id":                CHECKSET,
+			"clusters.0.description":       CHECKSET,
+			"clusters.0.charge_type":       "PostPaid",
+			"clusters.0.network_type":      "VPC",
+			"clusters.0.region_id":         CHECKSET,
+			"clusters.0.zone_id":           CHECKSET,
+			"clusters.0.expired":           "false",
+			"clusters.0.status":            "Running",
+			"clusters.0.engine":            "POLARDB",
+			"clusters.0.db_type":           "MySQL",
+			"clusters.0.db_version":        "8.0",
+			"clusters.0.lock_mode":         "Unlock",
+			"clusters.0.delete_lock":       "0",
+			"clusters.0.create_time":       CHECKSET,
+			"clusters.0.vpc_id":            CHECKSET,
+			"clusters.0.db_node_number":    "2",
+			"clusters.0.db_node_class":     CHECKSET,
+			"clusters.0.storage_used":      CHECKSET,
+			"clusters.0.db_nodes.#":        "2",
+			"clusters.0.connection_string": CHECKSET,
+			"clusters.0.port":              "3306",
 		}
 	}
 
@@ -115,11 +117,8 @@ func TestAccAlicloudPolarDBClustersDataSource(t *testing.T) {
 		existMapFunc: existPolarClusterMapFunc,
 		fakeMapFunc:  fakePolarClusterMapFunc,
 	}
-	preCheck := func() {
-		testAccPreCheckWithNoDefaultVpc(t)
-	}
 
-	PolarClusterCheckInfo.dataSourceTestCheckWithPreCheck(t, rand, preCheck, nameConf, statusConf, dbtypeConf, tagsConf, allConf)
+	PolarClusterCheckInfo.dataSourceTestCheck(t, rand, nameConf, statusConf, dbtypeConf, tagsConf, allConf)
 }
 
 func testAccCheckAlicloudPolarClusterDataSourceConfig(rand int, attrMap map[string]string) string {
@@ -137,6 +136,7 @@ func testAccCheckAlicloudPolarClusterDataSourceConfig(rand int, attrMap map[stri
 	  db_version = "8.0"
       pay_type   = "PostPaid"
 	  zone_id    = local.zone_id
+      category   = "Normal"
 	}
 
 	resource "alicloud_polardb_cluster" "default" {
@@ -150,6 +150,7 @@ func testAccCheckAlicloudPolarClusterDataSourceConfig(rand int, attrMap map[stri
 			"key1" = "value1"
 			"key2" = "value2"
 		}
+		security_ips = ["10.168.1.12", "100.69.7.112"]
 	}
 	data "alicloud_polardb_clusters" "default" {
 	  %s

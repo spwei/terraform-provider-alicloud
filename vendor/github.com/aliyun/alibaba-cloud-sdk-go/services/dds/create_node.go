@@ -74,23 +74,29 @@ type CreateNodeRequest struct {
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
 	NodeType             string           `position:"Query" name:"NodeType"`
 	ClientToken          string           `position:"Query" name:"ClientToken"`
+	ReadonlyReplicas     requests.Integer `position:"Query" name:"ReadonlyReplicas"`
+	CouponNo             string           `position:"Query" name:"CouponNo"`
 	NodeClass            string           `position:"Query" name:"NodeClass"`
+	ShardDirect          requests.Boolean `position:"Query" name:"ShardDirect"`
+	AccountName          string           `position:"Query" name:"AccountName"`
 	SecurityToken        string           `position:"Query" name:"SecurityToken"`
 	DBInstanceId         string           `position:"Query" name:"DBInstanceId"`
+	BusinessInfo         string           `position:"Query" name:"BusinessInfo"`
 	AutoPay              requests.Boolean `position:"Query" name:"AutoPay"`
 	FromApp              string           `position:"Query" name:"FromApp"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	NodeStorage          requests.Integer `position:"Query" name:"NodeStorage"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	AccountPassword      string           `position:"Query" name:"AccountPassword"`
 }
 
 // CreateNodeResponse is the response struct for api CreateNode
 type CreateNodeResponse struct {
 	*responses.BaseResponse
 	RequestId string `json:"RequestId" xml:"RequestId"`
-	OrderId   string `json:"OrderId" xml:"OrderId"`
 	NodeId    string `json:"NodeId" xml:"NodeId"`
+	OrderId   string `json:"OrderId" xml:"OrderId"`
 }
 
 // CreateCreateNodeRequest creates a request to invoke CreateNode API
@@ -98,7 +104,7 @@ func CreateCreateNodeRequest() (request *CreateNodeRequest) {
 	request = &CreateNodeRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("Dds", "2015-12-01", "CreateNode", "Dds", "openAPI")
+	request.InitWithApiInfo("Dds", "2015-12-01", "CreateNode", "dds", "openAPI")
 	request.Method = requests.POST
 	return
 }

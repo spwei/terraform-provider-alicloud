@@ -79,8 +79,8 @@ type DescribeLogStoreExistStatusRequest struct {
 // DescribeLogStoreExistStatusResponse is the response struct for api DescribeLogStoreExistStatus
 type DescribeLogStoreExistStatusResponse struct {
 	*responses.BaseResponse
-	RequestId   string `json:"RequestId" xml:"RequestId"`
 	ExistStatus bool   `json:"ExistStatus" xml:"ExistStatus"`
+	RequestId   string `json:"RequestId" xml:"RequestId"`
 }
 
 // CreateDescribeLogStoreExistStatusRequest creates a request to invoke DescribeLogStoreExistStatus API

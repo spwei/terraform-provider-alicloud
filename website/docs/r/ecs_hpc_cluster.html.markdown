@@ -21,8 +21,8 @@ Basic Usage
 
 ```terraform
 resource "alicloud_ecs_hpc_cluster" "example" {
-	name          = "tf-testAcc"
-	description   = "For Terraform Test"
+  name        = "tf-testAcc"
+  description = "For Terraform Test"
 }
 
 ```
@@ -44,6 +44,6 @@ The following attributes are exported:
 
 ECS Hpc Cluster can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_ecs_hpc_cluster.example <id>
 ```

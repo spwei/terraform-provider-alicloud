@@ -77,6 +77,7 @@ type ModifyDBInstanceConnectionStringRequest struct {
 	NodeId                  string           `position:"Query" name:"NodeId"`
 	ResourceOwnerAccount    string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount            string           `position:"Query" name:"OwnerAccount"`
+	NewPort                 requests.Integer `position:"Query" name:"NewPort"`
 	NewConnectionString     string           `position:"Query" name:"NewConnectionString"`
 	OwnerId                 requests.Integer `position:"Query" name:"OwnerId"`
 	CurrentConnectionString string           `position:"Query" name:"CurrentConnectionString"`
@@ -93,7 +94,7 @@ func CreateModifyDBInstanceConnectionStringRequest() (request *ModifyDBInstanceC
 	request = &ModifyDBInstanceConnectionStringRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("Dds", "2015-12-01", "ModifyDBInstanceConnectionString", "Dds", "openAPI")
+	request.InitWithApiInfo("Dds", "2015-12-01", "ModifyDBInstanceConnectionString", "dds", "openAPI")
 	request.Method = requests.POST
 	return
 }

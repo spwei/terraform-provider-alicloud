@@ -1,5 +1,5 @@
 ---
-subcategory: "Serverless Workflow"
+subcategory: "Serverless Workflow (FnF)"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_fnf_schedule"
 sidebar_current: "docs-alicloud-resource-fnf-schedule"
@@ -21,7 +21,7 @@ Basic Usage
 
 ```terraform
 resource "alicloud_fnf_flow" "example" {
-  definition = <<EOF
+  definition  = <<EOF
   version: v1beta1
   type: flow
   steps:
@@ -74,6 +74,6 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/d
 
 Serverless Workflow Schedule can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_fnf_schedule.example <schedule_name>:<flow_name>
 ```

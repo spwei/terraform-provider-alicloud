@@ -90,10 +90,10 @@ type ModifyInstanceParameter struct {
 // ModifyInstanceResponse is the response struct for api ModifyInstance
 type ModifyInstanceResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
-	Success   bool   `json:"Success" xml:"Success"`
 	Code      string `json:"Code" xml:"Code"`
 	Message   string `json:"Message" xml:"Message"`
+	RequestId string `json:"RequestId" xml:"RequestId"`
+	Success   bool   `json:"Success" xml:"Success"`
 	Data      Data   `json:"Data" xml:"Data"`
 }
 
@@ -102,7 +102,7 @@ func CreateModifyInstanceRequest() (request *ModifyInstanceRequest) {
 	request = &ModifyInstanceRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "ModifyInstance", "", "")
+	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "ModifyInstance", "bssopenapi", "openAPI")
 	request.Method = requests.POST
 	return
 }

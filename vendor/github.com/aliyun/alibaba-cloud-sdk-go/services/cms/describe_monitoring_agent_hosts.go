@@ -78,21 +78,24 @@ type DescribeMonitoringAgentHostsRequest struct {
 	PageSize         requests.Integer `position:"Query" name:"PageSize"`
 	AliyunHost       requests.Boolean `position:"Query" name:"AliyunHost"`
 	KeyWord          string           `position:"Query" name:"KeyWord"`
+	Order            string           `position:"Query" name:"Order"`
+	OrderBy          string           `position:"Query" name:"OrderBy"`
 	InstanceIds      string           `position:"Query" name:"InstanceIds"`
+	SysomStatus      string           `position:"Query" name:"SysomStatus"`
 	Status           string           `position:"Query" name:"Status"`
 }
 
 // DescribeMonitoringAgentHostsResponse is the response struct for api DescribeMonitoringAgentHosts
 type DescribeMonitoringAgentHostsResponse struct {
 	*responses.BaseResponse
+	RequestId  string `json:"RequestId" xml:"RequestId"`
+	Success    bool   `json:"Success" xml:"Success"`
 	Code       string `json:"Code" xml:"Code"`
 	Message    string `json:"Message" xml:"Message"`
-	Success    bool   `json:"Success" xml:"Success"`
-	RequestId  string `json:"RequestId" xml:"RequestId"`
+	PageNumber int    `json:"PageNumber" xml:"PageNumber"`
+	PageSize   int    `json:"PageSize" xml:"PageSize"`
 	PageTotal  int    `json:"PageTotal" xml:"PageTotal"`
 	Total      int    `json:"Total" xml:"Total"`
-	PageSize   int    `json:"PageSize" xml:"PageSize"`
-	PageNumber int    `json:"PageNumber" xml:"PageNumber"`
 	Hosts      Hosts  `json:"Hosts" xml:"Hosts"`
 }
 

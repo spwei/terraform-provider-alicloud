@@ -83,10 +83,13 @@ type DescribeMasterSlaveServerGroupAttributeRequest struct {
 // DescribeMasterSlaveServerGroupAttributeResponse is the response struct for api DescribeMasterSlaveServerGroupAttribute
 type DescribeMasterSlaveServerGroupAttributeResponse struct {
 	*responses.BaseResponse
+	ServiceManagedMode         string                                                             `json:"ServiceManagedMode" xml:"ServiceManagedMode"`
 	RequestId                  string                                                             `json:"RequestId" xml:"RequestId"`
 	LoadBalancerId             string                                                             `json:"LoadBalancerId" xml:"LoadBalancerId"`
-	MasterSlaveServerGroupId   string                                                             `json:"MasterSlaveServerGroupId" xml:"MasterSlaveServerGroupId"`
 	MasterSlaveServerGroupName string                                                             `json:"MasterSlaveServerGroupName" xml:"MasterSlaveServerGroupName"`
+	MasterSlaveServerGroupId   string                                                             `json:"MasterSlaveServerGroupId" xml:"MasterSlaveServerGroupId"`
+	CreateTime                 string                                                             `json:"CreateTime" xml:"CreateTime"`
+	Tags                       TagsInDescribeMasterSlaveServerGroupAttribute                      `json:"Tags" xml:"Tags"`
 	MasterSlaveBackendServers  MasterSlaveBackendServersInDescribeMasterSlaveServerGroupAttribute `json:"MasterSlaveBackendServers" xml:"MasterSlaveBackendServers"`
 }
 

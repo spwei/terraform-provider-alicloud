@@ -79,10 +79,10 @@ type DescribeDDosEventMaxRequest struct {
 // DescribeDDosEventMaxResponse is the response struct for api DescribeDDosEventMax
 type DescribeDDosEventMaxResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
-	Mbps      int64  `json:"Mbps" xml:"Mbps"`
 	Qps       int64  `json:"Qps" xml:"Qps"`
+	RequestId string `json:"RequestId" xml:"RequestId"`
 	Cps       int64  `json:"Cps" xml:"Cps"`
+	Mbps      int64  `json:"Mbps" xml:"Mbps"`
 }
 
 // CreateDescribeDDosEventMaxRequest creates a request to invoke DescribeDDosEventMax API

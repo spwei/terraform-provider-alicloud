@@ -83,8 +83,8 @@ type CheckCloudResourceAuthorizedRequest struct {
 // CheckCloudResourceAuthorizedResponse is the response struct for api CheckCloudResourceAuthorized
 type CheckCloudResourceAuthorizedResponse struct {
 	*responses.BaseResponse
-	RequestId          string `json:"RequestId" xml:"RequestId"`
 	AuthorizationState int    `json:"AuthorizationState" xml:"AuthorizationState"`
+	RequestId          string `json:"RequestId" xml:"RequestId"`
 	RoleArn            string `json:"RoleArn" xml:"RoleArn"`
 }
 
@@ -93,7 +93,7 @@ func CreateCheckCloudResourceAuthorizedRequest() (request *CheckCloudResourceAut
 	request = &CheckCloudResourceAuthorizedRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("Dds", "2015-12-01", "CheckCloudResourceAuthorized", "Dds", "openAPI")
+	request.InitWithApiInfo("Dds", "2015-12-01", "CheckCloudResourceAuthorized", "dds", "openAPI")
 	request.Method = requests.POST
 	return
 }

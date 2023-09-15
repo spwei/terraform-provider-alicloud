@@ -83,11 +83,11 @@ type QueryUserOmsDataRequest struct {
 // QueryUserOmsDataResponse is the response struct for api QueryUserOmsData
 type QueryUserOmsDataResponse struct {
 	*responses.BaseResponse
-	RequestId string                 `json:"RequestId" xml:"RequestId"`
-	Success   bool                   `json:"Success" xml:"Success"`
-	Code      string                 `json:"Code" xml:"Code"`
-	Message   string                 `json:"Message" xml:"Message"`
-	Data      DataInQueryUserOmsData `json:"Data" xml:"Data"`
+	Code      string `json:"Code" xml:"Code"`
+	Message   string `json:"Message" xml:"Message"`
+	RequestId string `json:"RequestId" xml:"RequestId"`
+	Success   bool   `json:"Success" xml:"Success"`
+	Data      Data   `json:"Data" xml:"Data"`
 }
 
 // CreateQueryUserOmsDataRequest creates a request to invoke QueryUserOmsData API
@@ -95,7 +95,7 @@ func CreateQueryUserOmsDataRequest() (request *QueryUserOmsDataRequest) {
 	request = &QueryUserOmsDataRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "QueryUserOmsData", "", "")
+	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "QueryUserOmsData", "bssopenapi", "openAPI")
 	request.Method = requests.POST
 	return
 }

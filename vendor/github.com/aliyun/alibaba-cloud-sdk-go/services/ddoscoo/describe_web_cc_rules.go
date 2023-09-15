@@ -83,8 +83,8 @@ type DescribeWebCCRulesRequest struct {
 // DescribeWebCCRulesResponse is the response struct for api DescribeWebCCRules
 type DescribeWebCCRulesResponse struct {
 	*responses.BaseResponse
-	RequestId  string      `json:"RequestId" xml:"RequestId"`
 	TotalCount int64       `json:"TotalCount" xml:"TotalCount"`
+	RequestId  string      `json:"RequestId" xml:"RequestId"`
 	WebCCRules []WebCCRule `json:"WebCCRules" xml:"WebCCRules"`
 }
 

@@ -72,23 +72,7 @@ func resourceAliCloudImage() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-				Default:  "Ubuntu",
-				ValidateFunc: validation.StringInSlice([]string{
-					"CentOS",
-					"Ubuntu",
-					"SUSE",
-					"OpenSUSE",
-					"RedHat",
-					"Debian",
-					"CoreOS",
-					"Aliyun Linux",
-					"Windows Server 2003",
-					"Windows Server 2008",
-					"Windows Server 2012",
-					"Windows 7",
-					"Customized Linux",
-					"Others Linux",
-				}, false),
+				Computed: true,
 			},
 			"resource_group_id": {
 				Type:     schema.TypeString,
@@ -135,6 +119,12 @@ func resourceAliCloudImage() *schema.Resource {
 				Default:  false,
 			},
 			"tags": tagsSchema(),
+			// Not the public attribute and it used to automatically delete dependence snapshots while deleting the image.
+			// Available in 1.136.0
+			"delete_auto_snapshot": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 		},
 	}
 }

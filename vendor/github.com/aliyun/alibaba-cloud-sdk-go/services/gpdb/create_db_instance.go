@@ -21,7 +21,6 @@ import (
 )
 
 // CreateDBInstance invokes the gpdb.CreateDBInstance API synchronously
-// api document: https://help.aliyun.com/api/gpdb/createdbinstance.html
 func (client *Client) CreateDBInstance(request *CreateDBInstanceRequest) (response *CreateDBInstanceResponse, err error) {
 	response = CreateCreateDBInstanceResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) CreateDBInstance(request *CreateDBInstanceRequest) (respon
 }
 
 // CreateDBInstanceWithChan invokes the gpdb.CreateDBInstance API asynchronously
-// api document: https://help.aliyun.com/api/gpdb/createdbinstance.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) CreateDBInstanceWithChan(request *CreateDBInstanceRequest) (<-chan *CreateDBInstanceResponse, <-chan error) {
 	responseChan := make(chan *CreateDBInstanceResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) CreateDBInstanceWithChan(request *CreateDBInstanceRequest)
 }
 
 // CreateDBInstanceWithCallback invokes the gpdb.CreateDBInstance API asynchronously
-// api document: https://help.aliyun.com/api/gpdb/createdbinstance.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) CreateDBInstanceWithCallback(request *CreateDBInstanceRequest, callback func(response *CreateDBInstanceResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,22 +71,46 @@ func (client *Client) CreateDBInstanceWithCallback(request *CreateDBInstanceRequ
 // CreateDBInstanceRequest is the request struct for api CreateDBInstance
 type CreateDBInstanceRequest struct {
 	*requests.RpcRequest
-	DBInstanceGroupCount  string           `position:"Query" name:"DBInstanceGroupCount"`
-	Period                string           `position:"Query" name:"Period"`
-	ClientToken           string           `position:"Query" name:"ClientToken"`
-	EngineVersion         string           `position:"Query" name:"EngineVersion"`
-	OwnerId               requests.Integer `position:"Query" name:"OwnerId"`
-	UsedTime              string           `position:"Query" name:"UsedTime"`
-	DBInstanceClass       string           `position:"Query" name:"DBInstanceClass"`
-	SecurityIPList        string           `position:"Query" name:"SecurityIPList"`
-	VSwitchId             string           `position:"Query" name:"VSwitchId"`
-	PrivateIpAddress      string           `position:"Query" name:"PrivateIpAddress"`
-	Engine                string           `position:"Query" name:"Engine"`
-	VPCId                 string           `position:"Query" name:"VPCId"`
-	ZoneId                string           `position:"Query" name:"ZoneId"`
-	DBInstanceDescription string           `position:"Query" name:"DBInstanceDescription"`
-	PayType               string           `position:"Query" name:"PayType"`
-	InstanceNetworkType   string           `position:"Query" name:"InstanceNetworkType"`
+	EngineVersion             string                 `position:"Query" name:"EngineVersion"`
+	DBInstanceCategory        string                 `position:"Query" name:"DBInstanceCategory"`
+	StorageType               string                 `position:"Query" name:"StorageType"`
+	ResourceGroupId           string                 `position:"Query" name:"ResourceGroupId"`
+	EncryptionType            string                 `position:"Query" name:"EncryptionType"`
+	DBInstanceDescription     string                 `position:"Query" name:"DBInstanceDescription"`
+	ServerlessMode            string                 `position:"Query" name:"ServerlessMode"`
+	Tag                       *[]CreateDBInstanceTag `position:"Query" name:"Tag"  type:"Repeated"`
+	Period                    string                 `position:"Query" name:"Period"`
+	VectorConfigurationStatus string                 `position:"Query" name:"VectorConfigurationStatus"`
+	EncryptionKey             string                 `position:"Query" name:"EncryptionKey"`
+	OwnerId                   requests.Integer       `position:"Query" name:"OwnerId"`
+	SegDiskPerformanceLevel   string                 `position:"Query" name:"SegDiskPerformanceLevel"`
+	DBInstanceClass           string                 `position:"Query" name:"DBInstanceClass"`
+	SecurityIPList            string                 `position:"Query" name:"SecurityIPList"`
+	VSwitchId                 string                 `position:"Query" name:"VSwitchId"`
+	PrivateIpAddress          string                 `position:"Query" name:"PrivateIpAddress"`
+	ZoneId                    string                 `position:"Query" name:"ZoneId"`
+	InstanceNetworkType       string                 `position:"Query" name:"InstanceNetworkType"`
+	ClientToken               string                 `position:"Query" name:"ClientToken"`
+	InstanceSpec              string                 `position:"Query" name:"InstanceSpec"`
+	StorageSize               requests.Integer       `position:"Query" name:"StorageSize"`
+	SegStorageType            string                 `position:"Query" name:"SegStorageType"`
+	MasterNodeNum             string                 `position:"Query" name:"MasterNodeNum"`
+	SegNodeNum                string                 `position:"Query" name:"SegNodeNum"`
+	Engine                    string                 `position:"Query" name:"Engine"`
+	CreateSampleData          requests.Boolean       `position:"Query" name:"CreateSampleData"`
+	DBInstanceGroupCount      string                 `position:"Query" name:"DBInstanceGroupCount"`
+	DBInstanceMode            string                 `position:"Query" name:"DBInstanceMode"`
+	UsedTime                  string                 `position:"Query" name:"UsedTime"`
+	VPCId                     string                 `position:"Query" name:"VPCId"`
+	ServerlessResource        requests.Integer       `position:"Query" name:"ServerlessResource"`
+	IdleTime                  requests.Integer       `position:"Query" name:"IdleTime"`
+	PayType                   string                 `position:"Query" name:"PayType"`
+}
+
+// CreateDBInstanceTag is a repeated param struct in CreateDBInstanceRequest
+type CreateDBInstanceTag struct {
+	Value string `name:"Value"`
+	Key   string `name:"Key"`
 }
 
 // CreateDBInstanceResponse is the response struct for api CreateDBInstance
@@ -99,9 +118,9 @@ type CreateDBInstanceResponse struct {
 	*responses.BaseResponse
 	RequestId        string `json:"RequestId" xml:"RequestId"`
 	DBInstanceId     string `json:"DBInstanceId" xml:"DBInstanceId"`
-	OrderId          string `json:"OrderId" xml:"OrderId"`
-	ConnectionString string `json:"ConnectionString" xml:"ConnectionString"`
 	Port             string `json:"Port" xml:"Port"`
+	ConnectionString string `json:"ConnectionString" xml:"ConnectionString"`
+	OrderId          string `json:"OrderId" xml:"OrderId"`
 }
 
 // CreateCreateDBInstanceRequest creates a request to invoke CreateDBInstance API
@@ -109,7 +128,8 @@ func CreateCreateDBInstanceRequest() (request *CreateDBInstanceRequest) {
 	request = &CreateDBInstanceRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("gpdb", "2016-05-03", "CreateDBInstance", "gpdb", "openAPI")
+	request.InitWithApiInfo("gpdb", "2016-05-03", "CreateDBInstance", "", "")
+	request.Method = requests.POST
 	return
 }
 

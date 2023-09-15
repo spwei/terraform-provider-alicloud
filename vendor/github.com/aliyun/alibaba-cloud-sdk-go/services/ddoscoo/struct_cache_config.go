@@ -17,8 +17,8 @@ package ddoscoo
 
 // CacheConfig is a nested struct in ddoscoo response
 type CacheConfig struct {
+	Domain      string       `json:"Domain" xml:"Domain"`
 	Mode        string       `json:"Mode" xml:"Mode"`
 	Enable      int          `json:"Enable" xml:"Enable"`
-	Domain      string       `json:"Domain" xml:"Domain"`
 	CustomRules []CustomRule `json:"CustomRules" xml:"CustomRules"`
 }

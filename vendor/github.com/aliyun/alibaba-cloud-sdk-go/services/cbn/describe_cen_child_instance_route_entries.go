@@ -81,6 +81,7 @@ type DescribeCenChildInstanceRouteEntriesRequest struct {
 	DestinationCidrBlock      string           `position:"Query" name:"DestinationCidrBlock"`
 	OwnerId                   requests.Integer `position:"Query" name:"OwnerId"`
 	ChildInstanceType         string           `position:"Query" name:"ChildInstanceType"`
+	Version                   string           `position:"Query" name:"Version"`
 	ChildInstanceId           string           `position:"Query" name:"ChildInstanceId"`
 	ChildInstanceRouteTableId string           `position:"Query" name:"ChildInstanceRouteTableId"`
 	Status                    string           `position:"Query" name:"Status"`
@@ -89,10 +90,10 @@ type DescribeCenChildInstanceRouteEntriesRequest struct {
 // DescribeCenChildInstanceRouteEntriesResponse is the response struct for api DescribeCenChildInstanceRouteEntries
 type DescribeCenChildInstanceRouteEntriesResponse struct {
 	*responses.BaseResponse
+	PageSize        int                                                   `json:"PageSize" xml:"PageSize"`
 	RequestId       string                                                `json:"RequestId" xml:"RequestId"`
 	PageNumber      int                                                   `json:"PageNumber" xml:"PageNumber"`
 	TotalCount      int                                                   `json:"TotalCount" xml:"TotalCount"`
-	PageSize        int                                                   `json:"PageSize" xml:"PageSize"`
 	CenRouteEntries CenRouteEntriesInDescribeCenChildInstanceRouteEntries `json:"CenRouteEntries" xml:"CenRouteEntries"`
 }
 
@@ -101,7 +102,7 @@ func CreateDescribeCenChildInstanceRouteEntriesRequest() (request *DescribeCenCh
 	request = &DescribeCenChildInstanceRouteEntriesRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("Cbn", "2017-09-12", "DescribeCenChildInstanceRouteEntries", "cbn", "openAPI")
+	request.InitWithApiInfo("Cbn", "2017-09-12", "DescribeCenChildInstanceRouteEntries", "", "")
 	request.Method = requests.POST
 	return
 }

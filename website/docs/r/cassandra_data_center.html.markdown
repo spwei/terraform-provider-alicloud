@@ -26,7 +26,7 @@ The official website mark  more regions. Or you can call [DescribeRegions](https
 
 ### Create a cassandra dataCenter
 
-```
+```terraform
 resource "alicloud_cassandra_cluster" "default" {
   cluster_name        = "cassandra-cluster-name-tf"
   data_center_name    = "dc-1"
@@ -97,6 +97,6 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/d
 If you need full function, please import Cassandra cluster first.
 Cassandra dataCenter can be imported using the dcId:clusterId, e.g.
 
-```
+```shell
 $ terraform import alicloud_cassandra_data_center.dc_2 cn-shenxxxx-x:cds-wz933ryoaurxxxxx
 ```

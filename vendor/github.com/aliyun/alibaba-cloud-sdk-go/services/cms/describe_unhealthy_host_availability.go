@@ -79,8 +79,8 @@ type DescribeUnhealthyHostAvailabilityResponse struct {
 	*responses.BaseResponse
 	Code          string        `json:"Code" xml:"Code"`
 	Message       string        `json:"Message" xml:"Message"`
-	Success       bool          `json:"Success" xml:"Success"`
 	RequestId     string        `json:"RequestId" xml:"RequestId"`
+	Success       bool          `json:"Success" xml:"Success"`
 	UnhealthyList UnhealthyList `json:"UnhealthyList" xml:"UnhealthyList"`
 }
 

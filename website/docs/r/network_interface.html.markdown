@@ -9,6 +9,8 @@ description: |-
 
 # alicloud\_network\_interface
 
+-> **DEPRECATED:** This resource has been renamed to [alicloud_ecs_network_interface](https://www.terraform.io/docs/providers/alicloud/r/ecs_network_interface) from version 1.123.1.
+
 Provides an ECS Elastic Network Interface resource.
 
 For information about Elastic Network Interface and how to use it, see [Elastic Network Interface](https://www.alibabacloud.com/help/doc-detail/58496.html).
@@ -17,13 +19,13 @@ For information about Elastic Network Interface and how to use it, see [Elastic 
 
 ## Example Usage
 
-```
+```terraform
 variable "name" {
   default = "networkInterfaceName"
 }
 
 resource "alicloud_vpc" "vpc" {
-  vpc_name       = var.name
+  vpc_name   = var.name
   cidr_block = "192.168.0.0/24"
 }
 
@@ -32,10 +34,10 @@ data "alicloud_zones" "default" {
 }
 
 resource "alicloud_vswitch" "vswitch" {
-  name              = var.name
-  cidr_block        = "192.168.0.0/24"
-  zone_id           = data.alicloud_zones.default.zones[0].id
-  vpc_id            = alicloud_vpc.vpc.id
+  name       = var.name
+  cidr_block = "192.168.0.0/24"
+  zone_id    = data.alicloud_zones.default.zones[0].id
+  vpc_id     = alicloud_vpc.vpc.id
 }
 
 resource "alicloud_security_group" "group" {
@@ -44,11 +46,11 @@ resource "alicloud_security_group" "group" {
 }
 
 resource "alicloud_network_interface" "default" {
-  name              = "${var.name}%d"
-  vswitch_id        = alicloud_vswitch.vswitch.id
-  security_groups   = [alicloud_security_group.group.id]
-  private_ip        = "192.168.0.2"
-  private_ips_count = 3
+  network_interface_name = var.name
+  vswitch_id             = alicloud_vswitch.vswitch.id
+  security_group_ids     = [alicloud_security_group.group.id]
+  private_ip             = "192.168.0.2"
+  private_ips_count      = 3
 }
 ```
 
@@ -77,6 +79,6 @@ The following attributes are exported:
 
 ENI can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_network_interface.eni eni-abc1234567890000
 ```

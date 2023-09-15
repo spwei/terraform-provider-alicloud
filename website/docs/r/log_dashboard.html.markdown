@@ -11,33 +11,44 @@ description: |-
 The dashboard is a real-time data analysis platform provided by the log service. You can display frequently used query and analysis statements in the form of charts and save statistical charts to the dashboard.
 [Refer to details](https://www.alibabacloud.com/help/doc-detail/102530.htm).
 
--> **NOTE:** Available in 1.86.0
+-> **NOTE:** Available in 1.86.0, parameter "action" in char_list is supported since 1.164.0+. 
 
 ## Example Usage
 
 Basic Usage
 
 ```terraform
-resource "alicloud_log_project" "default" {
-  name        = "tf-project"
-  description = "tf unit test"
+resource "random_integer" "default" {
+  max = 99999
+  min = 10000
 }
-resource "alicloud_log_store" "default" {
-  project          = "tf-project"
-  name             = "tf-logstore"
-  retention_period = "3000"
-  shard_count      = 1
+
+resource "alicloud_log_project" "example" {
+  name        = "terraform-example-${random_integer.default.result}"
+  description = "terraform-example"
 }
+
+resource "alicloud_log_store" "example" {
+  project               = alicloud_log_project.example.name
+  name                  = "example-store"
+  shard_count           = 3
+  auto_split            = true
+  max_split_shard_count = 60
+  append_meta           = true
+}
+
 resource "alicloud_log_dashboard" "example" {
-  project_name   = "tf-project"
-  dashboard_name = "tf-dashboard"
+  project_name   = alicloud_log_project.example.name
+  dashboard_name = "terraform-example"
+  attribute      = "{\"type\":\"grid\"}"
   char_list      = <<EOF
   [
     {
+      "action": {},
       "title":"new_title",
       "type":"map",
       "search":{
-        "logstore":"tf-logstore",
+        "logstore":"example-store",
         "topic":"new_topic",
         "query":"* | SELECT COUNT(name) as ct_name, COUNT(product) as ct_product, name,product GROUP BY name,product",
         "start":"-86400s",
@@ -54,7 +65,7 @@ resource "alicloud_log_dashboard" "example" {
         "yPos":0,
         "width":10,
         "height":12,
-        "displayName":"xixihaha911"
+        "displayName":"terraform-example"
       }
     }
   ]
@@ -71,6 +82,7 @@ The following arguments are supported:
 * `dashboard_name` - (Required, ForceNew) The name of the Log Dashboard.
 * `char_list` - (Required) Configuration of charts in the dashboard.
 * `display_name` - (Optional) Dashboard alias.
+* `attribute` - (Optional, Available in 1.183.0+) Dashboard attribute.
 
 ## Attributes Reference
 
@@ -82,6 +94,6 @@ The following attributes are exported:
 
 Log Dashboard can be imported using the id or name, e.g.
 
-```
+```shell
 $ terraform import alicloud_log_dashboard.example tf-project:tf-logstore:tf-dashboard
 ```

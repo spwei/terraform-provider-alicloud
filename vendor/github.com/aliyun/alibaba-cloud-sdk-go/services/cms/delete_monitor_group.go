@@ -77,10 +77,10 @@ type DeleteMonitorGroupRequest struct {
 // DeleteMonitorGroupResponse is the response struct for api DeleteMonitorGroup
 type DeleteMonitorGroupResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
-	Success   bool   `json:"Success" xml:"Success"`
 	Code      int    `json:"Code" xml:"Code"`
 	Message   string `json:"Message" xml:"Message"`
+	RequestId string `json:"RequestId" xml:"RequestId"`
+	Success   bool   `json:"Success" xml:"Success"`
 	Group     Group  `json:"Group" xml:"Group"`
 }
 

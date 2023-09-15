@@ -9,7 +9,7 @@ description: |-
 
 # alicloud\_kvstore\_backup\_policy
 
--> **DEPRECATED:**  This resource  has been deprecated from version `1.104.0`. Please use resource [alicloud_kvstore_instance](https://www.terraform.io/docs/providers/alicloud/r/kvstore_instance.html).
+-> **DEPRECATED:**  This resource  has been deprecated from version `1.104.0`. Please use resource [alicloud_kvstore_instance](https://www.terraform.io/docs/providers/alicloud/r/kvstore_instance).
 
 Provides a backup policy for ApsaraDB Redis / Memcache instance resource. 
 
@@ -17,7 +17,7 @@ Provides a backup policy for ApsaraDB Redis / Memcache instance resource.
 
 Basic Usage
 
-```
+```terraform
 variable "creation" {
   default = "KVStore"
 }
@@ -40,10 +40,10 @@ resource "alicloud_vpc" "default" {
 }
 
 resource "alicloud_vswitch" "default" {
-  vpc_id            = alicloud_vpc.default.id
-  cidr_block        = "172.16.0.0/24"
-  zone_id           = data.alicloud_zones.default.zones[0].id
-  name              = var.name
+  vpc_id     = alicloud_vpc.default.id
+  cidr_block = "172.16.0.0/24"
+  zone_id    = data.alicloud_zones.default.zones[0].id
+  name       = var.name
 }
 
 resource "alicloud_kvstore_instance" "default" {
@@ -84,6 +84,6 @@ The following attributes are exported:
 
 KVStore backup policy can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_kvstore_backup_policy.example r-abc12345678
 ```

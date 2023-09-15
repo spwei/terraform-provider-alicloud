@@ -17,8 +17,8 @@ package ddoscoo
 
 // AutoCcWhitelistItem is a nested struct in ddoscoo response
 type AutoCcWhitelistItem struct {
-	DestIp   string `json:"DestIp" xml:"DestIp"`
-	SourceIp string `json:"SourceIp" xml:"SourceIp"`
-	EndTime  int64  `json:"EndTime" xml:"EndTime"`
 	Type     string `json:"Type" xml:"Type"`
+	DestIp   string `json:"DestIp" xml:"DestIp"`
+	EndTime  int64  `json:"EndTime" xml:"EndTime"`
+	SourceIp string `json:"SourceIp" xml:"SourceIp"`
 }

@@ -1,5 +1,5 @@
 ---
-subcategory: "Message Notification Service (MNS)"
+subcategory: "Message Service"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_mns_topic"
 sidebar_current: "docs-alicloud-resource-mns-topic"
@@ -13,17 +13,18 @@ Provides a MNS topic resource.
 
 -> **NOTE:** Terraform will auto build a mns topic  while it uses `alicloud_mns_topic` to build a mns topic resource.
 
+-> **DEPRECATED:**  This resource has been deprecated from version `1.188.0`. Please use new resource [message_service_topic](https://www.terraform.io/docs/providers/alicloud/r/message_service_topic).
+
 ## Example Usage
 
 Basic Usage
 
-```
+```terraform
 resource "alicloud_mns_topic" "topic" {
   name                 = "tf-example-mnstopic"
   maximum_message_size = 65536
   logging_enabled      = false
 }
-
 ```
 
 ## Argument Reference
@@ -44,7 +45,6 @@ The following attributes are exported:
 
 MNS Topic can be imported using the id or name, e.g.
 
-```
+```shell
 $ terraform import alicloud_mns_topic.topic topicName
-
 ```

@@ -79,6 +79,7 @@ type DescribePublishedRouteEntriesRequest struct {
 	ResourceOwnerAccount      string           `position:"Query" name:"ResourceOwnerAccount"`
 	DestinationCidrBlock      string           `position:"Query" name:"DestinationCidrBlock"`
 	ChildInstanceType         string           `position:"Query" name:"ChildInstanceType"`
+	Version                   string           `position:"Query" name:"Version"`
 	ChildInstanceId           string           `position:"Query" name:"ChildInstanceId"`
 	ChildInstanceRouteTableId string           `position:"Query" name:"ChildInstanceRouteTableId"`
 }
@@ -86,10 +87,10 @@ type DescribePublishedRouteEntriesRequest struct {
 // DescribePublishedRouteEntriesResponse is the response struct for api DescribePublishedRouteEntries
 type DescribePublishedRouteEntriesResponse struct {
 	*responses.BaseResponse
+	PageSize              int                   `json:"PageSize" xml:"PageSize"`
 	RequestId             string                `json:"RequestId" xml:"RequestId"`
 	PageNumber            int                   `json:"PageNumber" xml:"PageNumber"`
 	TotalCount            int                   `json:"TotalCount" xml:"TotalCount"`
-	PageSize              int                   `json:"PageSize" xml:"PageSize"`
 	PublishedRouteEntries PublishedRouteEntries `json:"PublishedRouteEntries" xml:"PublishedRouteEntries"`
 }
 
@@ -98,7 +99,7 @@ func CreateDescribePublishedRouteEntriesRequest() (request *DescribePublishedRou
 	request = &DescribePublishedRouteEntriesRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("Cbn", "2017-09-12", "DescribePublishedRouteEntries", "cbn", "openAPI")
+	request.InitWithApiInfo("Cbn", "2017-09-12", "DescribePublishedRouteEntries", "", "")
 	request.Method = requests.POST
 	return
 }

@@ -2,6 +2,7 @@ package sls
 
 import (
 	"errors"
+	"net/http"
 	"sync"
 	"time"
 
@@ -134,6 +135,25 @@ func (c *TokenAutoUpdateClient) processError(err error) (retry bool) {
 	}
 	return false
 
+}
+
+func (c *TokenAutoUpdateClient) SetUserAgent(userAgent string) {
+	c.logClient.SetUserAgent(userAgent)
+}
+
+// SetHTTPClient set a custom http client, all request will send to sls by this client
+func (c *TokenAutoUpdateClient) SetHTTPClient(client *http.Client) {
+	c.logClient.SetHTTPClient(client)
+}
+
+// SetAuthVersion set auth version that the client used
+func (c *TokenAutoUpdateClient) SetAuthVersion(version AuthVersionType) {
+	c.logClient.SetAuthVersion(version)
+}
+
+// SetRegion set a region, must be set if using signature version v4
+func (c *TokenAutoUpdateClient) SetRegion(region string) {
+	c.logClient.SetRegion(region)
 }
 
 func (c *TokenAutoUpdateClient) Close() error {
@@ -466,6 +486,86 @@ func (c *TokenAutoUpdateClient) RemoveConfigFromMachineGroup(project string, con
 	return
 }
 
+func (c *TokenAutoUpdateClient) CreateETL(project string, etljob ETL) (err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		err = c.logClient.CreateETL(project, etljob)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) UpdateETL(project string, etljob ETL) (err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		err = c.logClient.UpdateETL(project, etljob)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) GetETL(project string, etlName string) (ETLJob *ETL, err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		ETLJob, err = c.logClient.GetETL(project, etlName)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) ListETL(project string, offset int, size int) (ETLResponse *ListETLResponse, err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		ETLResponse, err = c.logClient.ListETL(project, offset, size)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) DeleteETL(project string, etlName string) (err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		err = c.logClient.DeleteETL(project, etlName)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) StartETL(project string, name string) (err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		err = c.logClient.StartETL(project, name)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) StopETL(project string, name string) (err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		err = c.logClient.StopETL(project, name)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) RestartETL(project string, etljob ETL) (err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		err = c.logClient.RestartETL(project, etljob)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
 func (c *TokenAutoUpdateClient) CreateEtlMeta(project string, etlMeta *EtlMeta) (err error) {
 	for i := 0; i < c.maxTryTimes; i++ {
 		err = c.logClient.CreateEtlMeta(project, etlMeta)
@@ -559,6 +659,16 @@ func (c *TokenAutoUpdateClient) ListShards(project, logstore string) (shardIDs [
 func (c *TokenAutoUpdateClient) SplitShard(project, logstore string, shardID int, splitKey string) (shards []*Shard, err error) {
 	for i := 0; i < c.maxTryTimes; i++ {
 		shards, err = c.logClient.SplitShard(project, logstore, shardID, splitKey)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) SplitNumShard(project, logstore string, shardID, shardNum int) (shards []*Shard, err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		shards, err = c.logClient.SplitNumShard(project, logstore, shardID, shardNum)
 		if !c.processError(err) {
 			return
 		}
@@ -669,10 +779,61 @@ func (c *TokenAutoUpdateClient) GetHistograms(project, logstore string, topic st
 	return
 }
 
+func (c *TokenAutoUpdateClient) GetHistogramsToCompleted(project, logstore string, topic string, from int64, to int64, queryExp string) (h *GetHistogramsResponse, err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		h, err = c.logClient.GetHistogramsToCompleted(project, logstore, topic, from, to, queryExp)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) GetLogsV2(project, logstore string, req *GetLogRequest) (r *GetLogsResponse, err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		r, err = c.logClient.GetLogsV2(project, logstore, req)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) GetLogsToCompletedV2(project, logstore string, req *GetLogRequest) (r *GetLogsResponse, err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		r, err = c.logClient.GetLogsToCompletedV2(project, logstore, req)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) GetLogLinesV2(project, logstore string, req *GetLogRequest) (r *GetLogLinesResponse, err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		r, err = c.logClient.GetLogLinesV2(project, logstore, req)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
 func (c *TokenAutoUpdateClient) GetLogs(project, logstore string, topic string, from int64, to int64, queryExp string,
 	maxLineNum int64, offset int64, reverse bool) (r *GetLogsResponse, err error) {
 	for i := 0; i < c.maxTryTimes; i++ {
 		r, err = c.logClient.GetLogs(project, logstore, topic, from, to, queryExp, maxLineNum, offset, reverse)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) GetLogsToCompleted(project, logstore string, topic string, from int64, to int64, queryExp string,
+	maxLineNum int64, offset int64, reverse bool) (r *GetLogsResponse, err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		r, err = c.logClient.GetLogsToCompleted(project, logstore, topic, from, to, queryExp, maxLineNum, offset, reverse)
 		if !c.processError(err) {
 			return
 		}
@@ -1178,4 +1339,430 @@ func (c *TokenAutoUpdateClient) ListTagResources(project string,
 		}
 	}
 	return
+}
+
+// ####################### Scheduled SQL API ######################
+func (c *TokenAutoUpdateClient) CreateScheduledSQL(project string, scheduledsql *ScheduledSQL) (err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		err = c.logClient.CreateScheduledSQL(project, scheduledsql)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) DeleteScheduledSQL(project string, name string) (err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		err = c.logClient.DeleteScheduledSQL(project, name)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) UpdateScheduledSQL(project string, scheduledsql *ScheduledSQL) (err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		err = c.logClient.UpdateScheduledSQL(project, scheduledsql)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) GetScheduledSQL(project string, name string) (s *ScheduledSQL, err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		s, err = c.logClient.GetScheduledSQL(project, name)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) ListScheduledSQL(project, name, displayName string, offset, size int) (scheduledsqls []*ScheduledSQL, total, count int, err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		scheduledsqls, total, count, err = c.logClient.ListScheduledSQL(project, name, displayName, offset, size)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) GetScheduledSQLJobInstance(projectName, jobName, instanceId string, result bool) (instance *ScheduledSQLJobInstance, err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		instance, err = c.logClient.GetScheduledSQLJobInstance(projectName, jobName, instanceId, result)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return instance, err
+}
+
+func (c *TokenAutoUpdateClient) ModifyScheduledSQLJobInstanceState(projectName, jobName, instanceId string, state ScheduledSQLState) (err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		err = c.logClient.ModifyScheduledSQLJobInstanceState(projectName, jobName, instanceId, state)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return err
+}
+
+func (c *TokenAutoUpdateClient) ListScheduledSQLJobInstances(projectName, jobName string, status *InstanceStatus) (instances []*ScheduledSQLJobInstance, total, count int64, err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		instances, total, count, err = c.logClient.ListScheduledSQLJobInstances(projectName, jobName, status)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return instances, total, count, err
+}
+
+// ####################### Resource API ######################
+func (c *TokenAutoUpdateClient) ListResource(resourceType string, resourceName string, offset, size int) (resourceList []*Resource, count, total int, err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		resourceList, count, total, err = c.logClient.ListResource(resourceType, resourceName, offset, size)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) GetResource(name string) (resource *Resource, err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		resource, err = c.logClient.GetResource(name)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) GetResourceString(name string) (resource string, err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		resource, err = c.logClient.GetResourceString(name)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) DeleteResource(name string) (err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		err = c.logClient.DeleteResource(name)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) UpdateResource(resource *Resource) (err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		err = c.logClient.UpdateResource(resource)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) UpdateResourceString(resourceName, resourceStr string) (err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		err = c.logClient.UpdateResourceString(resourceName, resourceStr)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) CreateResource(resource *Resource) (err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		err = c.logClient.CreateResource(resource)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) CreateResourceString(resourceStr string) (err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		err = c.logClient.CreateResourceString(resourceStr)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+// ####################### Resource Record API ######################
+func (c *TokenAutoUpdateClient) ListResourceRecord(resourceName string, offset, size int) (recordList []*ResourceRecord, count, total int, err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		recordList, count, total, err = c.logClient.ListResourceRecord(resourceName, offset, size)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) GetResourceRecord(resourceName, recordId string) (record *ResourceRecord, err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		record, err = c.logClient.GetResourceRecord(resourceName, recordId)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) GetResourceRecordString(resourceName, name string) (record string, err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		record, err = c.logClient.GetResourceRecordString(resourceName, name)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) DeleteResourceRecord(resourceName, recordId string) (err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		err = c.logClient.DeleteResourceRecord(resourceName, recordId)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) UpdateResourceRecord(resourceName string, record *ResourceRecord) (err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		err = c.logClient.UpdateResourceRecord(resourceName, record)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) UpdateResourceRecordString(resourceName, recordStr string) (err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		err = c.logClient.UpdateResourceString(resourceName, recordStr)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) CreateResourceRecord(resourceName string, record *ResourceRecord) (err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		err = c.logClient.CreateResourceRecord(resourceName, record)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) CreateResourceRecordString(resourceName, recordStr string) (err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		err = c.logClient.CreateResourceRecordString(resourceName, recordStr)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+// ####################### Ingestion API ######################
+func (c *TokenAutoUpdateClient) CreateIngestion(project string, ingestion *Ingestion) (err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		err = c.logClient.CreateIngestion(project, ingestion)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) UpdateIngestion(project string, ingestion *Ingestion) (err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		err = c.logClient.UpdateIngestion(project, ingestion)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) GetIngestion(project string, name string) (ingestion *Ingestion, err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		ingestion, err = c.logClient.GetIngestion(project, name)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) ListIngestion(project, logstore, name, displayName string, offset, size int) (ingestions []*Ingestion, total, count int, err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		ingestions, total, count, err = c.logClient.ListIngestion(project, logstore, name, displayName, offset, size)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) DeleteIngestion(project string, name string) (err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		err = c.logClient.DeleteIngestion(project, name)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) CreateExport(project string, export *Export) (err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		err = c.logClient.CreateExport(project, export)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+func (c *TokenAutoUpdateClient) UpdateExport(project string, export *Export) (err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		err = c.logClient.UpdateExport(project, export)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+func (c *TokenAutoUpdateClient) GetExport(project, name string) (export *Export, err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		export, err = c.logClient.GetExport(project, name)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+func (c *TokenAutoUpdateClient) ListExport(project, logstore, name, displayName string, offset, size int) (exports []*Export, total, count int, err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		exports, total, count, err = c.logClient.ListExport(project, logstore, name, displayName, offset, size)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+func (c *TokenAutoUpdateClient) DeleteExport(project string, name string) (err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		err = c.logClient.DeleteExport(project, name)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+func (c *TokenAutoUpdateClient) RestartExport(project string, export *Export) (err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		err = c.logClient.RestartExport(project, export)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+func (c *TokenAutoUpdateClient) CreateMetricStore(project string, metricStore *LogStore) (err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		err = c.logClient.CreateMetricStore(project, metricStore)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+func (c *TokenAutoUpdateClient) UpdateMetricStore(project string, metricStore *LogStore) (err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		err = c.logClient.UpdateMetricStore(project, metricStore)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+func (c *TokenAutoUpdateClient) DeleteMetricStore(project, name string) (err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		err = c.logClient.DeleteMetricStore(project, name)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+func (c *TokenAutoUpdateClient) GetMetricStore(project, name string) (metricStore *LogStore, err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		metricStore, err = c.logClient.GetMetricStore(project, name)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) UpdateProjectPolicy(project, policy string) (err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		err = c.logClient.UpdateProjectPolicy(project, policy)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) DeleteProjectPolicy(project string) (err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		err = c.logClient.DeleteProjectPolicy(project)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) GetProjectPolicy(project string) (policy string, err error) {
+	for i := 0; i < c.maxTryTimes; i++ {
+		policy, err = c.logClient.GetProjectPolicy(project)
+		if !c.processError(err) {
+			return
+		}
+	}
+	return
+}
+
+func (c *TokenAutoUpdateClient) PublishAlertEvent(project string, alertResult []byte) error {
+	var err error = nil
+	for i := 0; i < c.maxTryTimes; i++ {
+		err = c.logClient.PublishAlertEvent(project, alertResult)
+		if err == nil {
+			break
+		}
+	}
+	return err
 }

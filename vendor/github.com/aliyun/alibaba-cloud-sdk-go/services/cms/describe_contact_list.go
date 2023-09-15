@@ -81,11 +81,11 @@ type DescribeContactListRequest struct {
 // DescribeContactListResponse is the response struct for api DescribeContactList
 type DescribeContactListResponse struct {
 	*responses.BaseResponse
-	Success   bool                          `json:"Success" xml:"Success"`
 	Code      string                        `json:"Code" xml:"Code"`
 	Message   string                        `json:"Message" xml:"Message"`
-	Total     int                           `json:"Total" xml:"Total"`
 	RequestId string                        `json:"RequestId" xml:"RequestId"`
+	Total     int                           `json:"Total" xml:"Total"`
+	Success   bool                          `json:"Success" xml:"Success"`
 	Contacts  ContactsInDescribeContactList `json:"Contacts" xml:"Contacts"`
 }
 

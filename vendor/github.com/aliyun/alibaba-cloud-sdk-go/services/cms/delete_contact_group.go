@@ -77,10 +77,10 @@ type DeleteContactGroupRequest struct {
 // DeleteContactGroupResponse is the response struct for api DeleteContactGroup
 type DeleteContactGroupResponse struct {
 	*responses.BaseResponse
-	Success   bool   `json:"Success" xml:"Success"`
 	Code      string `json:"Code" xml:"Code"`
 	Message   string `json:"Message" xml:"Message"`
 	RequestId string `json:"RequestId" xml:"RequestId"`
+	Success   bool   `json:"Success" xml:"Success"`
 }
 
 // CreateDeleteContactGroupRequest creates a request to invoke DeleteContactGroup API

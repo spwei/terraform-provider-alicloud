@@ -81,8 +81,8 @@ type DescribeAsyncTasksRequest struct {
 // DescribeAsyncTasksResponse is the response struct for api DescribeAsyncTasks
 type DescribeAsyncTasksResponse struct {
 	*responses.BaseResponse
-	RequestId  string      `json:"RequestId" xml:"RequestId"`
 	TotalCount int         `json:"TotalCount" xml:"TotalCount"`
+	RequestId  string      `json:"RequestId" xml:"RequestId"`
 	AsyncTasks []AsyncTask `json:"AsyncTasks" xml:"AsyncTasks"`
 }
 

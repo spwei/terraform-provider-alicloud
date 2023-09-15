@@ -1,5 +1,5 @@
 ---
-subcategory: "Alikafka"
+subcategory: "AliKafka"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_alikafka_instances"
 sidebar_current: "docs-alicloud-datasource-alikafka-instances"
@@ -15,41 +15,41 @@ This data source provides a list of ALIKAFKA Instances in an Alibaba Cloud accou
 
 ## Example Usage
 
-```
+```terraform
 variable "instance_name" {
- default = "alikafkaInstanceName"
+  default = "alikafkaInstanceName"
 }
 
 data "alicloud_zones" "default" {
-    available_resource_creation= "VSwitch"
+  available_resource_creation = "VSwitch"
 }
 resource "alicloud_vpc" "default" {
   cidr_block = "172.16.0.0/12"
 }
 
 resource "alicloud_vswitch" "default" {
-  vpc_id = "${alicloud_vpc.default.id}"
+  vpc_id     = alicloud_vpc.default.id
   cidr_block = "172.16.0.0/24"
-  availability_zone = "${data.alicloud_zones.default.zones.0.id}"
+  zone_id    = data.alicloud_zones.default.zones.0.id
 }
 
 resource "alicloud_alikafka_instance" "default" {
-  name = "${var.instance_name}"
-  topic_quota = "50"
-  disk_type = "1"
-  disk_size = "500"
-  deploy_type = "4"
-  io_max = "20"
-  vswitch_id = "${alicloud_vswitch.default.id}"
+  name          = var.instance_name
+  partition_num = "50"
+  disk_type     = "1"
+  disk_size     = "500"
+  deploy_type   = "4"
+  io_max        = "20"
+  vswitch_id    = alicloud_vswitch.default.id
 }
 
 data "alicloud_alikafka_instances" "instances_ds" {
-  name_regex = "alikafkaInstanceName"
+  name_regex  = "alikafkaInstanceName"
   output_file = "instances.txt"
 }
 
 output "first_instance_name" {
-  value = "${data.alicloud_alikafka_instances.instances_ds.instances.0.name}"
+  value = data.alicloud_alikafka_instances.instances_ds.instances.0.name
 }
 ```
 
@@ -79,6 +79,7 @@ The following attributes are exported in addition to the arguments listed above:
   * `eip_max` - The peak bandwidth of the instance.
   * `disk_type` - The disk type of the instance. 0: efficient cloud disk , 1: SSD.
   * `disk_size` - The disk size of the instance.
+  * `partition_num` - (Available in 1.194.0+) The number of partitions.
   * `topic_quota` - The max num of topic can be create of the instance.
   * `zone_id` - The ID of attaching zone to instance.
   * `end_point` - The endPoint to access the instance.
@@ -87,5 +88,20 @@ The following attributes are exported in addition to the arguments listed above:
   * `security_group` - The security group of the instance.
   * `service_version` - The kafka openSource version of the instance.
   * `config` - The config the instance.
-
-
+  * `expired_time` - The expired time  of the instance.
+  * `msg_retain` - The msg retain of the instance.
+  * `ssl_end_point` - The SSL end point of the instance.
+  * `upgrade_service_detail_info` - The UpgradeServiceDetailInfo List.
+    * `current2_open_source_version` - The Current2OpenSourceVersion of the instance.
+  * `domain_endpoint` - The domain point of the instance.
+  * `ssl_domain_endpoint` - The SSL domain point of the instance.
+  * `sasl_domain_endpoint` - The SASL domain point of the instance.
+  * `tags` - A mapping of tags to assign to the instance.
+  * `allowed_list` - The allowed list of the instance.
+    * `deploy_type` - The deployed type of the instance.
+    * `vpc_list` - The vpc list of the instance.
+      * `allowed_ip_list` - The allowed ip list of the vpc_list.
+      * `port_range` - The port range of the vpc_list.
+    * `internet_list` - The internet list of the instance.
+      * `allowed_ip_list` - The allowed ip list of the internet_list.
+      * `port_range` - The port range of the internet_list.

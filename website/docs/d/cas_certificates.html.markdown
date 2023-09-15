@@ -1,5 +1,5 @@
 ---
-subcategory: "SSL Certificates"
+subcategory: "SSL Certificates Service"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_cas_certificates"
 sidebar_current: "docs-alicloud-datasource-cas-certificates"
@@ -8,6 +8,8 @@ description: |-
 ---
 
 # alicloud\_cas\_certificates
+
+-> **DEPRECATED:**  This datasource has been deprecated from version `1.129.0`. Please use new datasource [alicloud_ssl_certificates_service_certificates](https://www.terraform.io/docs/providers/alicloud/d/ssl_certificates_service_certificates).
 
 This data source provides a list of CAS Certificates in an Alibaba Cloud account according to the specified filters.
 

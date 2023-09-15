@@ -1,5 +1,5 @@
 ---
-subcategory: "RAM"
+subcategory: "ECS"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_ram_role_attachment"
 sidebar_current: "docs-alicloud-resource-ram-role-attachment"
@@ -7,9 +7,11 @@ description: |-
   Provides a RAM role attachment resource to bind role for several ECS instances.
 ---
 
-# alicloud\_ram\_role\_attachment
+# alicloud_ram_role_attachment
 
 Provides a RAM role attachment resource to bind role for several ECS instances.
+
+-> **NOTE:** Available since v1.0.0+.
 
 ## Example Usage
 
@@ -32,15 +34,15 @@ data "alicloud_images" "default" {
 }
 
 resource "alicloud_vpc" "default" {
-  vpc_name       = var.name
+  vpc_name   = var.name
   cidr_block = "172.16.0.0/16"
 }
 
 resource "alicloud_vswitch" "default" {
-  vpc_id            = alicloud_vpc.default.id
-  cidr_block        = "172.16.0.0/24"
-  zone_id           = data.alicloud_zones.default.zones[0].id
-  name              = var.name
+  vpc_id       = alicloud_vpc.default.id
+  cidr_block   = "172.16.0.0/24"
+  zone_id      = data.alicloud_zones.default.zones[0].id
+  vswitch_name = var.name
 }
 
 resource "alicloud_security_group" "default" {
@@ -77,7 +79,7 @@ resource "alicloud_instance" "foo" {
 }
 
 resource "alicloud_ram_role" "role" {
-  name     = "testrole"
+  name     = "terraform-example"
   document = <<EOF
   {
     "Statement": [
@@ -93,7 +95,7 @@ resource "alicloud_ram_role" "role" {
     ],
     "Version": "1"
   }
-  
+
 EOF
 
 
@@ -113,10 +115,3 @@ The following arguments are supported:
 
 * `role_name` - (Required, ForceNew) The name of role used to bind. This name can have a string of 1 to 64 characters, must contain only alphanumeric characters or hyphens, such as "-", "_", and must not begin with a hyphen.
 * `instance_ids` - (Required, ForceNew) The list of ECS instance's IDs.
-
-## Attributes Reference
-
-The following attributes are exported:
-
-* `role_name` - The name of the role.
-* `instance_ids` The list of ECS instance's IDs.

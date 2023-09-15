@@ -80,8 +80,8 @@ type DescribeSceneDefensePoliciesRequest struct {
 // DescribeSceneDefensePoliciesResponse is the response struct for api DescribeSceneDefensePolicies
 type DescribeSceneDefensePoliciesResponse struct {
 	*responses.BaseResponse
-	RequestId string   `json:"RequestId" xml:"RequestId"`
 	Success   bool     `json:"Success" xml:"Success"`
+	RequestId string   `json:"RequestId" xml:"RequestId"`
 	Policies  []Policy `json:"Policies" xml:"Policies"`
 }
 

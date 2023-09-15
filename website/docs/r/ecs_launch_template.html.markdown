@@ -20,70 +20,99 @@ For information about ECS Launch Template and how to use it, see [What is Launch
 Basic Usage
 
 ```terraform
+data "alicloud_zones" "default" {
+  available_disk_category     = "cloud_efficiency"
+  available_resource_creation = "VSwitch"
+}
+data "alicloud_instance_types" "default" {
+  availability_zone = data.alicloud_zones.default.zones.0.id
+}
+
+data "alicloud_images" "default" {
+  name_regex = "^ubuntu_[0-9]+_[0-9]+_x64*"
+  owners     = "system"
+}
+
+resource "alicloud_vpc" "default" {
+  vpc_name   = "terraform-example"
+  cidr_block = "172.17.3.0/24"
+}
+
+resource "alicloud_vswitch" "default" {
+  vswitch_name = "terraform-example"
+  cidr_block   = "172.17.3.0/24"
+  vpc_id       = alicloud_vpc.default.id
+  zone_id      = data.alicloud_zones.default.zones.0.id
+}
+
+resource "alicloud_security_group" "default" {
+  name   = "terraform-example"
+  vpc_id = alicloud_vpc.default.id
+}
+
 resource "alicloud_ecs_launch_template" "default" {
-    name                           =  "tf_test_name"
-    description                    =  "Test For Terraform"
-    image_id                       =  "m-bp1i3ucxxxxx"
-    host_name                      =  "host_name"
-    instance_charge_type           =  "PrePaid"
-    instance_name                  =  "instance_name"
-    instance_type                  =  "instance_type"
-    internet_charge_type           =  "PayByBandwidth"
-    internet_max_bandwidth_in      =  "5"
-    internet_max_bandwidth_out     =  "0"
-    io_optimized                   =  "optimized"
-    key_pair_name                  =  "key_pair_name"
-    ram_role_name                  =  "ram_role_name"
-    network_type                   =  "vpc"
-    security_enhancement_strategy  =  "Active"
-    spot_price_limit               =  "5"
-    spot_strategy                  =  "SpotWithPriceLimit"
-    security_group_ids             =  ["sg-zkdfjaxxxxxx"]
-    system_disk {
-            category             = "cloud_ssd"
-            description          = "Test For Terraform"
-            name                 = "tf_test_name"
-            size                 = "40"
-            delete_with_instance = "false"
-        }
-    
-    resource_group_id    =  "rg-zkdfjaxxxxxx"
-    user_data            =  "xxxxxxx"
-    vswitch_id           =  "vw-zwxscaxxxxxx"
-    vpc_id               =  "vpc-asdfnbgxxxxxxx"
-    zone_id              =  "cn-hangzhou-i"
+  launch_template_name          = "terraform-example"
+  description                   = "terraform-example"
+  image_id                      = data.alicloud_images.default.images.0.id
+  host_name                     = "terraform-example"
+  instance_charge_type          = "PrePaid"
+  instance_name                 = "terraform-example"
+  instance_type                 = data.alicloud_instance_types.default.instance_types.0.id
+  internet_charge_type          = "PayByBandwidth"
+  internet_max_bandwidth_in     = "5"
+  internet_max_bandwidth_out    = "5"
+  io_optimized                  = "optimized"
+  key_pair_name                 = "key_pair_name"
+  ram_role_name                 = "ram_role_name"
+  network_type                  = "vpc"
+  security_enhancement_strategy = "Active"
+  spot_price_limit              = "5"
+  spot_strategy                 = "SpotWithPriceLimit"
+  security_group_ids            = [alicloud_security_group.default.id]
+  system_disk {
+    category             = "cloud_ssd"
+    description          = "Test For Terraform"
+    name                 = "terraform-example"
+    size                 = "40"
+    delete_with_instance = "false"
+  }
 
-    template_tags = {
-        Create = "Terraform"
-        For    = "Test"
-    }
+  user_data  = "xxxxxxx"
+  vswitch_id = alicloud_vswitch.default.id
+  vpc_id     = alicloud_vpc.default.id
+  zone_id    = data.alicloud_zones.default.zones.0.id
 
-    network_interfaces {
-            name               = "eth0"
-            description        = "hello1"
-            primary_ip         = "10.0.0.2"
-            security_group_id  = "sg-asdfnbgxxxxxxx"
-            vswitch_id         = "vw-zkdfjaxxxxxx"
-        }
+  template_tags = {
+    Create = "Terraform"
+    For    = "example"
+  }
 
-    data_disks {
-            name                 = "disk1"
-            description          = "test1"
-            delete_with_instance = "true"
-            category             = "cloud"
-            encrypted            = "false"
-            performance_level    = "PL0"
-            size                 = "20"
-        }
-    data_disks {
-            name                 = "disk2"
-            description          = "test2"
-            delete_with_instance = "true"
-            category             = "cloud"
-            encrypted            = "false"
-            performance_level    = "PL0"
-            size                 = "20"
-        }
+  network_interfaces {
+    name              = "eth0"
+    description       = "hello1"
+    primary_ip        = "10.0.0.2"
+    security_group_id = alicloud_security_group.default.id
+    vswitch_id        = alicloud_vswitch.default.id
+  }
+
+  data_disks {
+    name                 = "disk1"
+    description          = "description"
+    delete_with_instance = "true"
+    category             = "cloud"
+    encrypted            = "false"
+    performance_level    = "PL0"
+    size                 = "20"
+  }
+  data_disks {
+    name                 = "disk2"
+    description          = "description2"
+    delete_with_instance = "true"
+    category             = "cloud"
+    encrypted            = "false"
+    performance_level    = "PL0"
+    size                 = "20"
+  }
 }
 ```
 
@@ -99,6 +128,7 @@ The following arguments are supported:
 * `host_name` - (Optional) Instance host name.It cannot start or end with a period (.) or a hyphen (-) and it cannot have two or more consecutive periods (.) or hyphens (-).For Windows: The host name can be [2, 15] characters in length. It can contain A-Z, a-z, numbers, periods (.), and hyphens (-). It cannot only contain numbers. For other operating systems: The host name can be [2, 64] characters in length. It can be segments separated by periods (.). It can contain A-Z, a-z, numbers, and hyphens (-).
 * `image_id` - (Optional) The Image ID.
 * `image_owner_alias` - (Optional) Mirror source. Valid values: `system`, `self`, `others`, `marketplace`, `""`. Default to: `""`.
+* `instance_name` - (Optional) The name of the instance. The name must be 2 to 128 characters in length. It must start with a letter and cannot start with http:// or https://. It can contain letters, digits, colons (:), underscores (_), and hyphens (-).
 * `instance_charge_type` - (Optional) Billing methods. Valid values: `PostPaid`, `PrePaid`.
 * `instance_type` - (Optional) Instance type. For more information, call resource_alicloud_instances to obtain the latest instance type list.
 * `internet_charge_type` - (Optional) Internet bandwidth billing method. Valid values: `PayByTraffic`, `PayByBandwidth`.
@@ -128,13 +158,19 @@ The following arguments are supported:
 * `template_resource_group_id` - (Optional, ForceNew) The template resource group id.
 * `user_data` - (Optional, Computed) The User Data.
 * `version_description` - (Optional) The description of the launch template version. The description must be 2 to 256 characters in length and cannot start with http:// or https://.                                    
+* `vpc_id` - (Optional) The ID of the VPC.
 * `vswitch_id` - (Optional) When creating a VPC-Connected instance, you must specify its VSwitch ID.
 * `zone_id` - (Optional) The zone ID of the instance.
 * `tags` - (Optional) A mapping of tags to assign to instance, block storage, and elastic network.
     - Key: It can be up to 64 characters in length. It cannot begin with "aliyun", "acs:", "http://", or "https://". It cannot be a null string.
     - Value: It can be up to 128 characters in length. It cannot begin with "aliyun", "acs:", "http://", or "https://". It can be a null string.
 * `template_tags` - (Optional) A mapping of tags to assign to the launch template.
-  
+* `name` - (Deprecated) It has been deprecated from version 1.120.0, and use field `launch_template_name` instead.
+* `userdata` - (Deprecated) It has been deprecated from version 1.120.0, and use field `user_data` instead.
+* `system_disk_name` - (Deprecated) It has been deprecated from version 1.120.0, and use field `system_disk` instead.
+* `system_disk_category` - (Deprecated) It has been deprecated from version 1.120.0, and use field `system_disk` instead.
+* `system_disk_size` - (Deprecated) It has been deprecated from version 1.120.0, and use field `system_disk` instead.
+* `system_disk_description` - (Deprecated) It has been deprecated from version 1.120.0, and use field `system_disk` instead.
 
 #### Block system_disk
 
@@ -181,6 +217,6 @@ The following attributes are exported:
 
 ECS Launch Template can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_ecs_launch_template.example <id>
 ```

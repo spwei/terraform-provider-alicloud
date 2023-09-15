@@ -9,7 +9,7 @@ description: |-
 
 # alicloud\_key\_pair\_attachment
 
--> **DEPRECATED:** This resource has been renamed to [alicloud_ecs_key_pair_attachment](https://www.terraform.io/docs/providers/alicloud/r/ecs_key_pair_attachment.html) from version 1.121.0.
+-> **DEPRECATED:** This resource has been renamed to [alicloud_ecs_key_pair_attachment](https://www.terraform.io/docs/providers/alicloud/r/ecs_key_pair_attachment) from version 1.121.0.
 
 Provides a key pair attachment resource to bind key pair for several ECS instances.
 
@@ -19,7 +19,7 @@ Provides a key pair attachment resource to bind key pair for several ECS instanc
 
 Basic Usage
 
-```
+```terraform
 data "alicloud_zones" "default" {
   available_disk_category     = "cloud_ssd"
   available_resource_creation = "VSwitch"
@@ -27,8 +27,8 @@ data "alicloud_zones" "default" {
 
 data "alicloud_instance_types" "type" {
   avaiability_zone = data.alicloud_zones.default.zones[0].id
-  cpu_core_count    = 1
-  memory_size       = 2
+  cpu_core_count   = 1
+  memory_size      = 2
 }
 
 data "alicloud_images" "images" {
@@ -42,15 +42,15 @@ variable "name" {
 }
 
 resource "alicloud_vpc" "vpc" {
-  vpc_name       = var.name
+  vpc_name   = var.name
   cidr_block = "10.1.0.0/21"
 }
 
 resource "alicloud_vswitch" "vswitch" {
-  vpc_id            = alicloud_vpc.vpc.id
-  cidr_block        = "10.1.1.0/24"
-  zone_id           = data.alicloud_zones.default.zones[0].id
-  vswitch_name      = var.name
+  vpc_id       = alicloud_vpc.vpc.id
+  cidr_block   = "10.1.1.0/24"
+  zone_id      = data.alicloud_zones.default.zones[0].id
+  vswitch_name = var.name
 }
 
 resource "alicloud_security_group" "group" {

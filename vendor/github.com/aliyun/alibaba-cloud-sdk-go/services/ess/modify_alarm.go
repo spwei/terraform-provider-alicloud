@@ -71,22 +71,24 @@ func (client *Client) ModifyAlarmWithCallback(request *ModifyAlarmRequest, callb
 // ModifyAlarmRequest is the request struct for api ModifyAlarm
 type ModifyAlarmRequest struct {
 	*requests.RpcRequest
-	MetricType           string                  `position:"Query" name:"MetricType"`
-	Description          string                  `position:"Query" name:"Description"`
-	AlarmAction          *[]string               `position:"Query" name:"AlarmAction"  type:"Repeated"`
-	Threshold            requests.Float          `position:"Query" name:"Threshold"`
-	Effective            string                  `position:"Query" name:"Effective"`
-	EvaluationCount      requests.Integer        `position:"Query" name:"EvaluationCount"`
-	MetricName           string                  `position:"Query" name:"MetricName"`
-	Dimension            *[]ModifyAlarmDimension `position:"Query" name:"Dimension"  type:"Repeated"`
-	Period               requests.Integer        `position:"Query" name:"Period"`
-	ResourceOwnerAccount string                  `position:"Query" name:"ResourceOwnerAccount"`
-	GroupId              requests.Integer        `position:"Query" name:"GroupId"`
-	OwnerId              requests.Integer        `position:"Query" name:"OwnerId"`
-	AlarmTaskId          string                  `position:"Query" name:"AlarmTaskId"`
-	Name                 string                  `position:"Query" name:"Name"`
-	ComparisonOperator   string                  `position:"Query" name:"ComparisonOperator"`
-	Statistics           string                  `position:"Query" name:"Statistics"`
+	MetricType               string                   `position:"Query" name:"MetricType"`
+	Description              string                   `position:"Query" name:"Description"`
+	ExpressionsLogicOperator string                   `position:"Query" name:"ExpressionsLogicOperator"`
+	AlarmAction              *[]string                `position:"Query" name:"AlarmAction"  type:"Repeated"`
+	Threshold                requests.Float           `position:"Query" name:"Threshold"`
+	Effective                string                   `position:"Query" name:"Effective"`
+	EvaluationCount          requests.Integer         `position:"Query" name:"EvaluationCount"`
+	MetricName               string                   `position:"Query" name:"MetricName"`
+	Dimension                *[]ModifyAlarmDimension  `position:"Query" name:"Dimension"  type:"Repeated"`
+	Period                   requests.Integer         `position:"Query" name:"Period"`
+	Expression               *[]ModifyAlarmExpression `position:"Query" name:"Expression"  type:"Repeated"`
+	ResourceOwnerAccount     string                   `position:"Query" name:"ResourceOwnerAccount"`
+	GroupId                  requests.Integer         `position:"Query" name:"GroupId"`
+	OwnerId                  requests.Integer         `position:"Query" name:"OwnerId"`
+	AlarmTaskId              string                   `position:"Query" name:"AlarmTaskId"`
+	Name                     string                   `position:"Query" name:"Name"`
+	ComparisonOperator       string                   `position:"Query" name:"ComparisonOperator"`
+	Statistics               string                   `position:"Query" name:"Statistics"`
 }
 
 // ModifyAlarmDimension is a repeated param struct in ModifyAlarmRequest
@@ -95,11 +97,20 @@ type ModifyAlarmDimension struct {
 	DimensionKey   string `name:"DimensionKey"`
 }
 
+// ModifyAlarmExpression is a repeated param struct in ModifyAlarmRequest
+type ModifyAlarmExpression struct {
+	Period             string `name:"Period"`
+	Threshold          string `name:"Threshold"`
+	MetricName         string `name:"MetricName"`
+	ComparisonOperator string `name:"ComparisonOperator"`
+	Statistics         string `name:"Statistics"`
+}
+
 // ModifyAlarmResponse is the response struct for api ModifyAlarm
 type ModifyAlarmResponse struct {
 	*responses.BaseResponse
-	RequestId   string `json:"RequestId" xml:"RequestId"`
 	AlarmTaskId string `json:"AlarmTaskId" xml:"AlarmTaskId"`
+	RequestId   string `json:"RequestId" xml:"RequestId"`
 }
 
 // CreateModifyAlarmRequest creates a request to invoke ModifyAlarm API

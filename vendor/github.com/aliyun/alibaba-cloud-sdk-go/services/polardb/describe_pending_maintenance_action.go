@@ -73,6 +73,7 @@ type DescribePendingMaintenanceActionRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
 	PageNumber           requests.Integer `position:"Query" name:"PageNumber"`
+	ResourceGroupId      string           `position:"Query" name:"ResourceGroupId"`
 	IsHistory            requests.Integer `position:"Query" name:"IsHistory"`
 	SecurityToken        string           `position:"Query" name:"SecurityToken"`
 	PageSize             requests.Integer `position:"Query" name:"PageSize"`
@@ -86,8 +87,8 @@ type DescribePendingMaintenanceActionRequest struct {
 // DescribePendingMaintenanceActionResponse is the response struct for api DescribePendingMaintenanceAction
 type DescribePendingMaintenanceActionResponse struct {
 	*responses.BaseResponse
-	RequestId        string      `json:"RequestId" xml:"RequestId"`
 	TotalRecordCount int         `json:"TotalRecordCount" xml:"TotalRecordCount"`
+	RequestId        string      `json:"RequestId" xml:"RequestId"`
 	PageSize         int         `json:"PageSize" xml:"PageSize"`
 	PageNumber       int         `json:"PageNumber" xml:"PageNumber"`
 	Items            []ItemsItem `json:"Items" xml:"Items"`

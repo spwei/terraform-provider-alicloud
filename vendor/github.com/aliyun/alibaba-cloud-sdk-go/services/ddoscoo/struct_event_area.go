@@ -17,6 +17,6 @@ package ddoscoo
 
 // EventArea is a nested struct in ddoscoo response
 type EventArea struct {
-	Area   string `json:"Area" xml:"Area"`
 	InPkts int64  `json:"InPkts" xml:"InPkts"`
+	Area   string `json:"Area" xml:"Area"`
 }

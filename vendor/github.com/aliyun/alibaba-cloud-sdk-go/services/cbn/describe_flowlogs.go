@@ -71,30 +71,39 @@ func (client *Client) DescribeFlowlogsWithCallback(request *DescribeFlowlogsRequ
 // DescribeFlowlogsRequest is the request struct for api DescribeFlowlogs
 type DescribeFlowlogsRequest struct {
 	*requests.RpcRequest
-	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ClientToken          string           `position:"Query" name:"ClientToken"`
-	CenId                string           `position:"Query" name:"CenId"`
-	Description          string           `position:"Query" name:"Description"`
-	PageNumber           requests.Integer `position:"Query" name:"PageNumber"`
-	PageSize             requests.Integer `position:"Query" name:"PageSize"`
-	ProjectName          string           `position:"Query" name:"ProjectName"`
-	LogStoreName         string           `position:"Query" name:"LogStoreName"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
-	FlowLogId            string           `position:"Query" name:"FlowLogId"`
-	FlowLogName          string           `position:"Query" name:"FlowLogName"`
-	Status               string           `position:"Query" name:"Status"`
+	ResourceOwnerId           requests.Integer       `position:"Query" name:"ResourceOwnerId"`
+	ClientToken               string                 `position:"Query" name:"ClientToken"`
+	CenId                     string                 `position:"Query" name:"CenId"`
+	Description               string                 `position:"Query" name:"Description"`
+	PageNumber                requests.Integer       `position:"Query" name:"PageNumber"`
+	PageSize                  requests.Integer       `position:"Query" name:"PageSize"`
+	Tag                       *[]DescribeFlowlogsTag `position:"Query" name:"Tag"  type:"Repeated"`
+	ProjectName               string                 `position:"Query" name:"ProjectName"`
+	LogStoreName              string                 `position:"Query" name:"LogStoreName"`
+	ResourceOwnerAccount      string                 `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount              string                 `position:"Query" name:"OwnerAccount"`
+	OwnerId                   requests.Integer       `position:"Query" name:"OwnerId"`
+	Version                   string                 `position:"Query" name:"Version"`
+	TransitRouterAttachmentId string                 `position:"Query" name:"TransitRouterAttachmentId"`
+	FlowLogId                 string                 `position:"Query" name:"FlowLogId"`
+	FlowLogName               string                 `position:"Query" name:"FlowLogName"`
+	Status                    string                 `position:"Query" name:"Status"`
+}
+
+// DescribeFlowlogsTag is a repeated param struct in DescribeFlowlogsRequest
+type DescribeFlowlogsTag struct {
+	Value string `name:"Value"`
+	Key   string `name:"Key"`
 }
 
 // DescribeFlowlogsResponse is the response struct for api DescribeFlowlogs
 type DescribeFlowlogsResponse struct {
 	*responses.BaseResponse
-	RequestId  string   `json:"RequestId" xml:"RequestId"`
-	Success    string   `json:"Success" xml:"Success"`
-	TotalCount string   `json:"TotalCount" xml:"TotalCount"`
-	PageNumber string   `json:"PageNumber" xml:"PageNumber"`
 	PageSize   string   `json:"PageSize" xml:"PageSize"`
+	PageNumber string   `json:"PageNumber" xml:"PageNumber"`
+	RequestId  string   `json:"RequestId" xml:"RequestId"`
+	TotalCount string   `json:"TotalCount" xml:"TotalCount"`
+	Success    string   `json:"Success" xml:"Success"`
 	FlowLogs   FlowLogs `json:"FlowLogs" xml:"FlowLogs"`
 }
 
@@ -103,7 +112,7 @@ func CreateDescribeFlowlogsRequest() (request *DescribeFlowlogsRequest) {
 	request = &DescribeFlowlogsRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("Cbn", "2017-09-12", "DescribeFlowlogs", "cbn", "openAPI")
+	request.InitWithApiInfo("Cbn", "2017-09-12", "DescribeFlowlogs", "", "")
 	request.Method = requests.POST
 	return
 }

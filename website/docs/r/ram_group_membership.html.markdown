@@ -7,13 +7,15 @@ description: |-
   Provides a RAM Group membership resource.
 ---
 
-# alicloud\_ram\_group\_membership
+# alicloud_ram_group_membership
 
 Provides a RAM Group membership resource. 
 
+-> **NOTE:** Available since v1.0.0+.
+
 ## Example Usage
 
-```
+```terraform
 # Create a RAM Group membership.
 resource "alicloud_ram_group" "group" {
   name     = "groupName"
@@ -22,7 +24,7 @@ resource "alicloud_ram_group" "group" {
 }
 
 resource "alicloud_ram_user" "user" {
-  name         = "user_test"
+  name         = "terraform-example"
   display_name = "user_display_name"
   mobile       = "86-18688888888"
   email        = "hello.uuu@aaa.com"
@@ -31,7 +33,7 @@ resource "alicloud_ram_user" "user" {
 }
 
 resource "alicloud_ram_user" "user1" {
-  name         = "user_test1"
+  name         = "terraform-example"
   display_name = "user_display_name1"
   mobile       = "86-18688888889"
   email        = "hello.uuu@aaa.com"
@@ -56,12 +58,10 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `id` - The membership ID, it's set to `group_name`
-* `group_name` - The group name.
-* `user_names` - The list of names of users which in the group.
 
 ## Import
 RAM Group membership can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_ram_group_membership.example my-group
 ```

@@ -12,9 +12,9 @@ import (
 	"github.com/hashicorp/vault/helper/pgpkeys"
 )
 
-func TestAccAlicloudRamAccessKey_basic(t *testing.T) {
-	var v ram.AccessKeyInListAccessKeys
-	var u ram.UserInGetUser
+func TestAccAlicloudRAMAccessKey_basic(t *testing.T) {
+	var v ram.AccessKey
+	var u ram.User
 	resourceAKId := "alicloud_ram_access_key.default"
 	resourceUserId := "alicloud_ram_user.default"
 	ra := resourceAttrInit("alicloud_ram_access_key.default", accessKeyBasicMap)
@@ -67,9 +67,9 @@ func TestAccAlicloudRamAccessKey_basic(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudRamAccessKey_multi(t *testing.T) {
-	var v ram.AccessKeyInListAccessKeys
-	var u ram.UserInGetUser
+func TestAccAlicloudRAMAccessKey_multi(t *testing.T) {
+	var v ram.AccessKey
+	var u ram.User
 	resourceAKId := "alicloud_ram_access_key.default.1"
 	resourceUserId := "alicloud_ram_user.default"
 	ra := resourceAttrInit(resourceAKId, accessKeyMultiMap)
@@ -196,7 +196,7 @@ var accessKeyMultiMap = map[string]string{
 	"secret_file": "/hello.txt",
 }
 
-func testAccCheckRamAccessKeyExists(n string, ak *ram.AccessKeyInListAccessKeys) resource.TestCheckFunc {
+func testAccCheckRamAccessKeyExists(n string, ak *ram.AccessKey) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {

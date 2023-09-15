@@ -76,9 +76,10 @@ type CreateCenRouteMapRequest struct {
 	MapResult                          string           `position:"Query" name:"MapResult"`
 	DestinationRegionIds               *[]string        `position:"Query" name:"DestinationRegionIds"  type:"Repeated"`
 	NextPriority                       requests.Integer `position:"Query" name:"NextPriority"`
-	DestinationCidrBlocks              *[]string        `position:"Query" name:"DestinationCidrBlocks"  type:"Repeated"`
 	SystemPolicy                       requests.Boolean `position:"Query" name:"SystemPolicy"`
+	DestinationCidrBlocks              *[]string        `position:"Query" name:"DestinationCidrBlocks"  type:"Repeated"`
 	OriginalRouteTableIds              *[]string        `position:"Query" name:"OriginalRouteTableIds"  type:"Repeated"`
+	TransitRouterRouteTableId          string           `position:"Query" name:"TransitRouterRouteTableId"`
 	SourceInstanceIds                  *[]string        `position:"Query" name:"SourceInstanceIds"  type:"Repeated"`
 	SourceRegionIds                    *[]string        `position:"Query" name:"SourceRegionIds"  type:"Repeated"`
 	GatewayZoneId                      string           `position:"Query" name:"GatewayZoneId"`
@@ -86,6 +87,7 @@ type CreateCenRouteMapRequest struct {
 	Preference                         requests.Integer `position:"Query" name:"Preference"`
 	OwnerId                            requests.Integer `position:"Query" name:"OwnerId"`
 	Priority                           requests.Integer `position:"Query" name:"Priority"`
+	Version                            string           `position:"Query" name:"Version"`
 	DestinationChildInstanceTypes      *[]string        `position:"Query" name:"DestinationChildInstanceTypes"  type:"Repeated"`
 	SourceRouteTableIds                *[]string        `position:"Query" name:"SourceRouteTableIds"  type:"Repeated"`
 	SourceChildInstanceTypes           *[]string        `position:"Query" name:"SourceChildInstanceTypes"  type:"Repeated"`
@@ -97,6 +99,7 @@ type CreateCenRouteMapRequest struct {
 	CenId                              string           `position:"Query" name:"CenId"`
 	Description                        string           `position:"Query" name:"Description"`
 	SourceInstanceIdsReverseMatch      requests.Boolean `position:"Query" name:"SourceInstanceIdsReverseMatch"`
+	GatewayRegionId                    string           `position:"Query" name:"GatewayRegionId"`
 	DestinationRouteTableIds           *[]string        `position:"Query" name:"DestinationRouteTableIds"  type:"Repeated"`
 	SourceZoneIds                      *[]string        `position:"Query" name:"SourceZoneIds"  type:"Repeated"`
 	TransmitDirection                  string           `position:"Query" name:"TransmitDirection"`
@@ -113,8 +116,8 @@ type CreateCenRouteMapRequest struct {
 // CreateCenRouteMapResponse is the response struct for api CreateCenRouteMap
 type CreateCenRouteMapResponse struct {
 	*responses.BaseResponse
-	RequestId  string `json:"RequestId" xml:"RequestId"`
 	RouteMapId string `json:"RouteMapId" xml:"RouteMapId"`
+	RequestId  string `json:"RequestId" xml:"RequestId"`
 }
 
 // CreateCreateCenRouteMapRequest creates a request to invoke CreateCenRouteMap API
@@ -122,7 +125,7 @@ func CreateCreateCenRouteMapRequest() (request *CreateCenRouteMapRequest) {
 	request = &CreateCenRouteMapRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("Cbn", "2017-09-12", "CreateCenRouteMap", "cbn", "openAPI")
+	request.InitWithApiInfo("Cbn", "2017-09-12", "CreateCenRouteMap", "", "")
 	request.Method = requests.POST
 	return
 }

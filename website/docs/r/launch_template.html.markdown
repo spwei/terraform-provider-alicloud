@@ -13,11 +13,11 @@ Provides an ECS Launch Template resource.
 
 For information about Launch Template and how to use it, see [Launch Template](https://www.alibabacloud.com/help/doc-detail/73916.html).
 
--> **DEPRECATED:**  This resource  has been deprecated from version `1.120.0`. Please use new resource [alicloud_ecs_launch_template](https://www.terraform.io/docs/providers/alicloud/r/ecs_launch_template.html).
+-> **DEPRECATED:**  This resource  has been deprecated from version `1.120.0`. Please use new resource [alicloud_ecs_launch_template](https://www.terraform.io/docs/providers/alicloud/r/ecs_launch_template).
 
 ## Example Usage
 
-```
+```terraform
 data "alicloud_images" "images" {
   owners = "system"
 }
@@ -168,6 +168,6 @@ The following attributes are exported:
 
 Launch Template can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_launch_template.lt lt-abc1234567890000
 ```

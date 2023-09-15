@@ -1,5 +1,5 @@
 ---
-subcategory: "VPN"
+subcategory: "VPN Gateway"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_vpn_customer_gateways"
 sidebar_current: "docs-alicloud-datasource-vpn-customer-gateways"
@@ -42,4 +42,5 @@ The following attributes are exported:
   * `description` - The description of the VPN customer gateway.
   * `ip_address` - The ip address of the VPN customer gateway.
   * `create_time` - The creation time of the VPN customer gateway.
+  * `asn` - The autonomous system number of the local data center gateway device of the VPN customer gateway.
 

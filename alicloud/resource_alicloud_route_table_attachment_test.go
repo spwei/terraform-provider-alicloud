@@ -73,15 +73,17 @@ func testSweepRouteTableAttachment(region string) error {
 		id := vtb.RouteTableId
 		for _, vswitch := range vtb.VSwitchIds.VSwitchId {
 			skip := true
-			for _, prefix := range prefixes {
-				if strings.HasPrefix(strings.ToLower(name), strings.ToLower(prefix)) {
-					skip = false
-					break
+			if !sweepAll() {
+				for _, prefix := range prefixes {
+					if strings.HasPrefix(strings.ToLower(name), strings.ToLower(prefix)) {
+						skip = false
+						break
+					}
 				}
-			}
-			if skip {
-				log.Printf("[INFO] Skipping Route Table: %s (%s)", name, id)
-				continue
+				if skip {
+					log.Printf("[INFO] Skipping Route Table: %s (%s)", name, id)
+					continue
+				}
 			}
 			log.Printf("[INFO] Unassociating Route Table: %s (%s)", name, id)
 			req := vpc.CreateUnassociateRouteTableRequest()
@@ -121,7 +123,7 @@ func testAccCheckRouteTableAttachmentDestroy(s *terraform.State) error {
 	return nil
 }
 
-func TestAccAlicloudRouteTableAttachmentBasic(t *testing.T) {
+func TestAccAlicloudVPCRouteTableAttachmentBasic(t *testing.T) {
 	var v vpc.RouterTableListType
 	resourceId := "alicloud_route_table_attachment.default"
 	rand := acctest.RandIntRange(1000, 9999)
@@ -157,7 +159,7 @@ func TestAccAlicloudRouteTableAttachmentBasic(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudRouteTableAttachmentMulti(t *testing.T) {
+func TestAccAlicloudVPCRouteTableAttachmentMulti(t *testing.T) {
 	var v vpc.RouterTableListType
 	resourceId := "alicloud_route_table_attachment.default.1"
 	rand := acctest.RandIntRange(1000, 9999)

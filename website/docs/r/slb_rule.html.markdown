@@ -1,5 +1,5 @@
 ---
-subcategory: "Server Load Balancer (SLB)"
+subcategory: "Classic Load Balancer (SLB)"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_slb_rule"
 sidebar_current: "docs-alicloud-resource-slb-rule"
@@ -24,65 +24,66 @@ You can add forwarding rules to a listener to forward requests based on the doma
 
 ## Example Usage
 
-```
-variable "name" {
-  default = "slbrulebasicconfig"
+```terraform
+variable "slb_rule_name" {
+  default = "terraform-example"
 }
 
-data "alicloud_zones" "default" {
+data "alicloud_zones" "rule" {
   available_disk_category     = "cloud_efficiency"
   available_resource_creation = "VSwitch"
 }
 
-data "alicloud_instance_types" "default" {
-  availability_zone = data.alicloud_zones.default.zones[0].id
+data "alicloud_instance_types" "rule" {
+  availability_zone = data.alicloud_zones.rule.zones[0].id
   cpu_core_count    = 1
   memory_size       = 2
 }
 
-data "alicloud_images" "default" {
+data "alicloud_images" "rule" {
   name_regex  = "^ubuntu_18.*64"
   most_recent = true
   owners      = "system"
 }
 
-resource "alicloud_vpc" "default" {
-  name       = var.name
+resource "alicloud_vpc" "rule" {
+  vpc_name   = var.slb_rule_name
   cidr_block = "172.16.0.0/16"
 }
 
-resource "alicloud_vswitch" "default" {
-  vpc_id            = alicloud_vpc.default.id
-  cidr_block        = "172.16.0.0/16"
-  zone_id           = data.alicloud_zones.default.zones[0].id
-  name              = var.name
+resource "alicloud_vswitch" "rule" {
+  vpc_id       = alicloud_vpc.rule.id
+  cidr_block   = "172.16.0.0/16"
+  zone_id      = data.alicloud_zones.rule.zones[0].id
+  vswitch_name = var.slb_rule_name
 }
 
-resource "alicloud_security_group" "default" {
-  name   = var.name
-  vpc_id = alicloud_vpc.default.id
+resource "alicloud_security_group" "rule" {
+  name   = var.slb_rule_name
+  vpc_id = alicloud_vpc.rule.id
 }
 
-resource "alicloud_instance" "default" {
-  image_id                   = data.alicloud_images.default.images[0].id
-  instance_type              = data.alicloud_instance_types.default.instance_types[0].id
-  security_groups            = alicloud_security_group.default.*.id
+resource "alicloud_instance" "rule" {
+  image_id                   = data.alicloud_images.rule.images[0].id
+  instance_type              = data.alicloud_instance_types.rule.instance_types[0].id
+  security_groups            = alicloud_security_group.rule.*.id
   internet_charge_type       = "PayByTraffic"
   internet_max_bandwidth_out = "10"
-  availability_zone          = data.alicloud_zones.default.zones[0].id
+  availability_zone          = data.alicloud_zones.rule.zones[0].id
   instance_charge_type       = "PostPaid"
   system_disk_category       = "cloud_efficiency"
-  vswitch_id                 = alicloud_vswitch.default.id
-  instance_name              = var.name
+  vswitch_id                 = alicloud_vswitch.rule.id
+  instance_name              = var.slb_rule_name
 }
 
-resource "alicloud_slb" "default" {
-  name       = var.name
-  vswitch_id = alicloud_vswitch.default.id
+resource "alicloud_slb_load_balancer" "rule" {
+  load_balancer_name   = var.slb_rule_name
+  vswitch_id           = alicloud_vswitch.rule.id
+  instance_charge_type = "PayByCLCU"
 }
 
-resource "alicloud_slb_listener" "default" {
-  load_balancer_id          = alicloud_slb.default.id
+resource "alicloud_slb_listener" "rule" {
+  load_balancer_id          = alicloud_slb_load_balancer.rule.id
   backend_port              = 22
   frontend_port             = 22
   protocol                  = "http"
@@ -90,22 +91,18 @@ resource "alicloud_slb_listener" "default" {
   health_check_connect_port = "20"
 }
 
-resource "alicloud_slb_server_group" "default" {
-  load_balancer_id = alicloud_slb.default.id
-  servers {
-    server_ids = alicloud_instance.default.*.id
-    port       = 80
-    weight     = 100
-  }
+resource "alicloud_slb_server_group" "rule" {
+  load_balancer_id = alicloud_slb_load_balancer.rule.id
+  name             = var.slb_rule_name
 }
 
-resource "alicloud_slb_rule" "default" {
-  load_balancer_id          = alicloud_slb.default.id
-  frontend_port             = alicloud_slb_listener.default.frontend_port
-  name                      = var.name
+resource "alicloud_slb_rule" "rule" {
+  load_balancer_id          = alicloud_slb_load_balancer.rule.id
+  frontend_port             = alicloud_slb_listener.rule.frontend_port
+  name                      = var.slb_rule_name
   domain                    = "*.aliyun.com"
   url                       = "/image"
-  server_group_id           = alicloud_slb_server_group.default.id
+  server_group_id           = alicloud_slb_server_group.rule.id
   cookie                    = "23ffsa"
   cookie_timeout            = 100
   health_check_http_code    = "http_2xx"
@@ -160,11 +157,21 @@ and characters '-' '/' '?' '%' '#' and '&' are allowed. URLs must be started wit
 The following attributes are exported:
 
 * `id` - The ID of the forwarding rule.
+
+### Timeouts
+
+-> **NOTE:** Available in v1.163.0+.
+
+The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
+
+* `create` - (Defaults to 1 mins) Used when create the forwarding rule.
+* `update` - (Defaults to 1 mins) Used when update the forwarding rule.
+* `delete` - (Defaults to 1 mins) Used when delete the forwarding rule.
                                                                                              
 ## Import
 
 Load balancer forwarding rule can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_slb_rule.example rule-abc123456
 ```

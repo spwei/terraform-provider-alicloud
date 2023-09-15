@@ -17,12 +17,13 @@ package edas
 
 // SwimmingLane is a nested struct in edas response
 type SwimmingLane struct {
-	Id                              int64                         `json:"Id" xml:"Id"`
-	Name                            string                        `json:"Name" xml:"Name"`
-	Tag                             string                        `json:"Tag" xml:"Tag"`
 	NamespaceId                     string                        `json:"NamespaceId" xml:"NamespaceId"`
 	GroupId                         int64                         `json:"GroupId" xml:"GroupId"`
+	ScenarioSign                    string                        `json:"ScenarioSign" xml:"ScenarioSign"`
 	EntryRule                       string                        `json:"EntryRule" xml:"EntryRule"`
+	Tag                             string                        `json:"Tag" xml:"Tag"`
 	EnableRules                     bool                          `json:"EnableRules" xml:"EnableRules"`
+	Name                            string                        `json:"Name" xml:"Name"`
+	Id                              int64                         `json:"Id" xml:"Id"`
 	SwimmingLaneAppRelationShipList []SwimmingLaneAppRelationShip `json:"SwimmingLaneAppRelationShipList" xml:"SwimmingLaneAppRelationShipList"`
 }

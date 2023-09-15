@@ -10,8 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
-func TestAccAlicloudRamRolePolicyAttachment_basic(t *testing.T) {
-	var v *ram.PolicyInListPoliciesForRole
+func TestAccAlicloudRAMRolePolicyAttachment_basic(t *testing.T) {
+	var v *ram.Policy
 	resourceId := "alicloud_ram_role_policy_attachment.default"
 	ra := resourceAttrInit(resourceId, ramPolicyForRoleMap)
 	serviceFunc := func() interface{} {

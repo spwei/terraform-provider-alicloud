@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/alibabacloud-go/tea/tea"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alicloud/alicloud/connectivity"
 	"github.com/denverdino/aliyungo/common"
@@ -39,6 +41,10 @@ func dataSourceAlicloudCSManagerKubernetesClusters() *schema.Resource {
 				Default:  false,
 			},
 			"output_file": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"kube_config_file_prefix": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -279,7 +285,10 @@ func dataSourceAlicloudCSManagerKubernetesClustersRead(d *schema.ResourceData, m
 			continue
 		}
 		if nameRegex, ok := d.GetOk("name_regex"); ok {
-			r := regexp.MustCompile(nameRegex.(string))
+			r, err := regexp.Compile(nameRegex.(string))
+			if err != nil {
+				return WrapError(err)
+			}
 			if !r.MatchString(v.Name) {
 				continue
 			}
@@ -332,6 +341,20 @@ func dataSourceAlicloudCSManagerKubernetesClustersRead(d *schema.ResourceData, m
 }
 
 func csManagedKubernetesClusterDescriptionAttributes(d *schema.ResourceData, clusterTypes []cs.KubernetesCluster, meta interface{}) error {
+	client := meta.(*connectivity.AliyunClient)
+	roaClient, err := client.NewRoaCsClient()
+	if err != nil {
+		return WrapError(err)
+	}
+
+	csClient := CsClient{roaClient}
+	invoker := NewInvoker()
+
+	detailEnabled := false
+	if v, ok := d.GetOk("enable_details"); ok {
+		detailEnabled = v.(bool)
+	}
+
 	var ids, names []string
 	var s []map[string]interface{}
 	for _, ct := range clusterTypes {
@@ -340,7 +363,7 @@ func csManagedKubernetesClusterDescriptionAttributes(d *schema.ResourceData, clu
 			"name": ct.Name,
 		}
 
-		if detailedEnabled, ok := d.GetOk("enable_details"); ok && !detailedEnabled.(bool) {
+		if !detailEnabled {
 			ids = append(ids, ct.ClusterID)
 			names = append(names, ct.Name)
 			s = append(s, mapping)
@@ -353,13 +376,11 @@ func csManagedKubernetesClusterDescriptionAttributes(d *schema.ResourceData, clu
 
 		var workerNodes []map[string]interface{}
 
-		invoker := NewInvoker()
-		client := meta.(*connectivity.AliyunClient)
+		var requestInfo *cs.Client
 		pageNumber := 1
 		for {
 			var result []cs.KubernetesNodeType
 			var pagination *cs.PaginationResult
-			var requestInfo *cs.Client
 			var response interface{}
 
 			if err := invoker.Run(func() error {
@@ -488,6 +509,20 @@ func csManagedKubernetesClusterDescriptionAttributes(d *schema.ResourceData, clu
 		ids = append(ids, ct.ClusterID)
 		names = append(names, ct.Name)
 		s = append(s, mapping)
+
+		// kube_config
+		if ct.State == "failed" {
+			continue
+		}
+		if v, ok := d.GetOk("kube_config_file_prefix"); ok && v.(string) != "" {
+			filePath := fmt.Sprintf("%s-%s-kubeconfig", v.(string), ct.ClusterID)
+			kubeConfig, err := csClient.DescribeClusterKubeConfigWithExpiration(ct.ClusterID, 0)
+			if err != nil {
+				return WrapErrorf(err, DataDefaultErrorMsg, "alicloud_cs_managed_kubernetes_clusters", "DescribeClusterKubeConfigWithExpiration", AlibabaCloudSdkGoERROR)
+			}
+			writeToFile(filePath, tea.StringValue(kubeConfig.Config))
+		}
+
 	}
 
 	d.Set("ids", ids)

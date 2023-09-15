@@ -1,11 +1,11 @@
 package alicloud
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 	"time"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 
 	"strings"
@@ -32,6 +32,7 @@ func resourceAlicloudEdasK8sApplication() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"application_name": {
 				Type:     schema.TypeString,
+				ForceNew: true,
 				Required: true,
 			},
 			"cluster_id": {
@@ -78,21 +79,29 @@ func resourceAlicloudEdasK8sApplication() *schema.Resource {
 				Optional: true,
 			},
 			"internet_slb_id": {
-				Optional: true,
-				Type:     schema.TypeString,
+				Optional:   true,
+				Type:       schema.TypeString,
+				ForceNew:   true,
+				Deprecated: "Field 'internet_slb_id' has been deprecated, New Resource 'alicloud_edas_k8s_slb_attachment' replaces it",
 			},
 			"internet_slb_protocol": {
 				Optional:     true,
 				Type:         schema.TypeString,
+				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"TCP", "HTTP", "HTTPS"}, false),
+				Deprecated:   "Field 'internet_slb_protocol' has been deprecated, New Resource 'alicloud_edas_k8s_slb_attachment' replaces it",
 			},
 			"internet_slb_port": {
-				Type:     schema.TypeInt,
-				Optional: true,
+				Type:       schema.TypeInt,
+				ForceNew:   true,
+				Optional:   true,
+				Deprecated: "Field 'internet_slb_port' has been deprecated, New Resource 'alicloud_edas_k8s_slb_attachment' replaces it",
 			},
 			"internet_target_port": {
-				Type:     schema.TypeInt,
-				Optional: true,
+				Type:       schema.TypeInt,
+				Optional:   true,
+				ForceNew:   true,
+				Deprecated: "Field 'internet_target_port' has been deprecated, New Resource 'alicloud_edas_k8s_slb_attachment' replaces it",
 			},
 			"envs": {
 				Type: schema.TypeMap,
@@ -161,7 +170,7 @@ func resourceAlicloudEdasK8sApplication() *schema.Resource {
 			"package_version": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  strconv.FormatInt(time.Now().Unix(), 10),
+				Computed: true,
 			},
 			"jdk": {
 				Type:     schema.TypeString,
@@ -213,6 +222,8 @@ func resourceAlicloudEdasK8sApplicationCreate(d *schema.ResourceData, meta inter
 		}
 		if v, ok := d.GetOk("package_version"); ok {
 			request.PackageVersion = v.(string)
+		} else {
+			request.PackageVersion = strconv.FormatInt(time.Now().Unix(), 10)
 		}
 		if v, ok := d.GetOk("jdk"); !ok {
 			return WrapError(Error("jdk is needed for creating non-image k8s application"))
@@ -236,18 +247,18 @@ func resourceAlicloudEdasK8sApplicationCreate(d *schema.ResourceData, meta inter
 		}
 	}
 
-	request.Replicas = requests.NewInteger(d.Get("replicas").(int))
+	request.Replicas = fmt.Sprint(d.Get("replicas").(int))
 
 	if v, ok := d.GetOk("application_descriotion"); ok {
 		request.ApplicationDescription = v.(string)
 	}
 
 	if v, ok := d.GetOk("limit_mem"); ok {
-		request.LimitMem = requests.NewInteger(v.(int))
+		request.LimitMem = fmt.Sprint(v.(int))
 	}
 
 	if v, ok := d.GetOk("requests_mem"); ok {
-		request.RequestsMem = requests.NewInteger(v.(int))
+		request.RequestsMem = fmt.Sprint(v.(int))
 	}
 
 	if v, ok := d.GetOk("command"); ok {
@@ -271,11 +282,11 @@ func resourceAlicloudEdasK8sApplicationCreate(d *schema.ResourceData, meta inter
 	}
 
 	if v, ok := d.GetOk("internet_slb_port"); ok {
-		request.InternetSlbPort = requests.NewInteger(v.(int))
+		request.InternetSlbPort = fmt.Sprint(v.(int))
 	}
 
 	if v, ok := d.GetOk("internet_target_port"); ok {
-		request.InternetTargetPort = requests.NewInteger(v.(int))
+		request.InternetTargetPort = fmt.Sprint(v.(int))
 	}
 
 	if v, ok := d.GetOk("envs"); ok {
@@ -323,11 +334,11 @@ func resourceAlicloudEdasK8sApplicationCreate(d *schema.ResourceData, meta inter
 	}
 
 	if v, ok := d.GetOk("requests_m_cpu"); ok {
-		request.RequestsmCpu = requests.NewInteger(v.(int))
+		request.RequestsmCpu = fmt.Sprint(v.(int))
 	}
 
 	if v, ok := d.GetOk("limit_m_cpu"); ok {
-		request.LimitmCpu = requests.NewInteger(v.(int))
+		request.LimitmCpu = fmt.Sprint(v.(int))
 	}
 
 	var appId string
@@ -374,7 +385,7 @@ func resourceAlicloudEdasK8sApplicationRead(d *schema.ResourceData, meta interfa
 		return WrapError(err)
 	}
 	d.Set("application_name", response.App.ApplicationName)
-	d.Set("application_descriotion", response.App.Description)
+	d.Set("application_descriotion", response.Description)
 	d.Set("cluster_id", response.App.ClusterId)
 	d.Set("replicas", response.App.Instances)
 	d.Set("package_type", response.App.ApplicationType)
@@ -466,7 +477,12 @@ func resourceAlicloudEdasK8sApplicationUpdate(d *schema.ResourceData, meta inter
 		if len(request.PackageUrl) == 0 {
 			return WrapError(Error("package_url is needed for creating fatjar k8s application"))
 		}
-		request.PackageVersion = d.Get("package_version").(string)
+
+		if v, ok := d.GetOk("package_version"); ok {
+			request.PackageVersion = v.(string)
+		} else {
+			request.PackageVersion = strconv.FormatInt(time.Now().Unix(), 10)
+		}
 
 		if d.HasChange("jdk") {
 			partialKeys = append(partialKeys, "jdk")
@@ -498,16 +514,16 @@ func resourceAlicloudEdasK8sApplicationUpdate(d *schema.ResourceData, meta inter
 	if d.HasChange("replicas") {
 		partialKeys = append(partialKeys, "replicas")
 	}
-	request.Replicas = requests.NewInteger(d.Get("replicas").(int))
+	request.Replicas = fmt.Sprint(d.Get("replicas").(int))
 
 	if d.HasChange("limit_mem") {
 		partialKeys = append(partialKeys, "limit_mem")
-		request.MemoryLimit = requests.NewInteger(d.Get("limit_mem").(int))
+		request.MemoryLimit = fmt.Sprint(d.Get("limit_mem").(int))
 	}
 
 	if d.HasChange("requests_mem") {
 		partialKeys = append(partialKeys, "requests_mem")
-		request.MemoryRequest = requests.NewInteger(d.Get("requests_mem").(int))
+		request.MemoryRequest = fmt.Sprint(d.Get("requests_mem").(int))
 	}
 
 	if d.HasChange("command") {
@@ -578,12 +594,12 @@ func resourceAlicloudEdasK8sApplicationUpdate(d *schema.ResourceData, meta inter
 
 	if d.HasChange("requests_m_cpu") {
 		partialKeys = append(partialKeys, "requests_m_cpu")
-		request.McpuRequest = requests.NewInteger(d.Get("requests_m_cpu").(int))
+		request.McpuRequest = fmt.Sprint(d.Get("requests_m_cpu").(int))
 	}
 
 	if d.HasChange("limit_m_cpu") {
 		partialKeys = append(partialKeys, "limit_m_cpu")
-		request.McpuLimit = requests.NewInteger(d.Get("limit_m_cpu").(int))
+		request.McpuLimit = fmt.Sprint(d.Get("limit_m_cpu").(int))
 	}
 
 	if len(partialKeys) > 0 {

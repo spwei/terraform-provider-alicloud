@@ -81,8 +81,8 @@ type DescribeWebAccessLogDispatchStatusRequest struct {
 // DescribeWebAccessLogDispatchStatusResponse is the response struct for api DescribeWebAccessLogDispatchStatus
 type DescribeWebAccessLogDispatchStatusResponse struct {
 	*responses.BaseResponse
-	RequestId       string                `json:"RequestId" xml:"RequestId"`
 	TotalCount      int                   `json:"TotalCount" xml:"TotalCount"`
+	RequestId       string                `json:"RequestId" xml:"RequestId"`
 	SlsConfigStatus []SlsConfigStatusItem `json:"SlsConfigStatus" xml:"SlsConfigStatus"`
 }
 

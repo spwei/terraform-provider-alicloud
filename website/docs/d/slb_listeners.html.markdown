@@ -1,5 +1,5 @@
 ---
-subcategory: "Server Load Balancer (SLB)"
+subcategory: "Classic Load Balancer (SLB)"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_slb_listeners"
 sidebar_current: "docs-alicloud-datasource-slb-listeners"
@@ -14,11 +14,11 @@ This data source provides the listeners related to a server load balancer of the
 ## Example Usage
 
 ```
-resource "alicloud_slb" "default" {
-  name = "tf-testAccSlbListenertcp"
+resource "alicloud_slb_load_balancer" "default" {
+  load_balancer_name = "tf-testAccSlbListenertcp"
 }
 resource "alicloud_slb_listener" "tcp" {
-  load_balancer_id          = alicloud_slb.default.id
+  load_balancer_id          = alicloud_slb_load_balancer.default.id
   backend_port              = "22"
   frontend_port             = "22"
   protocol                  = "tcp"
@@ -36,7 +36,7 @@ resource "alicloud_slb_listener" "tcp" {
 }
 
 data "alicloud_slb_listeners" "sample_ds" {
-  load_balancer_id = alicloud_slb.default.id
+  load_balancer_id = alicloud_slb_load_balancer.default.id
 }
 
 output "first_slb_listener_protocol" {
@@ -97,3 +97,4 @@ The following attributes are exported in addition to the arguments listed above:
   * `enable_http2` -  Whether to enable https listener support http2 or not. Valid values are `on` and `off`. Default to `on`.
   * `tls_cipher_policy` - Https listener TLS cipher policy. Valid values are `tls_cipher_policy_1_0`, `tls_cipher_policy_1_1`, `tls_cipher_policy_1_2`, `tls_cipher_policy_1_2_strict`. Default to `tls_cipher_policy_1_0`.
   * `description` - The description of slb listener.
+  * `proxy_protocol_v2_enabled` - Whether to support carrying the client source address to the backend server through the Proxy Protocol. Valid values are `true` and `false`. Default to `false`.

@@ -47,7 +47,8 @@ func testSweepFCServices(region string) error {
 		return fcClient.ListServices(fc.NewListServicesInput())
 	})
 	if err != nil {
-		return fmt.Errorf("Error retrieving FC services: %s", err)
+		log.Printf("Error retrieving FC services: %s", err)
+		return nil
 	}
 	services, _ := raw.(*fc.ListServicesOutput)
 	for _, v := range services.Services {
@@ -324,6 +325,27 @@ func TestAccAlicloudFCServiceUpdate(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
+					"log_config": []map[string]string{
+						{
+							"project":                 "${alicloud_log_store.default.project}",
+							"logstore":                "${alicloud_log_store.default.name}",
+							"enable_request_metrics":  "true",
+							"enable_instance_metrics": "true",
+						},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"log_config.0.project":                 name,
+						"log_config.0.logstore":                name,
+						"log_config.0.enable_request_metrics":  CHECKSET,
+						"log_config.0.enable_instance_metrics": CHECKSET,
+						"version":                              "6",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
 					"log_config":      REMOVEKEY,
 					"role":            REMOVEKEY,
 					"internet_access": REMOVEKEY,
@@ -331,12 +353,14 @@ func TestAccAlicloudFCServiceUpdate(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"log_config.0.project":  REMOVEKEY,
-						"log_config.0.logstore": REMOVEKEY,
-						"role":                  REMOVEKEY,
-						"internet_access":       REMOVEKEY,
-						"description":           REMOVEKEY,
-						"version":               "6",
+						"log_config.0.project":                 REMOVEKEY,
+						"log_config.0.logstore":                REMOVEKEY,
+						"log_config.0.enable_request_metrics":  REMOVEKEY,
+						"log_config.0.enable_instance_metrics": REMOVEKEY,
+						"role":                                 REMOVEKEY,
+						"internet_access":                      REMOVEKEY,
+						"description":                          REMOVEKEY,
+						"version":                              "7",
 					}),
 				),
 			},
@@ -402,7 +426,7 @@ func TestAccAlicloudFCServiceVpcAndNasUpdate(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name_prefix"},
+				ImportStateVerifyIgnore: []string{"name_prefix", "publish"},
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -428,15 +452,19 @@ func TestAccAlicloudFCServiceVpcAndNasUpdate(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"log_config": []map[string]string{
 						{
-							"project":  "${alicloud_log_project.default.name}",
-							"logstore": "${alicloud_log_store.default.name}",
+							"project":                 "${alicloud_log_project.default.name}",
+							"logstore":                "${alicloud_log_store.default.name}",
+							"enable_request_metrics":  "true",
+							"enable_instance_metrics": "true",
 						},
 					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"log_config.0.project":  name,
-						"log_config.0.logstore": name,
+						"log_config.0.project":                 name,
+						"log_config.0.logstore":                name,
+						"log_config.0.enable_request_metrics":  CHECKSET,
+						"log_config.0.enable_instance_metrics": CHECKSET,
 					}),
 				),
 			},
@@ -448,10 +476,12 @@ func TestAccAlicloudFCServiceVpcAndNasUpdate(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"log_config.0.project":  REMOVEKEY,
-						"log_config.0.logstore": REMOVEKEY,
-						"internet_access":       REMOVEKEY,
-						"description":           REMOVEKEY,
+						"log_config.0.project":                 REMOVEKEY,
+						"log_config.0.logstore":                REMOVEKEY,
+						"log_config.0.enable_request_metrics":  REMOVEKEY,
+						"log_config.0.enable_instance_metrics": REMOVEKEY,
+						"internet_access":                      REMOVEKEY,
+						"description":                          REMOVEKEY,
 					}),
 				),
 			},
@@ -599,7 +629,7 @@ resource "alicloud_log_store" "default" {
 }
 
 data "alicloud_vpcs" "default" {
-  is_default = true
+    name_regex = "^default-NODELETING$"
 }
 
 resource "alicloud_security_group" "default" {

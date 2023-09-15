@@ -17,7 +17,7 @@ package dcdn
 
 // Field is a nested struct in dcdn response
 type Field struct {
-	FieldId     string `json:"FieldId" xml:"FieldId"`
-	FieldName   string `json:"FieldName" xml:"FieldName"`
-	Description string `json:"Description" xml:"Description"`
+	ExtendField   string  `json:"ExtendField" xml:"ExtendField"`
+	MatchField    string  `json:"MatchField" xml:"MatchField"`
+	LogicalSymbol []Logic `json:"LogicalSymbol" xml:"LogicalSymbol"`
 }

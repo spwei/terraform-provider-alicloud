@@ -88,8 +88,8 @@ type DescribeTagResourcesTags struct {
 // DescribeTagResourcesResponse is the response struct for api DescribeTagResources
 type DescribeTagResourcesResponse struct {
 	*responses.BaseResponse
-	RequestId    string       `json:"RequestId" xml:"RequestId"`
 	NextToken    string       `json:"NextToken" xml:"NextToken"`
+	RequestId    string       `json:"RequestId" xml:"RequestId"`
 	TagResources TagResources `json:"TagResources" xml:"TagResources"`
 }
 

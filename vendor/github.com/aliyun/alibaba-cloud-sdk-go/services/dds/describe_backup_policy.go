@@ -82,11 +82,15 @@ type DescribeBackupPolicyRequest struct {
 // DescribeBackupPolicyResponse is the response struct for api DescribeBackupPolicy
 type DescribeBackupPolicyResponse struct {
 	*responses.BaseResponse
-	RequestId               string `json:"RequestId" xml:"RequestId"`
-	BackupRetentionPeriod   string `json:"BackupRetentionPeriod" xml:"BackupRetentionPeriod"`
-	PreferredBackupTime     string `json:"PreferredBackupTime" xml:"PreferredBackupTime"`
-	PreferredBackupPeriod   string `json:"PreferredBackupPeriod" xml:"PreferredBackupPeriod"`
-	PreferredNextBackupTime string `json:"PreferredNextBackupTime" xml:"PreferredNextBackupTime"`
+	PreferredBackupPeriod    string `json:"PreferredBackupPeriod" xml:"PreferredBackupPeriod"`
+	RequestId                string `json:"RequestId" xml:"RequestId"`
+	PreferredBackupTime      string `json:"PreferredBackupTime" xml:"PreferredBackupTime"`
+	BackupRetentionPeriod    string `json:"BackupRetentionPeriod" xml:"BackupRetentionPeriod"`
+	PreferredNextBackupTime  string `json:"PreferredNextBackupTime" xml:"PreferredNextBackupTime"`
+	EnableBackupLog          int    `json:"EnableBackupLog" xml:"EnableBackupLog"`
+	LogBackupRetentionPeriod int    `json:"LogBackupRetentionPeriod" xml:"LogBackupRetentionPeriod"`
+	SnapshotBackupType       string `json:"SnapshotBackupType" xml:"SnapshotBackupType"`
+	BackupInterval           int    `json:"BackupInterval" xml:"BackupInterval"`
 }
 
 // CreateDescribeBackupPolicyRequest creates a request to invoke DescribeBackupPolicy API
@@ -94,7 +98,7 @@ func CreateDescribeBackupPolicyRequest() (request *DescribeBackupPolicyRequest) 
 	request = &DescribeBackupPolicyRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("Dds", "2015-12-01", "DescribeBackupPolicy", "Dds", "openAPI")
+	request.InitWithApiInfo("Dds", "2015-12-01", "DescribeBackupPolicy", "dds", "openAPI")
 	request.Method = requests.POST
 	return
 }

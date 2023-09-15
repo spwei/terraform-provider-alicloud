@@ -17,9 +17,9 @@ For information about WAF and how to use it, see [What is Alibaba Cloud WAF](htt
 
 ## Example Usage
 
-```
+```terraform
 resource "alicloud_waf_domain" "domain" {
-  domain            = "www.aliyun.com"
+  domain_name       = "alicloud-provider.cn"
   instance_id       = "waf-123455"
   is_access_product = "On"
   source_ips        = ["1.1.1.1"]
@@ -42,8 +42,8 @@ The following arguments are supported:
 
 * `cluster_type` - (Optional) The type of the WAF cluster. Valid values: `PhysicalCluster` and `VirtualCluster`. Default to `PhysicalCluster`.
 * `connection_time` - (Optional) The connection timeout for WAF exclusive clusters. Unit: seconds.
-* `domain` - (Required, ForceNew, Deprecated in v1.94.0+)  Field `domain` has been deprecated from version 1.94.0. Use `domain_name` instead.
-* `domain_name` - (Required, ForceNew, Available in v1.94.0+) The domain that you want to add to WAF.
+* `domain` - (Optional, ForceNew, Deprecated from v1.94.0+)  Field `domain` has been deprecated from version 1.94.0. Use `domain_name` instead.
+* `domain_name` - (Optional, ForceNew, Available in v1.94.0+) The domain that you want to add to WAF. The `domain_name` is required when the value of the `domain`  is Empty.
 * `http2_port` - (Optional) List of the HTTP 2.0 ports.
 * `http_port` - (Optional) List of the HTTP ports.
 * `http_to_user_ip` - (Optional) Specifies whether to enable the HTTP back-to-origin feature. After this feature is enabled, the WAF instance can use HTTP to forward HTTPS requests to the origin server. 
@@ -73,6 +73,6 @@ The following attributes are exported:
 
 WAF domain can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_waf_domain.domain waf-132435:www.domain.com
 ```

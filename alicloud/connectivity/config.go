@@ -3,6 +3,7 @@ package connectivity
 import (
 	"fmt"
 	"log"
+	"sync"
 
 	roa "github.com/alibabacloud-go/tea-roa/client"
 
@@ -23,22 +24,27 @@ var securityCredURL = "http://100.100.100.200/latest/meta-data/ram/security-cred
 
 // Config of aliyun
 type Config struct {
-	SourceIp        string
-	AccessKey       string
-	SecretKey       string
-	EcsRoleName     string
-	Region          Region
-	RegionId        string
-	SecurityToken   string
-	OtsInstanceName string
-	AccountId       string
-	Protocol        string
+	AccessKey            string
+	SecretKey            string
+	EcsRoleName          string
+	Region               Region
+	RegionId             string
+	SecurityToken        string
+	OtsInstanceName      string
+	AccountId            string
+	Protocol             string
+	ClientReadTimeout    int
+	ClientConnectTimeout int
+	SourceIp             string
+	SecureTransport      string
+	MaxRetryTimeout      int
 
 	RamRoleArn               string
 	RamRoleSessionName       string
 	RamRolePolicy            string
+	RamRoleExternalId        string
 	RamRoleSessionExpiration int
-	Endpoints                map[string]interface{}
+	Endpoints                *sync.Map
 	RKvstoreEndpoint         string
 	EcsEndpoint              string
 	RdsEndpoint              string
@@ -83,34 +89,104 @@ type Config struct {
 	AdbEndpoint              string
 	MaxComputeEndpoint       string
 
-	edasEndpoint            string
-	SkipRegionValidation    bool
-	ConfigurationSource     string
-	CbnEndpoint             string
-	DmsEnterpriseEndpoint   string
-	WafOpenapiEndpoint      string
-	ResourcemanagerEndpoint string
-	BssopenapiEndpoint      string
-	AlidnsEndpoint          string
-	CassandraEndpoint       string
-	EciEndpoint             string
-	OosEndpoint             string
-	DcdnEndpoint            string
-	MseEndpoint             string
-	ActiontrailEndpoint     string
-	ConfigEndpoint          string
-	FnfEndpoint             string
-	RosEndpoint             string
-	PrivatelinkEndpoint     string
-	MaxcomputeEndpoint      string
-	ResourcesharingEndpoint string
-	GaEndpoint              string
-	HitsdbEndpoint          string
-	BrainIndustrialEndpoint string
-	EipanycastEndpoint      string
-	ImsEndpoint             string
-	QuotasEndpoint          string
-	SgwEndpoint             string
+	edasEndpoint                string
+	SkipRegionValidation        bool
+	ConfigurationSource         string
+	TerraformTraceId            string
+	TerraformVersion            string
+	CbnEndpoint                 string
+	DmsEnterpriseEndpoint       string
+	WafOpenapiEndpoint          string
+	ResourcemanagerEndpoint     string
+	BssopenapiEndpoint          string
+	AlidnsEndpoint              string
+	CassandraEndpoint           string
+	EciEndpoint                 string
+	OosEndpoint                 string
+	DcdnEndpoint                string
+	MseEndpoint                 string
+	ActiontrailEndpoint         string
+	ConfigEndpoint              string
+	FnfEndpoint                 string
+	RosEndpoint                 string
+	PrivatelinkEndpoint         string
+	MaxcomputeEndpoint          string
+	ResourcesharingEndpoint     string
+	GaEndpoint                  string
+	HitsdbEndpoint              string
+	BrainIndustrialEndpoint     string
+	EipanycastEndpoint          string
+	ImsEndpoint                 string
+	QuotasEndpoint              string
+	SgwEndpoint                 string
+	ScdnEndpoint                string
+	DmEndpoint                  string
+	EventbridgeEndpoint         string
+	OnsproxyEndpoint            string
+	CdsEndpoint                 string
+	HbrEndpoint                 string
+	ArmsEndpoint                string
+	CloudfwEndpoint             string
+	ServerlessEndpoint          string
+	AlbEndpoint                 string
+	RedisaEndpoint              string
+	GwsecdEndpoint              string
+	CloudphoneEndpoint          string
+	DataworkspublicEndpoint     string
+	HcsSgwEndpoint              string
+	CddcEndpoint                string
+	MscopensubscriptionEndpoint string
+	SddpEndpoint                string
+	BastionhostEndpoint         string
+	SasEndpoint                 string
+	AlidfsEndpoint              string
+	EhpcEndpoint                string
+	EnsEndpoint                 string
+	IotEndpoint                 string
+	ImmEndpoint                 string
+	ClickhouseEndpoint          string
+	DtsEndpoint                 string
+	DgEndpoint                  string
+	CloudssoEndpoint            string
+	WafEndpoint                 string
+	SwasEndpoint                string
+	VsEndpoint                  string
+	QuickbiEndpoint             string
+	VodEndpoint                 string
+	OpensearchEndpoint          string
+	GdsEndpoint                 string
+	DbfsEndpoint                string
+	DevopsrdcEndpoint           string
+	EaisEndpoint                string
+	CloudauthEndpoint           string
+	ImpEndpoint                 string
+	MhubEndpoint                string
+	ServicemeshEndpoint         string
+	AcrEndpoint                 string
+	EdsuserEndpoint             string
+	GpdbEndpoint                string
+	GaplusEndpoint              string
+	DdosbasicEndpoint           string
+	SmartagEndpoint             string
+	TagEndpoint                 string
+	EdasEndpoint                string
+	EdasschedulerxEndpoint      string
+	EhsEndpoint                 string
+	DysmsEndpoint               string
+	CbsEndpoint                 string
+	NlbEndpoint                 string
+	VpcpeerEndpoint             string
+	EbsEndpoint                 string
+	DmsenterpriseEndpoint       string
+	BpStudioEndpoint            string
+	DasEndpoint                 string
+	CloudfirewallEndpoint       string
+	SrvcatalogEndpoint          string
+	VpcPeerEndpoint             string
+	EfloEndpoint                string
+	OceanbaseEndpoint           string
+	BeebotEndpoint              string
+	ComputeNestEndpoint         string
 }
 
 func (c *Config) loadAndValidate() error {
@@ -130,7 +206,8 @@ func (c *Config) validateRegion() error {
 		}
 	}
 
-	return fmt.Errorf("Invalid Alibaba Cloud region: %s", c.RegionId)
+	return fmt.Errorf("Invalid Alibaba Cloud region: %s. "+
+		"You can skip checking this region by setting provider parameter 'skip_region_validation'.", c.RegionId)
 }
 
 func (c *Config) getAuthCredential(stsSupported bool) auth.Credential {
@@ -140,6 +217,11 @@ func (c *Config) getAuthCredential(stsSupported bool) auth.Credential {
 		}
 		if c.RamRoleArn != "" {
 			log.Printf("[INFO] Assume RAM Role specified in provider block assume_role { ... }")
+			if c.RamRoleExternalId != "" {
+				return credentials.NewRamRoleArnWithPolicyAndExternalIdCredential(
+					c.AccessKey, c.SecretKey, c.RamRoleArn,
+					c.RamRoleSessionName, c.RamRolePolicy, c.RamRoleExternalId, c.RamRoleSessionExpiration)
+			}
 			return credentials.NewRamRoleArnWithPolicyCredential(
 				c.AccessKey, c.SecretKey, c.RamRoleArn,
 				c.RamRoleSessionName, c.RamRolePolicy, c.RamRoleSessionExpiration)
@@ -239,24 +321,39 @@ func (c *Config) MakeConfigByEcsRoleName() error {
 
 func (c *Config) getTeaDslSdkConfig(stsSupported bool) (config rpc.Config, err error) {
 	config.SetRegionId(c.RegionId)
-	config.SetUserAgent(fmt.Sprintf("%s/%s %s/%s %s/%s", Terraform, terraformVersion, Provider, providerVersion, Module, c.ConfigurationSource))
+	config.SetUserAgent(fmt.Sprintf("%s/%s %s/%s %s/%s %s/%s", Terraform, c.TerraformVersion, Provider, providerVersion, Module, c.ConfigurationSource, TerraformTraceId, c.TerraformTraceId))
 	credential, err := credential.NewCredential(c.getCredentialConfig(stsSupported))
 	config.SetCredential(credential).
 		SetRegionId(c.RegionId).
 		SetProtocol(c.Protocol).
-		SetReadTimeout(30000).
-		SetConnectTimeout(30000)
+		SetReadTimeout(c.ClientReadTimeout).
+		SetConnectTimeout(c.ClientConnectTimeout).
+		SetMaxIdleConns(500)
+	if c.SourceIp != "" {
+		config.SetSourceIp(c.SourceIp)
+	}
+	if c.SecureTransport != "" {
+		config.SetSecureTransport(c.SecureTransport)
+	}
+
 	return
 }
 func (c *Config) getTeaRoaDslSdkConfig(stsSupported bool) (config roa.Config, err error) {
 	config.SetRegionId(c.RegionId)
-	config.SetUserAgent(fmt.Sprintf("%s/%s %s/%s %s/%s", Terraform, terraformVersion, Provider, providerVersion, Module, c.ConfigurationSource))
+	config.SetUserAgent(fmt.Sprintf("%s/%s %s/%s %s/%s %s/%s", Terraform, c.TerraformVersion, Provider, providerVersion, Module, c.ConfigurationSource, TerraformTraceId, c.TerraformTraceId))
 	credential, err := credential.NewCredential(c.getCredentialConfig(stsSupported))
 	config.SetCredential(credential).
 		SetRegionId(c.RegionId).
 		SetProtocol(c.Protocol).
-		SetReadTimeout(30000).
-		SetConnectTimeout(30000)
+		SetReadTimeout(c.ClientReadTimeout).
+		SetConnectTimeout(c.ClientConnectTimeout).
+		SetMaxIdleConns(500)
+	if c.SourceIp != "" {
+		config.SetSourceIp(c.SourceIp)
+	}
+	if c.SecureTransport != "" {
+		config.SetSecureTransport(c.SecureTransport)
+	}
 	return
 }
 func (c *Config) getCredentialConfig(stsSupported bool) *credential.Config {
@@ -277,6 +374,9 @@ func (c *Config) getCredentialConfig(stsSupported bool) *credential.Config {
 			credentialConfig.RoleSessionName = &c.RamRoleSessionName
 			credentialConfig.RoleSessionExpiration = &c.RamRoleSessionExpiration
 			credentialConfig.Policy = &c.RamRolePolicy
+			if c.RamRoleExternalId != "" {
+				credentialConfig.ExternalId = &c.RamRoleExternalId
+			}
 		}
 	} else if c.EcsRoleName != "" {
 		credentialType = "ecs_ram_role"

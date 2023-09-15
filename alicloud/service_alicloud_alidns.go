@@ -1,7 +1,11 @@
 package alicloud
 
 import (
+	"fmt"
 	"time"
+
+	"github.com/PaesslerAG/jsonpath"
+	util "github.com/alibabacloud-go/tea-utils/service"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/alidns"
@@ -105,7 +109,7 @@ func (s *AlidnsService) SetResourceTags(d *schema.ResourceData, resourceType str
 		})
 	}
 	removed := make([]string, 0)
-	for key, _ := range oldItems.(map[string]interface{}) {
+	for key := range oldItems.(map[string]interface{}) {
 		removed = append(removed, key)
 	}
 	if len(removed) > 0 {
@@ -161,33 +165,273 @@ func (s *AlidnsService) DescribeAlidnsDomain(id string) (object alidns.DescribeD
 	return *response, nil
 }
 
-func (s *AlidnsService) DescribeAlidnsInstance(id string) (object alidns.DescribeDnsProductInstanceResponse, err error) {
-	request := alidns.CreateDescribeDnsProductInstanceRequest()
-	request.RegionId = s.client.RegionId
-
-	request.InstanceId = id
-
+func (s *AlidnsService) DescribeAlidnsInstance(id string) (object map[string]interface{}, err error) {
+	var response map[string]interface{}
+	conn, err := s.client.NewAlidnsClient()
+	if err != nil {
+		return nil, WrapError(err)
+	}
+	action := "DescribeDnsProductInstance"
+	request := map[string]interface{}{
+		"RegionId":   s.client.RegionId,
+		"InstanceId": id,
+	}
+	runtime := util.RuntimeOptions{}
+	runtime.SetAutoretry(true)
 	wait := incrementalWait(3*time.Second, 5*time.Second)
 	err = resource.Retry(11*time.Minute, func() *resource.RetryError {
-		raw, err := s.client.WithAlidnsClient(func(alidnsClient *alidns.Client) (interface{}, error) {
-			return alidnsClient.DescribeDnsProductInstance(request)
-		})
+		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2015-01-09"), StringPointer("AK"), nil, request, &runtime)
 		if err != nil {
-			if IsExpectedErrors(err, []string{"Throttling.User"}) {
+			if NeedRetry(err) {
 				wait()
 				return resource.RetryableError(err)
 			}
-			if IsExpectedErrors(err, []string{"InvalidDnsProduct"}) {
-				err = WrapErrorf(Error(GetNotFoundMessage("AlidnsInstance", id)), NotFoundMsg, ProviderERROR)
-				return resource.NonRetryableError(err)
-			}
-			err = WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabaCloudSdkGoERROR)
 			return resource.NonRetryableError(err)
 		}
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		response, _ := raw.(*alidns.DescribeDnsProductInstanceResponse)
-		object = *response
 		return nil
 	})
-	return object, WrapError(err)
+	addDebug(action, response, request)
+	if err != nil {
+		if IsExpectedErrors(err, []string{"InvalidDnsProduct"}) {
+			return object, WrapErrorf(Error(GetNotFoundMessage("Alidns:Instance", id)), NotFoundMsg, ProviderERROR, fmt.Sprint(response["RequestId"]))
+		}
+		return object, WrapErrorf(err, DefaultErrorMsg, id, action, AlibabaCloudSdkGoERROR)
+	}
+	v, err := jsonpath.Get("$", response)
+	if err != nil {
+		return object, WrapErrorf(err, DefaultErrorMsg, id, action, AlibabaCloudSdkGoERROR)
+	}
+	object = v.(map[string]interface{})
+	return object, nil
+}
+
+func (s *AlidnsService) DescribeAlidnsCustomLine(id string) (object map[string]interface{}, err error) {
+	var response map[string]interface{}
+	conn, err := s.client.NewAlidnsClient()
+	if err != nil {
+		return nil, WrapError(err)
+	}
+	action := "DescribeCustomLine"
+	request := map[string]interface{}{
+		"LineId": id,
+	}
+	runtime := util.RuntimeOptions{}
+	runtime.SetAutoretry(true)
+	wait := incrementalWait(3*time.Second, 3*time.Second)
+	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2015-01-09"), StringPointer("AK"), nil, request, &runtime)
+		if err != nil {
+			if NeedRetry(err) {
+				wait()
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
+		}
+		return nil
+	})
+	addDebug(action, response, request)
+	if err != nil {
+		if IsExpectedErrors(err, []string{"DnsCustomLine.NotExists"}) {
+			return object, WrapErrorf(Error(GetNotFoundMessage("Alidns::CustomLine", id)), NotFoundMsg, ProviderERROR)
+		}
+		return object, WrapErrorf(err, DefaultErrorMsg, id, action, AlibabaCloudSdkGoERROR)
+	}
+	v, err := jsonpath.Get("$", response)
+	if err != nil {
+		return object, WrapErrorf(err, FailedGetAttributeMsg, id, "$", response)
+	}
+	object = v.(map[string]interface{})
+	return object, nil
+}
+
+func (s *AlidnsService) DescribeCustomLine(id string) (object map[string]interface{}, err error) {
+	var response map[string]interface{}
+	conn, err := s.client.NewAlidnsClient()
+	if err != nil {
+		return nil, WrapError(err)
+	}
+	action := "DescribeCustomLine"
+	request := map[string]interface{}{
+		"LineId": id,
+	}
+	runtime := util.RuntimeOptions{}
+	runtime.SetAutoretry(true)
+	wait := incrementalWait(3*time.Second, 3*time.Second)
+	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2015-01-09"), StringPointer("AK"), nil, request, &runtime)
+		if err != nil {
+			if NeedRetry(err) {
+				wait()
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
+		}
+		return nil
+	})
+	addDebug(action, response, request)
+	if err != nil {
+		if IsExpectedErrors(err, []string{"DnsCustomLine.NotExists"}) {
+			return object, WrapErrorf(Error(GetNotFoundMessage("Alidns::CustomLine", id)), NotFoundMsg, ProviderERROR)
+		}
+		return object, WrapErrorf(err, DefaultErrorMsg, id, action, AlibabaCloudSdkGoERROR)
+	}
+	v, err := jsonpath.Get("$", response)
+	if err != nil {
+		return object, WrapErrorf(err, FailedGetAttributeMsg, id, "$", response)
+	}
+	object = v.(map[string]interface{})
+	return object, nil
+}
+
+func (s *AlidnsService) DescribeAlidnsGtmInstance(id string) (object map[string]interface{}, err error) {
+	var response map[string]interface{}
+	conn, err := s.client.NewAlidnsClient()
+	if err != nil {
+		return nil, WrapError(err)
+	}
+	action := "DescribeDnsGtmInstance"
+	request := map[string]interface{}{
+		"InstanceId": id,
+	}
+	runtime := util.RuntimeOptions{}
+	runtime.SetAutoretry(true)
+	wait := incrementalWait(3*time.Second, 3*time.Second)
+	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2015-01-09"), StringPointer("AK"), nil, request, &runtime)
+		if err != nil {
+			if NeedRetry(err) {
+				wait()
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
+		}
+		return nil
+	})
+	addDebug(action, response, request)
+	if err != nil {
+		if IsExpectedErrors(err, []string{"DnsGtmInstance.NotExists"}) {
+			return object, WrapErrorf(Error(GetNotFoundMessage("Alidns:GtmInstance", id)), NotFoundWithResponse, response)
+		}
+		return object, WrapErrorf(err, DefaultErrorMsg, id, action, AlibabaCloudSdkGoERROR)
+	}
+	v, err := jsonpath.Get("$", response)
+	if err != nil {
+		return object, WrapErrorf(err, FailedGetAttributeMsg, id, "$", response)
+	}
+	object = v.(map[string]interface{})
+	return object, nil
+}
+
+func (s *AlidnsService) DescribeAlidnsAddressPool(id string) (object map[string]interface{}, err error) {
+	var response map[string]interface{}
+	conn, err := s.client.NewAlidnsClient()
+	if err != nil {
+		return nil, WrapError(err)
+	}
+	action := "DescribeDnsGtmInstanceAddressPool"
+	request := map[string]interface{}{
+		"AddrPoolId": id,
+	}
+	runtime := util.RuntimeOptions{}
+	runtime.SetAutoretry(true)
+	wait := incrementalWait(3*time.Second, 3*time.Second)
+	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2015-01-09"), StringPointer("AK"), nil, request, &runtime)
+		if err != nil {
+			if NeedRetry(err) {
+				wait()
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
+		}
+		return nil
+	})
+	addDebug(action, response, request)
+	if err != nil {
+		if IsExpectedErrors(err, []string{"DnsGtmAddrPool.NotExists"}) {
+			return object, WrapErrorf(Error(GetNotFoundMessage("Alidns::AddressPool", id)), NotFoundMsg, ProviderERROR, fmt.Sprint(response["RequestId"]))
+		}
+		return object, WrapErrorf(err, DefaultErrorMsg, id, action, AlibabaCloudSdkGoERROR)
+	}
+	v, err := jsonpath.Get("$", response)
+	if err != nil {
+		return object, WrapErrorf(err, FailedGetAttributeMsg, id, "$", response)
+	}
+	object = v.(map[string]interface{})
+	return object, nil
+}
+
+func (s *AlidnsService) DescribeAlidnsAccessStrategy(id string) (object map[string]interface{}, err error) {
+	var response map[string]interface{}
+	conn, err := s.client.NewAlidnsClient()
+	if err != nil {
+		return nil, WrapError(err)
+	}
+	action := "DescribeDnsGtmAccessStrategy"
+	request := map[string]interface{}{
+		"StrategyId": id,
+	}
+	runtime := util.RuntimeOptions{}
+	runtime.SetAutoretry(true)
+	wait := incrementalWait(3*time.Second, 3*time.Second)
+	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2015-01-09"), StringPointer("AK"), nil, request, &runtime)
+		if err != nil {
+			if NeedRetry(err) {
+				wait()
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
+		}
+		return nil
+	})
+	addDebug(action, response, request)
+	if err != nil {
+		if IsExpectedErrors(err, []string{"DnsGtmAccessStrategy.NotExists"}) {
+			return object, WrapErrorf(Error(GetNotFoundMessage("Alidns:DnsGtmAccessStrategy", id)), NotFoundWithResponse, response)
+		}
+		return object, WrapErrorf(err, DefaultErrorMsg, id, action, AlibabaCloudSdkGoERROR)
+	}
+	v, err := jsonpath.Get("$", response)
+	if err != nil {
+		return object, WrapErrorf(err, FailedGetAttributeMsg, id, "$", response)
+	}
+	object = v.(map[string]interface{})
+	return object, nil
+}
+
+func (s *AlidnsService) DescribeAlidnsMonitorConfig(id string) (object map[string]interface{}, err error) {
+	var response map[string]interface{}
+	conn, err := s.client.NewAlidnsClient()
+	if err != nil {
+		return nil, WrapError(err)
+	}
+	action := "DescribeDnsGtmMonitorConfig"
+	request := map[string]interface{}{
+		"MonitorConfigId": id,
+	}
+	runtime := util.RuntimeOptions{}
+	runtime.SetAutoretry(true)
+	wait := incrementalWait(3*time.Second, 3*time.Second)
+	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2015-01-09"), StringPointer("AK"), nil, request, &runtime)
+		if err != nil {
+			if NeedRetry(err) {
+				wait()
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
+		}
+		return nil
+	})
+	addDebug(action, response, request)
+	if err != nil {
+		return object, WrapErrorf(err, DefaultErrorMsg, id, action, AlibabaCloudSdkGoERROR)
+	}
+	v, err := jsonpath.Get("$", response)
+	if err != nil {
+		return object, WrapErrorf(err, FailedGetAttributeMsg, id, "$", response)
+	}
+	object = v.(map[string]interface{})
+	return object, nil
 }

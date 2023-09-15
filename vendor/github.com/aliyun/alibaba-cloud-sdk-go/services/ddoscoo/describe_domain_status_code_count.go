@@ -71,29 +71,29 @@ func (client *Client) DescribeDomainStatusCodeCountWithCallback(request *Describ
 // DescribeDomainStatusCodeCountRequest is the request struct for api DescribeDomainStatusCodeCount
 type DescribeDomainStatusCodeCountRequest struct {
 	*requests.RpcRequest
-	EndTime         requests.Integer `position:"Query" name:"EndTime"`
 	StartTime       requests.Integer `position:"Query" name:"StartTime"`
 	ResourceGroupId string           `position:"Query" name:"ResourceGroupId"`
 	SourceIp        string           `position:"Query" name:"SourceIp"`
+	EndTime         requests.Integer `position:"Query" name:"EndTime"`
 	Domain          string           `position:"Query" name:"Domain"`
 }
 
 // DescribeDomainStatusCodeCountResponse is the response struct for api DescribeDomainStatusCodeCount
 type DescribeDomainStatusCodeCountResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
-	Status2XX int64  `json:"Status2XX" xml:"Status2XX"`
-	Status501 int64  `json:"Status501" xml:"Status501"`
 	Status502 int64  `json:"Status502" xml:"Status502"`
-	Status503 int64  `json:"Status503" xml:"Status503"`
-	Status504 int64  `json:"Status504" xml:"Status504"`
-	Status200 int64  `json:"Status200" xml:"Status200"`
 	Status405 int64  `json:"Status405" xml:"Status405"`
-	Status5XX int64  `json:"Status5XX" xml:"Status5XX"`
+	Status3XX int64  `json:"Status3XX" xml:"Status3XX"`
+	Status503 int64  `json:"Status503" xml:"Status503"`
 	Status4XX int64  `json:"Status4XX" xml:"Status4XX"`
+	Status2XX int64  `json:"Status2XX" xml:"Status2XX"`
+	Status5XX int64  `json:"Status5XX" xml:"Status5XX"`
+	Status504 int64  `json:"Status504" xml:"Status504"`
+	RequestId string `json:"RequestId" xml:"RequestId"`
+	Status200 int64  `json:"Status200" xml:"Status200"`
 	Status403 int64  `json:"Status403" xml:"Status403"`
 	Status404 int64  `json:"Status404" xml:"Status404"`
-	Status3XX int64  `json:"Status3XX" xml:"Status3XX"`
+	Status501 int64  `json:"Status501" xml:"Status501"`
 }
 
 // CreateDescribeDomainStatusCodeCountRequest creates a request to invoke DescribeDomainStatusCodeCount API

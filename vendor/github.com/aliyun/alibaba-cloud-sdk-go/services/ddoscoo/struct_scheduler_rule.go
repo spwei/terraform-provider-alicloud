@@ -17,9 +17,9 @@ package ddoscoo
 
 // SchedulerRule is a nested struct in ddoscoo response
 type SchedulerRule struct {
-	RuleName string `json:"RuleName" xml:"RuleName"`
-	Cname    string `json:"Cname" xml:"Cname"`
 	RuleType string `json:"RuleType" xml:"RuleType"`
+	Cname    string `json:"Cname" xml:"Cname"`
+	RuleName string `json:"RuleName" xml:"RuleName"`
 	Param    Param  `json:"Param" xml:"Param"`
 	Rules    []Rule `json:"Rules" xml:"Rules"`
 }

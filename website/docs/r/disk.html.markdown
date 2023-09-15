@@ -11,13 +11,13 @@ description: |-
 
 Provides a ECS disk resource.
 
--> **DEPRECATED:** This resource has been renamed to [alicloud_ecs_disk](https://www.terraform.io/docs/providers/alicloud/r/ecs_disk.html) from version 1.122.0.
+-> **DEPRECATED:** This resource has been renamed to [alicloud_ecs_disk](https://www.terraform.io/docs/providers/alicloud/r/ecs_disk) from version 1.122.0.
 
 -> **NOTE:** One of `size` or `snapshot_id` is required when specifying an ECS disk. If all of them be specified, `size` must more than the size of snapshot which `snapshot_id` represents. Currently, `alicloud_disk` doesn't resize disk.
 
 ## Example Usage
 
-```
+```terraform
 # Create a new ECS disk.
 resource "alicloud_disk" "ecs_disk" {
   # cn-beijing
@@ -50,9 +50,9 @@ The following arguments are supported:
     * `PL3`: A single ESSD delivers up to 1,000,000 random read/write IOPS.
 * `tags` - (Optional) A mapping of tags to assign to the resource.
 * `encrypted` - (Optional, ForceNew) If true, the disk will be encrypted, conflict with `snapshot_id`.
-* `delete_auto_snapshot` - (Optional Available in 1.53.0+) Indicates whether the automatic snapshot is deleted when the disk is released. Default value: false.
-* `delete_with_instance` - (Optional Available in 1.53.0+) Indicates whether the disk is released together with the instance: Default value: false.
-* `enable_auto_snapshot` - (Optional Available in 1.53.0+) Indicates whether to apply a created automatic snapshot policy to the disk. Default value: false.
+* `delete_auto_snapshot` - (Optional, Available in 1.53.0+) Indicates whether the automatic snapshot is deleted when the disk is released. Default value: false.
+* `delete_with_instance` - (Optional, Available in 1.53.0+) Indicates whether the disk is released together with the instance: Default value: false.
+* `enable_auto_snapshot` - (Optional, Available in 1.53.0+) Indicates whether to apply a created automatic snapshot policy to the disk. Default value: false.
 * `resource_group_id` - (Optional, Available in 1.57.0+, Modifiable in 1.115.0+) The Id of resource group which the disk belongs.
 -> **NOTE:** Disk category `cloud` has been outdated and it only can be used none I/O Optimized ECS instances. Recommend `cloud_efficiency` and `cloud_ssd` disk.
 
@@ -67,6 +67,6 @@ The following attributes are exported:
 
 Cloud disk can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_disk.example d-abc12345678
 ```

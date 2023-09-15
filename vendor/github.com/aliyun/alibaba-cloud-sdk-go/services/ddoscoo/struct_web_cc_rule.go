@@ -17,11 +17,11 @@ package ddoscoo
 
 // WebCCRule is a nested struct in ddoscoo response
 type WebCCRule struct {
-	Name     string `json:"Name" xml:"Name"`
+	Ttl      int    `json:"Ttl" xml:"Ttl"`
 	Act      string `json:"Act" xml:"Act"`
-	Count    int    `json:"Count" xml:"Count"`
 	Interval int    `json:"Interval" xml:"Interval"`
 	Mode     string `json:"Mode" xml:"Mode"`
-	Ttl      int    `json:"Ttl" xml:"Ttl"`
+	Name     string `json:"Name" xml:"Name"`
 	Uri      string `json:"Uri" xml:"Uri"`
+	Count    int    `json:"Count" xml:"Count"`
 }

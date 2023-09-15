@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeAvailableResource invokes the adb.DescribeAvailableResource API synchronously
-// api document: https://help.aliyun.com/api/adb/describeavailableresource.html
 func (client *Client) DescribeAvailableResource(request *DescribeAvailableResourceRequest) (response *DescribeAvailableResourceResponse, err error) {
 	response = CreateDescribeAvailableResourceResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeAvailableResource(request *DescribeAvailableResour
 }
 
 // DescribeAvailableResourceWithChan invokes the adb.DescribeAvailableResource API asynchronously
-// api document: https://help.aliyun.com/api/adb/describeavailableresource.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeAvailableResourceWithChan(request *DescribeAvailableResourceRequest) (<-chan *DescribeAvailableResourceResponse, <-chan error) {
 	responseChan := make(chan *DescribeAvailableResourceResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeAvailableResourceWithChan(request *DescribeAvailab
 }
 
 // DescribeAvailableResourceWithCallback invokes the adb.DescribeAvailableResource API asynchronously
-// api document: https://help.aliyun.com/api/adb/describeavailableresource.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeAvailableResourceWithCallback(request *DescribeAvailableResourceRequest, callback func(response *DescribeAvailableResourceResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -79,6 +74,7 @@ type DescribeAvailableResourceRequest struct {
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
+	DBClusterVersion     string           `position:"Query" name:"DBClusterVersion"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 	AcceptLanguage       string           `position:"Query" name:"AcceptLanguage"`
 	ZoneId               string           `position:"Query" name:"ZoneId"`
@@ -88,8 +84,8 @@ type DescribeAvailableResourceRequest struct {
 // DescribeAvailableResourceResponse is the response struct for api DescribeAvailableResource
 type DescribeAvailableResourceResponse struct {
 	*responses.BaseResponse
-	RequestId         string          `json:"RequestId" xml:"RequestId"`
 	RegionId          string          `json:"RegionId" xml:"RegionId"`
+	RequestId         string          `json:"RequestId" xml:"RequestId"`
 	AvailableZoneList []AvailableZone `json:"AvailableZoneList" xml:"AvailableZoneList"`
 }
 

@@ -80,8 +80,8 @@ type DetachSceneDefenseObjectRequest struct {
 // DetachSceneDefenseObjectResponse is the response struct for api DetachSceneDefenseObject
 type DetachSceneDefenseObjectResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
 	Success   bool   `json:"Success" xml:"Success"`
+	RequestId string `json:"RequestId" xml:"RequestId"`
 }
 
 // CreateDetachSceneDefenseObjectRequest creates a request to invoke DetachSceneDefenseObject API

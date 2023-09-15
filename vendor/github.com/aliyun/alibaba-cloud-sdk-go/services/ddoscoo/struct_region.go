@@ -17,6 +17,6 @@ package ddoscoo
 
 // Region is a nested struct in ddoscoo response
 type Region struct {
-	Block  int    `json:"Block" xml:"Block"`
 	Region string `json:"Region" xml:"Region"`
+	Block  int    `json:"Block" xml:"Block"`
 }

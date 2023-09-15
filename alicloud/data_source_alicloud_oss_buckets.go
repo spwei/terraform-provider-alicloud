@@ -286,12 +286,16 @@ func dataSourceAlicloudOssBucketsRead(d *schema.ResourceData, meta interface{}) 
 	var filteredBucketsTemp []oss.BucketProperties
 	nameRegex, ok := d.GetOk("name_regex")
 	if ok && nameRegex.(string) != "" {
-		var r *regexp.Regexp
+		var ossBucketNameRegex *regexp.Regexp
 		if nameRegex != "" {
-			r = regexp.MustCompile(nameRegex.(string))
+			r, err := regexp.Compile(nameRegex.(string))
+			if err != nil {
+				return WrapError(err)
+			}
+			ossBucketNameRegex = r
 		}
 		for _, bucket := range allBuckets {
-			if r != nil && !r.MatchString(bucket.Name) {
+			if ossBucketNameRegex != nil && !ossBucketNameRegex.MatchString(bucket.Name) {
 				continue
 			}
 			filteredBucketsTemp = append(filteredBucketsTemp, bucket)
@@ -480,17 +484,19 @@ func bucketsDescriptionAttributes(d *schema.ResourceData, buckets []oss.BucketPr
 
 					// Expiration
 					expirationMapping := make(map[string]interface{})
-					if lifecycleRule.Expiration.Date != "" {
-						t, err := time.Parse("2006-01-02T15:04:05.000Z", lifecycleRule.Expiration.Date)
-						if err != nil {
-							return WrapError(err)
+					if lifecycleRule.Expiration != nil {
+						if len(lifecycleRule.Expiration.Date) > 0 {
+							t, err := time.Parse("2006-01-02T15:04:05.000Z", lifecycleRule.Expiration.Date)
+							if err != nil {
+								return WrapError(err)
+							}
+							expirationMapping["date"] = t.Format("2006-01-02")
 						}
-						expirationMapping["date"] = t.Format("2006-01-02")
+						if &lifecycleRule.Expiration.Days != nil {
+							expirationMapping["days"] = int(lifecycleRule.Expiration.Days)
+						}
+						ruleMapping["expiration"] = []map[string]interface{}{expirationMapping}
 					}
-					if &lifecycleRule.Expiration.Days != nil {
-						expirationMapping["days"] = int(lifecycleRule.Expiration.Days)
-					}
-					ruleMapping["expiration"] = []map[string]interface{}{expirationMapping}
 					lifecycleRuleMappings = append(lifecycleRuleMappings, ruleMapping)
 				}
 			}

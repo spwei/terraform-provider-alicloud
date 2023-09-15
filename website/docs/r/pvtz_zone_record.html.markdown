@@ -17,17 +17,17 @@ Provides a Private Zone Record resource.
 
 Basic Usage
 
-```
+```terraform
 resource "alicloud_pvtz_zone" "zone" {
   name = "foo.test.com"
 }
 
 resource "alicloud_pvtz_zone_record" "foo" {
-  zone_id         = alicloud_pvtz_zone.zone.id
-  rr              = "www"
-  type            = "CNAME"
-  value           = "bbb.test.com"
-  ttl             = 60
+  zone_id = alicloud_pvtz_zone.zone.id
+  rr      = "www"
+  type    = "CNAME"
+  value   = "bbb.test.com"
+  ttl     = 60
 }
 ```
 ## Argument Reference
@@ -36,7 +36,7 @@ The following arguments are supported:
 
 * `zone_id` - (Required, ForceNew) The name of the Private Zone Record.
 * `lang` - (Optional, Available in 1.109.0+) User language.
-* `resource_record` - (Optional, ForceNew, Deprecated in v1.109.0+) The resource record of the Private Zone Record.
+* `resource_record` - (Optional, ForceNew, Deprecated from v1.109.0+) The resource record of the Private Zone Record.
 * `rr` - (Optional, ForceNew) The rr of the Private Zone Record.
 * `type` - (Required) The type of the Private Zone Record. Valid values: A, CNAME, TXT, MX, PTR, SRV.
 * `value` - (Required) The value of the Private Zone Record.
@@ -68,7 +68,7 @@ The following attributes are exported:
 
 Private Zone Record can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_pvtz_zone_record.example abc123456
 ```
 

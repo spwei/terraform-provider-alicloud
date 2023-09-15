@@ -36,7 +36,7 @@ func testSweepEdasCluster(region string) error {
 
 	prefixes := []string{
 		"tf-testAcc",
-		"tf-testacc",
+		"tf_testAcc",
 	}
 
 	clusterListRq := edas.CreateListClusterRequest()
@@ -47,26 +47,30 @@ func testSweepEdasCluster(region string) error {
 	})
 	if err != nil {
 		log.Printf("[ERROR] Failed to retrieve edas cluster in service list: %s", err)
+		return nil
 	}
 
 	listClusterResponse, _ := raw.(*edas.ListClusterResponse)
 	if listClusterResponse.Code != 200 {
 		log.Printf("[ERROR] Failed to retrieve edas cluster in service list: %s", listClusterResponse)
+		return nil
 	}
 
 	for _, v := range listClusterResponse.ClusterList.Cluster {
 		name := v.ClusterName
 		skip := true
-		for _, prefix := range prefixes {
-			if strings.HasPrefix(strings.ToLower(name), strings.ToLower(prefix)) {
-				skip = false
-				break
+		if !sweepAll() {
+			for _, prefix := range prefixes {
+				if strings.HasPrefix(strings.ToLower(name), strings.ToLower(prefix)) {
+					skip = false
+					break
+				}
 			}
-		}
 
-		if skip {
-			log.Printf("[INFO] Skipping edas cluster: %s", name)
-			continue
+			if skip {
+				log.Printf("[INFO] Skipping edas cluster: %s", name)
+				continue
+			}
 		}
 		log.Printf("[INFO] delete edas cluster: %s", name)
 
@@ -74,13 +78,13 @@ func testSweepEdasCluster(region string) error {
 		deleteClusterRq.RegionId = region
 		deleteClusterRq.ClusterId = v.ClusterId
 
-		err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+		err = resource.Retry(1*time.Minute, func() *resource.RetryError {
 			raw, err := edasService.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
 				return edasClient.DeleteCluster(deleteClusterRq)
 			})
 			if err != nil {
 				if IsExpectedErrors(err, []string{ThrottlingUser}) {
-					time.Sleep(10 * time.Second)
+					time.Sleep(5 * time.Second)
 					return resource.RetryableError(err)
 				}
 				return resource.NonRetryableError(err)
@@ -130,7 +134,8 @@ func TestAccAlicloudEdasCluster_basic(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"cluster_name": "${var.name}",
 					"cluster_type": "2",
-					"network_mode": "1",
+					"network_mode": "2",
+					"vpc_id":       "${data.alicloud_vpcs.default.ids.0}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -198,7 +203,8 @@ func TestAccAlicloudEdasCluster_multi(t *testing.T) {
 					"count":        "2",
 					"cluster_name": "${var.name}-${count.index}",
 					"cluster_type": "2",
-					"network_mode": "1",
+					"network_mode": "2",
+					"vpc_id":       "${data.alicloud_vpcs.default.ids.0}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
@@ -255,6 +261,10 @@ func resourceEdasClusterConfigDependence(name string) string {
 	return fmt.Sprintf(`
 		variable "name" {
 		  default = "%v"
+		}
+
+		data "alicloud_vpcs" "default" {
+			name_regex = "^default-NODELETING$"
 		}
 		`, name)
 }

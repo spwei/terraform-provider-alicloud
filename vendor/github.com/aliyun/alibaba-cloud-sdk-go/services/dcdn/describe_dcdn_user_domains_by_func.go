@@ -71,11 +71,12 @@ func (client *Client) DescribeDcdnUserDomainsByFuncWithCallback(request *Describ
 // DescribeDcdnUserDomainsByFuncRequest is the request struct for api DescribeDcdnUserDomainsByFunc
 type DescribeDcdnUserDomainsByFuncRequest struct {
 	*requests.RpcRequest
-	PageNumber      requests.Integer `position:"Query" name:"PageNumber"`
+	FuncFilter      string           `position:"Query" name:"FuncFilter"`
 	ResourceGroupId string           `position:"Query" name:"ResourceGroupId"`
+	DomainName      string           `position:"Query" name:"DomainName"`
 	PageSize        requests.Integer `position:"Query" name:"PageSize"`
-	OwnerId         requests.Integer `position:"Query" name:"OwnerId"`
 	FuncId          requests.Integer `position:"Query" name:"FuncId"`
+	PageNumber      requests.Integer `position:"Query" name:"PageNumber"`
 }
 
 // DescribeDcdnUserDomainsByFuncResponse is the response struct for api DescribeDcdnUserDomainsByFunc

@@ -79,8 +79,8 @@ type CreateInstanceRequest struct {
 	OwnerId          requests.Integer           `position:"Query" name:"OwnerId"`
 	ProductType      string                     `position:"Query" name:"ProductType"`
 	RenewPeriod      requests.Integer           `position:"Query" name:"RenewPeriod"`
-	Parameter        *[]CreateInstanceParameter `position:"Query" name:"Parameter"  type:"Repeated"`
 	RenewalStatus    string                     `position:"Query" name:"RenewalStatus"`
+	Parameter        *[]CreateInstanceParameter `position:"Query" name:"Parameter"  type:"Repeated"`
 }
 
 // CreateInstanceParameter is a repeated param struct in CreateInstanceRequest
@@ -92,10 +92,10 @@ type CreateInstanceParameter struct {
 // CreateInstanceResponse is the response struct for api CreateInstance
 type CreateInstanceResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
-	Success   bool   `json:"Success" xml:"Success"`
 	Code      string `json:"Code" xml:"Code"`
 	Message   string `json:"Message" xml:"Message"`
+	RequestId string `json:"RequestId" xml:"RequestId"`
+	Success   bool   `json:"Success" xml:"Success"`
 	Data      Data   `json:"Data" xml:"Data"`
 }
 
@@ -104,7 +104,7 @@ func CreateCreateInstanceRequest() (request *CreateInstanceRequest) {
 	request = &CreateInstanceRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "CreateInstance", "", "")
+	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "CreateInstance", "bssopenapi", "openAPI")
 	request.Method = requests.POST
 	return
 }

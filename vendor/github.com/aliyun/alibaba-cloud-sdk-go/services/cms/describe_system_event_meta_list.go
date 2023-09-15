@@ -76,10 +76,10 @@ type DescribeSystemEventMetaListRequest struct {
 // DescribeSystemEventMetaListResponse is the response struct for api DescribeSystemEventMetaList
 type DescribeSystemEventMetaListResponse struct {
 	*responses.BaseResponse
-	RequestId string                            `json:"RequestId" xml:"RequestId"`
-	Success   bool                              `json:"Success" xml:"Success"`
 	Code      int                               `json:"Code" xml:"Code"`
 	Message   string                            `json:"Message" xml:"Message"`
+	RequestId string                            `json:"RequestId" xml:"RequestId"`
+	Success   bool                              `json:"Success" xml:"Success"`
 	Data      DataInDescribeSystemEventMetaList `json:"Data" xml:"Data"`
 }
 

@@ -17,8 +17,8 @@ package ddoscoo
 
 // NetworkRuleAttribute is a nested struct in ddoscoo response
 type NetworkRuleAttribute struct {
+	FrontendPort int    `json:"FrontendPort" xml:"FrontendPort"`
 	InstanceId   string `json:"InstanceId" xml:"InstanceId"`
 	Protocol     string `json:"Protocol" xml:"Protocol"`
-	FrontendPort int    `json:"FrontendPort" xml:"FrontendPort"`
 	Config       Config `json:"Config" xml:"Config"`
 }

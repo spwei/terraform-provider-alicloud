@@ -1,5 +1,5 @@
 ---
-subcategory: "VPN"
+subcategory: "VPN Gateway"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_vpn_gateways"
 sidebar_current: "docs-alicloud-datasource-vpn-gateways"
@@ -13,16 +13,16 @@ The VPNs data source lists a number of VPNs resource information owned by an Ali
 
 ## Example Usage
 
-```
+```terraform
 data "alicloud_vpn_gateways" "vpn_gateways" {
-  vpc_id          = "fake-vpc-id"
-  ids             = ["fake-vpn-id1", "fake-vpn-id2"]
-  status          = "active"
-  business_status = "Normal"
-  name_regex      = "testAcc*"
-  output_file     = "/tmp/vpns"
+  vpc_id                   = "fake-vpc-id"
+  ids                      = ["fake-vpn-id1", "fake-vpn-id2"]
+  status                   = "Active"
+  business_status          = "Normal"
+  name_regex               = "testAcc*"
+  include_reservation_data = true
+  output_file              = "/tmp/vpns"
 }
-
 ```
 
 ## Argument Reference
@@ -35,6 +35,8 @@ The following arguments are supported:
 * `business_status` - (Optional) Limit search to specific business status - valid value is "Normal", "FinancialLocked".
 * `name_regex` - (Optional) A regex string of VPN name.
 * `output_file` - (Optional) Save the result to the file.
+* `enable_ipsec` - (Optional, Available 1.161.0+, has been deprecated from provider version 1.193.0, it will be removed in the future version.) Indicates whether the IPsec-VPN feature is enabled.
+* `include_reservation_data` - (Optional, Available 1.193.0+) Include ineffective ordering data.
 
 ## Attributes Reference
 
@@ -57,3 +59,5 @@ The following attributes are exported:
   * `enable_ipsec` - Whether the ipsec function is enabled.
   * `enable_ssl` - Whether the ssl function is enabled.
   * `ssl_connections` - Total count of ssl vpn connections.
+  * `network_type` - The network type of the VPN gateway.
+  * `auto_propagate` - Whether to automatically propagate BGP routes to the VPC. Valid values: `true`, `false`.

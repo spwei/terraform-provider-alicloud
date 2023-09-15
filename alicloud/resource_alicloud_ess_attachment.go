@@ -1,10 +1,7 @@
 package alicloud
 
 import (
-	"fmt"
 	"time"
-
-	"reflect"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ess"
 	"github.com/aliyun/terraform-provider-alicloud/alicloud/connectivity"
@@ -79,13 +76,9 @@ func resourceAliyunEssAttachmentUpdate(d *schema.ResourceData, meta interface{})
 			request := ess.CreateAttachInstancesRequest()
 			request.RegionId = client.RegionId
 			request.ScalingGroupId = d.Id()
-			s := reflect.ValueOf(request).Elem()
+			request.InstanceId = &add
 
 			err := resource.Retry(5*time.Minute, func() *resource.RetryError {
-				for i, id := range add {
-					s.FieldByName(fmt.Sprintf("InstanceId%d", i+1)).Set(reflect.ValueOf(id))
-				}
-
 				raw, err := client.WithEssClient(func(essClient *ess.Client) (interface{}, error) {
 					return essClient.AttachInstances(request)
 				})
@@ -112,7 +105,7 @@ func resourceAliyunEssAttachmentUpdate(d *schema.ResourceData, meta interface{})
 
 						if len(autoAdded) > 0 {
 							if d.Get("force").(bool) {
-								if err := essService.EssRemoveInstances(d.Id(), autoAdded); err != nil {
+								if err := essService.EssRemoveInstances(client, d, d.Id(), autoAdded); err != nil {
 									return resource.NonRetryableError(WrapError(err))
 								}
 								time.Sleep(5)
@@ -163,7 +156,20 @@ func resourceAliyunEssAttachmentUpdate(d *schema.ResourceData, meta interface{})
 			}
 		}
 		if len(remove) > 0 {
-			if err := essService.EssRemoveInstances(d.Id(), convertArrayInterfaceToArrayString(remove)); err != nil {
+
+			err := resource.Retry(1*time.Minute, func() *resource.RetryError {
+				if err := essService.EssRemoveInstances(client, d, d.Id(), convertArrayInterfaceToArrayString(remove)); err != nil {
+					if IsExpectedErrors(err, []string{"InvalidOperation.Conflict", "ScalingActivityInProgress", "IncorrectScalingGroupStatus"}) {
+						time.Sleep(5 * time.Second)
+						return resource.RetryableError(WrapErrorf(err, DefaultErrorMsg, d.Id(), "DetachInstances", AlibabaCloudSdkGoERROR))
+					}
+					return resource.NonRetryableError(WrapError(err))
+				}
+
+				return nil
+			})
+
+			if err != nil {
 				return WrapError(err)
 			}
 		}
@@ -245,8 +251,8 @@ func resourceAliyunEssAttachmentDelete(d *schema.ResourceData, meta interface{})
 						"Please shorten scaling group min size and try again.", len(removed), object.MinSize)))
 				}
 			}
-			if IsExpectedErrors(err, []string{"ScalingActivityInProgress", "IncorrectScalingGroupStatus"}) {
-				time.Sleep(5)
+			if IsExpectedErrors(err, []string{"InvalidOperation.Conflict", "ScalingActivityInProgress", "IncorrectScalingGroupStatus"}) {
+				time.Sleep(5 * time.Second)
 				return resource.RetryableError(WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabaCloudSdkGoERROR))
 			}
 			if IsExpectedErrors(err, []string{"InvalidScalingGroupId.NotFound"}) {
@@ -263,6 +269,14 @@ func resourceAliyunEssAttachmentDelete(d *schema.ResourceData, meta interface{})
 			}
 			return resource.NonRetryableError(WrapError(err))
 		}
+
+		response, _ := raw.(*ess.RemoveInstancesResponse)
+		essService := EssService{client}
+		stateConf := BuildStateConf([]string{}, []string{"Successful"}, d.Timeout(schema.TimeoutCreate), 1*time.Minute, essService.ActivityStateRefreshFunc(response.ScalingActivityId, []string{"Failed", "Rejected"}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return resource.NonRetryableError(WrapError(err))
+		}
+
 		if len(instances) > 0 {
 			removed = make([]string, 0)
 			for _, inst := range instances {

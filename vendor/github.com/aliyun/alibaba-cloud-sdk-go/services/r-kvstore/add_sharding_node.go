@@ -75,6 +75,7 @@ type AddShardingNodeRequest struct {
 	ClientToken          string           `position:"Query" name:"ClientToken"`
 	CouponNo             string           `position:"Query" name:"CouponNo"`
 	SecurityToken        string           `position:"Query" name:"SecurityToken"`
+	SourceBiz            string           `position:"Query" name:"SourceBiz"`
 	ShardCount           requests.Integer `position:"Query" name:"ShardCount"`
 	BusinessInfo         string           `position:"Query" name:"BusinessInfo"`
 	AutoPay              requests.Boolean `position:"Query" name:"AutoPay"`
@@ -82,7 +83,6 @@ type AddShardingNodeRequest struct {
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 	InstanceId           string           `position:"Query" name:"InstanceId"`
-	ShardClass           string           `position:"Query" name:"ShardClass"`
 }
 
 // AddShardingNodeResponse is the response struct for api AddShardingNode

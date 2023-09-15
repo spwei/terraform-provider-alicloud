@@ -71,28 +71,28 @@ func (client *Client) ScaleoutApplicationWithNewInstancesWithCallback(request *S
 // ScaleoutApplicationWithNewInstancesRequest is the request struct for api ScaleoutApplicationWithNewInstances
 type ScaleoutApplicationWithNewInstancesRequest struct {
 	*requests.RoaRequest
-	AutoRenewPeriod          requests.Integer `position:"Query" name:"AutoRenewPeriod"`
-	TemplateInstanceId       string           `position:"Query" name:"TemplateInstanceId"`
-	GroupId                  string           `position:"Query" name:"GroupId"`
-	InstanceChargePeriodUnit string           `position:"Query" name:"InstanceChargePeriodUnit"`
-	ClusterId                string           `position:"Query" name:"ClusterId"`
-	ScalingNum               requests.Integer `position:"Query" name:"ScalingNum"`
-	TemplateId               string           `position:"Query" name:"TemplateId"`
-	ScalingPolicy            string           `position:"Query" name:"ScalingPolicy"`
-	TemplateVersion          string           `position:"Query" name:"TemplateVersion"`
-	AutoRenew                requests.Boolean `position:"Query" name:"AutoRenew"`
-	AppId                    string           `position:"Query" name:"AppId"`
-	InstanceChargePeriod     requests.Integer `position:"Query" name:"InstanceChargePeriod"`
-	InstanceChargeType       string           `position:"Query" name:"InstanceChargeType"`
+	AutoRenewPeriod          string `position:"Query" name:"AutoRenewPeriod"`
+	TemplateInstanceId       string `position:"Query" name:"TemplateInstanceId"`
+	GroupId                  string `position:"Query" name:"GroupId"`
+	InstanceChargePeriodUnit string `position:"Query" name:"InstanceChargePeriodUnit"`
+	ClusterId                string `position:"Query" name:"ClusterId"`
+	ScalingNum               string `position:"Query" name:"ScalingNum"`
+	TemplateId               string `position:"Query" name:"TemplateId"`
+	ScalingPolicy            string `position:"Query" name:"ScalingPolicy"`
+	TemplateVersion          string `position:"Query" name:"TemplateVersion"`
+	AutoRenew                string `position:"Query" name:"AutoRenew"`
+	AppId                    string `position:"Query" name:"AppId"`
+	InstanceChargePeriod     string `position:"Query" name:"InstanceChargePeriod"`
+	InstanceChargeType       string `position:"Query" name:"InstanceChargeType"`
 }
 
 // ScaleoutApplicationWithNewInstancesResponse is the response struct for api ScaleoutApplicationWithNewInstances
 type ScaleoutApplicationWithNewInstancesResponse struct {
 	*responses.BaseResponse
-	RequestId     string   `json:"RequestId" xml:"RequestId"`
+	ChangeOrderId string   `json:"ChangeOrderId" xml:"ChangeOrderId"`
 	Code          int      `json:"Code" xml:"Code"`
 	Message       string   `json:"Message" xml:"Message"`
-	ChangeOrderId string   `json:"ChangeOrderId" xml:"ChangeOrderId"`
+	RequestId     string   `json:"RequestId" xml:"RequestId"`
 	InstanceIds   []string `json:"InstanceIds" xml:"InstanceIds"`
 }
 

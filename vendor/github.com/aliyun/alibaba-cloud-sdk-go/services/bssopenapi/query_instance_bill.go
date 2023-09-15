@@ -88,11 +88,11 @@ type QueryInstanceBillRequest struct {
 // QueryInstanceBillResponse is the response struct for api QueryInstanceBill
 type QueryInstanceBillResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
-	Success   bool   `json:"Success" xml:"Success"`
-	Code      string `json:"Code" xml:"Code"`
-	Message   string `json:"Message" xml:"Message"`
-	Data      Data   `json:"Data" xml:"Data"`
+	Code      string                  `json:"Code" xml:"Code"`
+	Message   string                  `json:"Message" xml:"Message"`
+	RequestId string                  `json:"RequestId" xml:"RequestId"`
+	Success   bool                    `json:"Success" xml:"Success"`
+	Data      DataInQueryInstanceBill `json:"Data" xml:"Data"`
 }
 
 // CreateQueryInstanceBillRequest creates a request to invoke QueryInstanceBill API
@@ -100,7 +100,7 @@ func CreateQueryInstanceBillRequest() (request *QueryInstanceBillRequest) {
 	request = &QueryInstanceBillRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "QueryInstanceBill", "", "")
+	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "QueryInstanceBill", "bssopenapi", "openAPI")
 	request.Method = requests.POST
 	return
 }

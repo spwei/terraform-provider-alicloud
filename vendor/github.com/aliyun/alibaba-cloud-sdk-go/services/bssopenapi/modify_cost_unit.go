@@ -84,9 +84,9 @@ type ModifyCostUnitUnitEntityList struct {
 // ModifyCostUnitResponse is the response struct for api ModifyCostUnit
 type ModifyCostUnitResponse struct {
 	*responses.BaseResponse
-	RequestId string     `json:"RequestId" xml:"RequestId"`
-	Message   string     `json:"Message" xml:"Message"`
 	Code      string     `json:"Code" xml:"Code"`
+	Message   string     `json:"Message" xml:"Message"`
+	RequestId string     `json:"RequestId" xml:"RequestId"`
 	Success   bool       `json:"Success" xml:"Success"`
 	Data      []DataItem `json:"Data" xml:"Data"`
 }
@@ -96,7 +96,7 @@ func CreateModifyCostUnitRequest() (request *ModifyCostUnitRequest) {
 	request = &ModifyCostUnitRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "ModifyCostUnit", "", "")
+	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "ModifyCostUnit", "bssopenapi", "openAPI")
 	request.Method = requests.POST
 	return
 }

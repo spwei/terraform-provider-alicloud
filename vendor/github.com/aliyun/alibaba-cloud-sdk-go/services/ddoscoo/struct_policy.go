@@ -17,12 +17,12 @@ package ddoscoo
 
 // Policy is a nested struct in ddoscoo response
 type Policy struct {
-	Name            string   `json:"Name" xml:"Name"`
 	StartTime       int64    `json:"StartTime" xml:"StartTime"`
+	Name            string   `json:"Name" xml:"Name"`
 	NewValue        string   `json:"NewValue" xml:"NewValue"`
 	Status          int      `json:"Status" xml:"Status"`
-	PolicyId        string   `json:"PolicyId" xml:"PolicyId"`
 	Done            int      `json:"Done" xml:"Done"`
+	PolicyId        string   `json:"PolicyId" xml:"PolicyId"`
 	OldValue        string   `json:"oldValue" xml:"oldValue"`
 	Template        string   `json:"Template" xml:"Template"`
 	PolicyType      int      `json:"PolicyType" xml:"PolicyType"`

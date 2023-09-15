@@ -79,8 +79,8 @@ type DescribeWebAccessLogEmptyCountRequest struct {
 // DescribeWebAccessLogEmptyCountResponse is the response struct for api DescribeWebAccessLogEmptyCount
 type DescribeWebAccessLogEmptyCountResponse struct {
 	*responses.BaseResponse
-	RequestId      string `json:"RequestId" xml:"RequestId"`
 	AvailableCount int    `json:"AvailableCount" xml:"AvailableCount"`
+	RequestId      string `json:"RequestId" xml:"RequestId"`
 }
 
 // CreateDescribeWebAccessLogEmptyCountRequest creates a request to invoke DescribeWebAccessLogEmptyCount API

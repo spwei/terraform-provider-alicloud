@@ -17,8 +17,8 @@ package ddoscoo
 
 // HealthCheckItem is a nested struct in ddoscoo response
 type HealthCheckItem struct {
+	FrontendPort int         `json:"FrontendPort" xml:"FrontendPort"`
 	InstanceId   string      `json:"InstanceId" xml:"InstanceId"`
 	Protocol     string      `json:"Protocol" xml:"Protocol"`
-	FrontendPort int         `json:"FrontendPort" xml:"FrontendPort"`
 	HealthCheck  HealthCheck `json:"HealthCheck" xml:"HealthCheck"`
 }

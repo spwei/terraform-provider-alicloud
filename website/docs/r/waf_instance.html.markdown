@@ -17,8 +17,10 @@ For information about WAF and how to use it, see [What is Alibaba Cloud WAF](htt
 
 ## Example Usage
 
-```
+```terraform
+data "alicloud_waf_instances" "default" {}
 resource "alicloud_waf_instance" "default" {
+  count                = length(data.alicloud_waf_instances.default.instances) > 0 ? 0 : 1
   big_screen           = "0"
   exclusive_ip_package = "1"
   ext_bandwidth        = "50"
@@ -57,6 +59,7 @@ The following arguments are supported:
     * AutoRenewal: The service time of WAF is renewed automatically.
     * ManualRenewal (default): The service time of WAF is renewed manually.Specifies whether to configure a Layer-7 proxy, such as Anti-DDoS Pro or CDN, to filter the inbound traffic before it is forwarded to WAF. Valid values: "On" and "Off". Default to "Off".
 * `resource_group_id` - (Optional) The resource group ID.
+* `region` - (Optional, Available in 1.139.0+) The instance region ID.
 * `subscription_type` - (Required, String) Subscription of WAF service. Valid values: ["Subscription", "PayAsYouGo"].
 * `waf_log` - (Required, String) Specify whether Log service is supported. Valid values: ["true", "false"]                                           
 			
@@ -71,6 +74,6 @@ The following attributes are exported:
 
 WAF instance can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_waf_instance.default waf-cn-132435
 ```

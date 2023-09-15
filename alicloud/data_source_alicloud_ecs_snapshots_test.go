@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 )
 
-func TestAccAlicloudEcsSnapshotsDataSource(t *testing.T) {
+func TestAccAlicloudECSSnapshotsDataSource(t *testing.T) {
 	rand := acctest.RandInt()
 	name := fmt.Sprintf("tf-testAcc%d", rand)
 	idsConf := dataSourceTestAccConfig{
@@ -185,13 +185,12 @@ data "alicloud_zones" default {
 }
 
 data "alicloud_instance_types" "default" {
-	availability_zone = "${data.alicloud_zones.default.zones.0.id}"
-  	cpu_core_count    = 1
-	memory_size       = 2
+  availability_zone = "${data.alicloud_zones.default.zones.0.id}"
+  instance_type_family = "ecs.sn1ne"
 }
 
 data "alicloud_vpcs" "default" {
-	is_default = true
+  name_regex = "^default-NODELETING$"
 }
 
 data "alicloud_vswitches" "default" {

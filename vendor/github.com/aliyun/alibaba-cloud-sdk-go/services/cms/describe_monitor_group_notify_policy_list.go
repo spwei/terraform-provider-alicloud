@@ -82,9 +82,9 @@ type DescribeMonitorGroupNotifyPolicyListResponse struct {
 	*responses.BaseResponse
 	Code             string           `json:"Code" xml:"Code"`
 	Message          string           `json:"Message" xml:"Message"`
-	Success          string           `json:"Success" xml:"Success"`
 	RequestId        string           `json:"RequestId" xml:"RequestId"`
 	Total            int              `json:"Total" xml:"Total"`
+	Success          string           `json:"Success" xml:"Success"`
 	NotifyPolicyList NotifyPolicyList `json:"NotifyPolicyList" xml:"NotifyPolicyList"`
 }
 

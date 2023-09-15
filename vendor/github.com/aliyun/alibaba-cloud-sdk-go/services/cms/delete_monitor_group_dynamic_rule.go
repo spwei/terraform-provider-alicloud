@@ -78,10 +78,10 @@ type DeleteMonitorGroupDynamicRuleRequest struct {
 // DeleteMonitorGroupDynamicRuleResponse is the response struct for api DeleteMonitorGroupDynamicRule
 type DeleteMonitorGroupDynamicRuleResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
-	Success   bool   `json:"Success" xml:"Success"`
 	Code      int    `json:"Code" xml:"Code"`
 	Message   string `json:"Message" xml:"Message"`
+	RequestId string `json:"RequestId" xml:"RequestId"`
+	Success   bool   `json:"Success" xml:"Success"`
 }
 
 // CreateDeleteMonitorGroupDynamicRuleRequest creates a request to invoke DeleteMonitorGroupDynamicRule API

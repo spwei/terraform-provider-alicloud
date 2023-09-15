@@ -76,7 +76,6 @@ type QuerySavingsPlansDeductLogRequest struct {
 	Locale       string           `position:"Query" name:"Locale"`
 	PageNum      requests.Integer `position:"Query" name:"PageNum"`
 	InstanceId   string           `position:"Query" name:"InstanceId"`
-	RequestId    string           `position:"Query" name:"RequestId"`
 	PageSize     requests.Integer `position:"Query" name:"PageSize"`
 	InstanceType string           `position:"Query" name:"InstanceType"`
 }
@@ -85,9 +84,9 @@ type QuerySavingsPlansDeductLogRequest struct {
 type QuerySavingsPlansDeductLogResponse struct {
 	*responses.BaseResponse
 	Code      string                           `json:"Code" xml:"Code"`
+	Message   string                           `json:"Message" xml:"Message"`
 	RequestId string                           `json:"RequestId" xml:"RequestId"`
 	Success   bool                             `json:"Success" xml:"Success"`
-	Message   string                           `json:"Message" xml:"Message"`
 	Data      DataInQuerySavingsPlansDeductLog `json:"Data" xml:"Data"`
 }
 
@@ -96,7 +95,7 @@ func CreateQuerySavingsPlansDeductLogRequest() (request *QuerySavingsPlansDeduct
 	request = &QuerySavingsPlansDeductLogRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "QuerySavingsPlansDeductLog", "", "")
+	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "QuerySavingsPlansDeductLog", "bssopenapi", "openAPI")
 	request.Method = requests.POST
 	return
 }

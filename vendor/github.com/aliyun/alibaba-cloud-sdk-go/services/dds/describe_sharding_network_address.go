@@ -83,9 +83,9 @@ type DescribeShardingNetworkAddressRequest struct {
 // DescribeShardingNetworkAddressResponse is the response struct for api DescribeShardingNetworkAddress
 type DescribeShardingNetworkAddressResponse struct {
 	*responses.BaseResponse
-	RequestId             string                `json:"RequestId" xml:"RequestId"`
-	NetworkAddresses      NetworkAddresses      `json:"NetworkAddresses" xml:"NetworkAddresses"`
-	CompatibleConnections CompatibleConnections `json:"CompatibleConnections" xml:"CompatibleConnections"`
+	RequestId             string                                           `json:"RequestId" xml:"RequestId"`
+	CompatibleConnections CompatibleConnections                            `json:"CompatibleConnections" xml:"CompatibleConnections"`
+	NetworkAddresses      NetworkAddressesInDescribeShardingNetworkAddress `json:"NetworkAddresses" xml:"NetworkAddresses"`
 }
 
 // CreateDescribeShardingNetworkAddressRequest creates a request to invoke DescribeShardingNetworkAddress API
@@ -93,7 +93,7 @@ func CreateDescribeShardingNetworkAddressRequest() (request *DescribeShardingNet
 	request = &DescribeShardingNetworkAddressRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("Dds", "2015-12-01", "DescribeShardingNetworkAddress", "Dds", "openAPI")
+	request.InitWithApiInfo("Dds", "2015-12-01", "DescribeShardingNetworkAddress", "dds", "openAPI")
 	request.Method = requests.POST
 	return
 }

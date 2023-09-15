@@ -80,11 +80,11 @@ type DescribePricingModuleRequest struct {
 // DescribePricingModuleResponse is the response struct for api DescribePricingModule
 type DescribePricingModuleResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
-	Success   bool   `json:"Success" xml:"Success"`
-	Code      string `json:"Code" xml:"Code"`
-	Message   string `json:"Message" xml:"Message"`
-	Data      Data   `json:"Data" xml:"Data"`
+	Code      string                      `json:"Code" xml:"Code"`
+	Message   string                      `json:"Message" xml:"Message"`
+	RequestId string                      `json:"RequestId" xml:"RequestId"`
+	Success   bool                        `json:"Success" xml:"Success"`
+	Data      DataInDescribePricingModule `json:"Data" xml:"Data"`
 }
 
 // CreateDescribePricingModuleRequest creates a request to invoke DescribePricingModule API
@@ -92,7 +92,7 @@ func CreateDescribePricingModuleRequest() (request *DescribePricingModuleRequest
 	request = &DescribePricingModuleRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "DescribePricingModule", "", "")
+	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "DescribePricingModule", "bssopenapi", "openAPI")
 	request.Method = requests.POST
 	return
 }

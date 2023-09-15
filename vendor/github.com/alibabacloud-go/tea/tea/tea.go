@@ -69,11 +69,12 @@ type Response struct {
 
 // SDKError struct is used save error code and message
 type SDKError struct {
-	Code    *string
-	Message *string
-	Data    *string
-	Stack   *string
-	errMsg  *string
+	Code       *string
+	StatusCode *int
+	Message    *string
+	Data       *string
+	Stack      *string
+	errMsg     *string
 }
 
 // RuntimeObject is used for converting http configuration
@@ -181,9 +182,39 @@ func NewSDKError(obj map[string]interface{}) *SDKError {
 		err.Message = String(obj["message"].(string))
 	}
 	if data := obj["data"]; data != nil {
+		r := reflect.ValueOf(data)
+		if r.Kind().String() == "map" {
+			res := make(map[string]interface{})
+			tmp := r.MapKeys()
+			for _, key := range tmp {
+				res[key.String()] = r.MapIndex(key).Interface()
+			}
+			if statusCode := res["statusCode"]; statusCode != nil {
+				if code, ok := statusCode.(int); ok {
+					err.StatusCode = Int(code)
+				} else if tmp, ok := statusCode.(string); ok {
+					code, err_ := strconv.Atoi(tmp)
+					if err_ == nil {
+						err.StatusCode = Int(code)
+					}
+				} else if code, ok := statusCode.(*int); ok {
+					err.StatusCode = code
+				}
+			}
+		}
 		byt, _ := json.Marshal(data)
 		err.Data = String(string(byt))
 	}
+
+	if statusCode, ok := obj["statusCode"].(int); ok {
+		err.StatusCode = Int(statusCode)
+	} else if status, ok := obj["statusCode"].(string); ok {
+		statusCode, err_ := strconv.Atoi(status)
+		if err_ == nil {
+			err.StatusCode = Int(statusCode)
+		}
+	}
+
 	return err
 }
 
@@ -194,8 +225,8 @@ func (err *SDKError) SetErrMsg(msg string) {
 
 func (err *SDKError) Error() string {
 	if err.errMsg == nil {
-		str := fmt.Sprintf("SDKError:\n   Code: %s\n   Message: %s\n   Data: %s\n",
-			StringValue(err.Code), StringValue(err.Message), StringValue(err.Data))
+		str := fmt.Sprintf("SDKError:\n   StatusCode: %d\n   Code: %s\n   Message: %s\n   Data: %s\n",
+			IntValue(err.StatusCode), StringValue(err.Code), StringValue(err.Message), StringValue(err.Data))
 		err.SetErrMsg(str)
 	}
 	return StringValue(err.errMsg)
@@ -209,7 +240,9 @@ func (err *CastError) Error() string {
 // Convert is use convert map[string]interface object to struct
 func Convert(in interface{}, out interface{}) error {
 	byt, _ := json.Marshal(in)
-	err := jsonParser.Unmarshal(byt, out)
+	decoder := jsonParser.NewDecoder(bytes.NewReader(byt))
+	decoder.UseNumber()
+	err := decoder.Decode(&out)
 	return err
 }
 
@@ -765,10 +798,10 @@ func Retryable(err error) *bool {
 		return Bool(false)
 	}
 	if realErr, ok := err.(*SDKError); ok {
-		code, err := strconv.Atoi(StringValue(realErr.Code))
-		if err != nil {
-			return Bool(true)
+		if realErr.StatusCode == nil {
+			return Bool(false)
 		}
+		code := IntValue(realErr.StatusCode)
 		return Bool(code >= http.StatusInternalServerError)
 	}
 	return Bool(true)

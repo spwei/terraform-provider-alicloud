@@ -77,10 +77,10 @@ type DeleteContactRequest struct {
 // DeleteContactResponse is the response struct for api DeleteContact
 type DeleteContactResponse struct {
 	*responses.BaseResponse
-	Success   bool   `json:"Success" xml:"Success"`
 	Code      string `json:"Code" xml:"Code"`
 	Message   string `json:"Message" xml:"Message"`
 	RequestId string `json:"RequestId" xml:"RequestId"`
+	Success   bool   `json:"Success" xml:"Success"`
 }
 
 // CreateDeleteContactRequest creates a request to invoke DeleteContact API

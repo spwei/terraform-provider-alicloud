@@ -84,8 +84,8 @@ type DescribeDefenseRecordsRequest struct {
 // DescribeDefenseRecordsResponse is the response struct for api DescribeDefenseRecords
 type DescribeDefenseRecordsResponse struct {
 	*responses.BaseResponse
-	RequestId      string          `json:"RequestId" xml:"RequestId"`
 	TotalCount     int64           `json:"TotalCount" xml:"TotalCount"`
+	RequestId      string          `json:"RequestId" xml:"RequestId"`
 	DefenseRecords []DefenseRecord `json:"DefenseRecords" xml:"DefenseRecords"`
 }
 

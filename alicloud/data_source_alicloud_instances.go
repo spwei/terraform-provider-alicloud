@@ -2,6 +2,7 @@ package alicloud
 
 import (
 	"regexp"
+	"strconv"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
@@ -28,6 +29,11 @@ func dataSourceAlicloudInstances() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.ValidateRegexp,
 				ForceNew:     true,
+			},
+			"instance_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
 			},
 			"image_id": {
 				Type:     schema.TypeString,
@@ -78,6 +84,14 @@ func dataSourceAlicloudInstances() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+			},
+			"page_number": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+			"page_size": {
+				Type:     schema.TypeInt,
+				Optional: true,
 			},
 
 			// Computed values
@@ -202,12 +216,29 @@ func dataSourceAlicloudInstances() *schema.Resource {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
+									"disk_id": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"disk_name": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
 								},
 							},
 						},
 						"tags": tagsSchema(),
 					},
 				},
+			},
+			"total_count": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"enable_details": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
 			},
 		},
 	}
@@ -234,6 +265,9 @@ func dataSourceAlicloudInstancesRead(d *schema.ResourceData, meta interface{}) e
 	if v, ok := d.GetOk("availability_zone"); ok && v.(string) != "" {
 		request.ZoneId = v.(string)
 	}
+	if v, ok := d.GetOk("instance_name"); ok && v.(string) != "" {
+		request.InstanceName = v.(string)
+	}
 	if v, ok := d.GetOk("tags"); ok {
 		var tags []ecs.DescribeInstancesTag
 
@@ -247,9 +281,18 @@ func dataSourceAlicloudInstancesRead(d *schema.ResourceData, meta interface{}) e
 	}
 
 	var allInstances []ecs.Instance
-	request.PageSize = requests.NewInteger(PageSizeLarge)
-	request.PageNumber = requests.NewInteger(1)
 
+	if v, ok := d.GetOk("page_number"); ok && v.(int) > 0 {
+		request.PageNumber = requests.NewInteger(v.(int))
+	} else {
+		request.PageNumber = requests.NewInteger(1)
+	}
+	if v, ok := d.GetOk("page_size"); ok && v.(int) > 0 {
+		request.PageSize = requests.NewInteger(v.(int))
+	} else {
+		request.PageSize = requests.NewInteger(PageSizeXLarge)
+	}
+	var response *ecs.DescribeInstancesResponse
 	for {
 		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 			return ecsClient.DescribeInstances(request)
@@ -258,14 +301,22 @@ func dataSourceAlicloudInstancesRead(d *schema.ResourceData, meta interface{}) e
 			return WrapErrorf(err, DataDefaultErrorMsg, "alicloud_instances", request.GetActionName(), AlibabaCloudSdkGoERROR)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		response, _ := raw.(*ecs.DescribeInstancesResponse)
+		response, _ = raw.(*ecs.DescribeInstancesResponse)
+		if isPagingRequest(d) {
+			allInstances = response.Instances.Instance
+			break
+		}
 		if len(response.Instances.Instance) < 1 {
 			break
 		}
 
 		allInstances = append(allInstances, response.Instances.Instance...)
+		pageSize, err := strconv.Atoi(string(request.PageSize))
+		if err != nil {
+			return WrapError(err)
+		}
 
-		if len(response.Instances.Instance) < PageSizeLarge {
+		if len(response.Instances.Instance) < pageSize {
 			break
 		}
 
@@ -281,12 +332,16 @@ func dataSourceAlicloudInstancesRead(d *schema.ResourceData, meta interface{}) e
 	nameRegex, ok := d.GetOk("name_regex")
 	imageId, okImg := d.GetOk("image_id")
 	if (ok && nameRegex.(string) != "") || (okImg && imageId.(string) != "") {
-		var r *regexp.Regexp
+		var instanceNameRegex *regexp.Regexp
 		if nameRegex != "" {
-			r = regexp.MustCompile(nameRegex.(string))
+			r, err := regexp.Compile(nameRegex.(string))
+			if err != nil {
+				return WrapError(err)
+			}
+			instanceNameRegex = r
 		}
 		for _, inst := range allInstances {
-			if r != nil && !r.MatchString(inst.InstanceName) {
+			if instanceNameRegex != nil && !instanceNameRegex.MatchString(inst.InstanceName) {
 				continue
 			}
 			if imageId.(string) != "" && inst.ImageId != imageId.(string) {
@@ -296,6 +351,9 @@ func dataSourceAlicloudInstancesRead(d *schema.ResourceData, meta interface{}) e
 		}
 	} else {
 		filteredInstancesTemp = allInstances
+	}
+	if v, ok := d.GetOkExists("enable_details"); !ok || !v.(bool) {
+		return instancessDescriptionAttributes(d, filteredInstancesTemp, nil, nil, meta, response.TotalCount)
 	}
 	// Filter by ram role name and fetch the instance role name
 	instanceIds := make([]string, 0)
@@ -345,11 +403,11 @@ func dataSourceAlicloudInstancesRead(d *schema.ResourceData, meta interface{}) e
 		return WrapError(err)
 	}
 
-	return instancessDescriptionAttributes(d, filteredInstancesTemp, instanceRoleNameMap, instanceDiskMappings, meta)
+	return instancessDescriptionAttributes(d, filteredInstancesTemp, instanceRoleNameMap, instanceDiskMappings, meta, response.TotalCount)
 }
 
 // populate the numerous fields that the instance description returns.
-func instancessDescriptionAttributes(d *schema.ResourceData, instances []ecs.Instance, instanceRoleNameMap map[string]string, instanceDisksMap map[string][]map[string]interface{}, meta interface{}) error {
+func instancessDescriptionAttributes(d *schema.ResourceData, instances []ecs.Instance, instanceRoleNameMap map[string]string, instanceDisksMap map[string][]map[string]interface{}, meta interface{}, totalCount int) error {
 	client := meta.(*connectivity.AliyunClient)
 	ecsService := EcsService{client}
 	var ids []string
@@ -357,8 +415,10 @@ func instancessDescriptionAttributes(d *schema.ResourceData, instances []ecs.Ins
 	var s []map[string]interface{}
 	for _, inst := range instances {
 		// if instance can not in instanceRoleNameMap, it should be removed.
-		if _, ok := instanceRoleNameMap[inst.InstanceId]; !ok {
-			continue
+		if instanceRoleNameMap != nil {
+			if _, ok := instanceRoleNameMap[inst.InstanceId]; !ok {
+				continue
+			}
 		}
 		mapping := map[string]interface{}{
 			"id":                         inst.InstanceId,
@@ -375,15 +435,13 @@ func instancessDescriptionAttributes(d *schema.ResourceData, instances []ecs.Ins
 			"resource_group_id":          inst.ResourceGroupId,
 			"eip":                        inst.EipAddress.IpAddress,
 			"key_name":                   inst.KeyPairName,
-			"ram_role_name":              instanceRoleNameMap[inst.InstanceId],
 			"spot_strategy":              inst.SpotStrategy,
 			"creation_time":              inst.CreationTime,
 			"instance_charge_type":       inst.InstanceChargeType,
 			"internet_charge_type":       inst.InternetChargeType,
 			"internet_max_bandwidth_out": inst.InternetMaxBandwidthOut,
 			// Complex types get their own functions
-			"disk_device_mappings": instanceDisksMap[inst.InstanceId],
-			"tags":                 ecsService.tagsToMap(inst.Tags.Tag),
+			"tags": ecsService.tagsToMap(inst.Tags.Tag),
 		}
 		if len(inst.InnerIpAddress.IpAddress) > 0 {
 			mapping["private_ip"] = inst.InnerIpAddress.IpAddress[0]
@@ -393,7 +451,14 @@ func instancessDescriptionAttributes(d *schema.ResourceData, instances []ecs.Ins
 		if len(inst.PublicIpAddress.IpAddress) > 0 {
 			mapping["public_ip"] = inst.PublicIpAddress.IpAddress[0]
 		} else {
-			mapping["public_ip"] = inst.VpcAttributes.NatIpAddress
+			mapping["public_ip"] = inst.EipAddress.IpAddress
+		}
+
+		if instanceRoleNameMap != nil {
+			mapping["ram_role_name"] = instanceRoleNameMap[inst.InstanceId]
+		}
+		if instanceDisksMap != nil {
+			mapping["disk_device_mappings"] = instanceDisksMap[inst.InstanceId]
 		}
 
 		ids = append(ids, inst.InstanceId)
@@ -407,7 +472,9 @@ func instancessDescriptionAttributes(d *schema.ResourceData, instances []ecs.Ins
 	if err := d.Set("instances", s); err != nil {
 		return WrapError(err)
 	}
-
+	if err := d.Set("total_count", totalCount); err != nil {
+		return WrapError(err)
+	}
 	// create a json file in current directory and write data source to it.
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
 		writeToFile(output.(string), s)
@@ -415,7 +482,7 @@ func instancessDescriptionAttributes(d *schema.ResourceData, instances []ecs.Ins
 	return nil
 }
 
-//Returns a mapping of instance disks
+// Returns a mapping of instance disks
 func getInstanceDisksMappings(instanceMap map[string]string, meta interface{}) (map[string][]map[string]interface{}, error) {
 	client := meta.(*connectivity.AliyunClient)
 	request := ecs.CreateDescribeDisksRequest()
@@ -454,10 +521,12 @@ func getInstanceDisksMappings(instanceMap map[string]string, meta interface{}) (
 			continue
 		}
 		mapping := map[string]interface{}{
-			"device":   disk.Device,
-			"size":     disk.Size,
-			"category": disk.Category,
-			"type":     disk.Type,
+			"device":    disk.Device,
+			"size":      disk.Size,
+			"category":  disk.Category,
+			"type":      disk.Type,
+			"disk_id":   disk.DiskId,
+			"disk_name": disk.DiskName,
 		}
 		instanceDisks[disk.InstanceId] = append(instanceDisks[disk.InstanceId], mapping)
 	}

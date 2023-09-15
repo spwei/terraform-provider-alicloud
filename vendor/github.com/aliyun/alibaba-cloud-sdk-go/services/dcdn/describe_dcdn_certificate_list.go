@@ -71,16 +71,16 @@ func (client *Client) DescribeDcdnCertificateListWithCallback(request *DescribeD
 // DescribeDcdnCertificateListRequest is the request struct for api DescribeDcdnCertificateList
 type DescribeDcdnCertificateListRequest struct {
 	*requests.RpcRequest
+	SecurityToken string           `position:"Query" name:"SecurityToken"`
 	DomainName    string           `position:"Query" name:"DomainName"`
 	OwnerId       requests.Integer `position:"Query" name:"OwnerId"`
-	SecurityToken string           `position:"Query" name:"SecurityToken"`
 }
 
 // DescribeDcdnCertificateListResponse is the response struct for api DescribeDcdnCertificateList
 type DescribeDcdnCertificateListResponse struct {
 	*responses.BaseResponse
-	RequestId            string               `json:"RequestId" xml:"RequestId"`
-	CertificateListModel CertificateListModel `json:"CertificateListModel" xml:"CertificateListModel"`
+	RequestId            string                                            `json:"RequestId" xml:"RequestId"`
+	CertificateListModel CertificateListModelInDescribeDcdnCertificateList `json:"CertificateListModel" xml:"CertificateListModel"`
 }
 
 // CreateDescribeDcdnCertificateListRequest creates a request to invoke DescribeDcdnCertificateList API

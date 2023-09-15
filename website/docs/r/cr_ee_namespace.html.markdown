@@ -7,13 +7,13 @@ description: |-
   Provides a Alicloud resource to manage Container Registry Enterprise Edition namespaces.
 ---
 
-# alicloud\_cr\_ee\_namespace
+# alicloud_cr_ee_namespace
 
 This resource will help you to manager Container Registry Enterprise Edition namespaces.
 
-For information about Container Registry Enterprise Edition namespaces and how to use it, see [Create a Namespace](https://www.alibabacloud.com/help/doc-detail/145483.htm)
+For information about Container Registry Enterprise Edition namespaces and how to use it, see [Create a Namespace](https://www.alibabacloud.com/help/en/acr/developer-reference/api-cr-2018-12-01-createnamespace)
 
--> **NOTE:** Available in v1.86.0+.
+-> **NOTE:** Available since v1.86.0.
 
 -> **NOTE:** You need to set your registry password in Container Registry Enterprise Edition console before use this resource.
 
@@ -21,10 +21,22 @@ For information about Container Registry Enterprise Edition namespaces and how t
 
 Basic Usage
 
-```
-resource "alicloud_cr_ee_namespace" "my-namespace" {
-  instance_id        = "cri-xxx"
-  name               = "my-namespace"
+```terraform
+variable "name" {
+  default = "terraform-example-name"
+}
+resource "alicloud_cr_ee_instance" "example" {
+  payment_type   = "Subscription"
+  period         = 1
+  renew_period   = 0
+  renewal_status = "ManualRenewal"
+  instance_type  = "Advanced"
+  instance_name  = var.name
+}
+
+resource "alicloud_cr_ee_namespace" "example" {
+  instance_id        = alicloud_cr_ee_instance.example.id
+  name               = var.name
   auto_create        = false
   default_visibility = "PUBLIC"
 }
@@ -49,6 +61,6 @@ The following attributes are exported:
 
 Container Registry Enterprise Edition namespace can be imported using the `{instance_id}:{namespace}`, e.g.
 
-```
+```shell
 $ terraform import alicloud_cr_ee_namespace.default cri-xxx:my-namespace
 ```

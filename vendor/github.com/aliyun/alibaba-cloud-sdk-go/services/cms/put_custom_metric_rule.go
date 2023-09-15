@@ -92,10 +92,10 @@ type PutCustomMetricRuleRequest struct {
 // PutCustomMetricRuleResponse is the response struct for api PutCustomMetricRule
 type PutCustomMetricRuleResponse struct {
 	*responses.BaseResponse
-	Success   bool   `json:"Success" xml:"Success"`
 	Code      string `json:"Code" xml:"Code"`
 	Message   string `json:"Message" xml:"Message"`
 	RequestId string `json:"RequestId" xml:"RequestId"`
+	Success   bool   `json:"Success" xml:"Success"`
 }
 
 // CreatePutCustomMetricRuleRequest creates a request to invoke PutCustomMetricRule API

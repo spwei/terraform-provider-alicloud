@@ -84,10 +84,10 @@ type QueryRIUtilizationDetailRequest struct {
 // QueryRIUtilizationDetailResponse is the response struct for api QueryRIUtilizationDetail
 type QueryRIUtilizationDetailResponse struct {
 	*responses.BaseResponse
-	RequestId string                         `json:"RequestId" xml:"RequestId"`
-	Success   bool                           `json:"Success" xml:"Success"`
 	Code      string                         `json:"Code" xml:"Code"`
 	Message   string                         `json:"Message" xml:"Message"`
+	RequestId string                         `json:"RequestId" xml:"RequestId"`
+	Success   bool                           `json:"Success" xml:"Success"`
 	Data      DataInQueryRIUtilizationDetail `json:"Data" xml:"Data"`
 }
 
@@ -96,7 +96,7 @@ func CreateQueryRIUtilizationDetailRequest() (request *QueryRIUtilizationDetailR
 	request = &QueryRIUtilizationDetailRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "QueryRIUtilizationDetail", "", "")
+	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "QueryRIUtilizationDetail", "bssopenapi", "openAPI")
 	request.Method = requests.POST
 	return
 }

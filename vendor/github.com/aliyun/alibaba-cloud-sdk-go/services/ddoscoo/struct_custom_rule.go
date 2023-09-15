@@ -18,7 +18,7 @@ package ddoscoo
 // CustomRule is a nested struct in ddoscoo response
 type CustomRule struct {
 	Mode     string `json:"Mode" xml:"Mode"`
-	Name     string `json:"Name" xml:"Name"`
 	CacheTtl int64  `json:"CacheTtl" xml:"CacheTtl"`
+	Name     string `json:"Name" xml:"Name"`
 	Uri      string `json:"Uri" xml:"Uri"`
 }

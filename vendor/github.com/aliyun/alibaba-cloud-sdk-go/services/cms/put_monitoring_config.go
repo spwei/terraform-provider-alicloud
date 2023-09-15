@@ -80,8 +80,8 @@ type PutMonitoringConfigResponse struct {
 	*responses.BaseResponse
 	Code      int    `json:"Code" xml:"Code"`
 	Message   string `json:"Message" xml:"Message"`
-	Success   bool   `json:"Success" xml:"Success"`
 	RequestId string `json:"RequestId" xml:"RequestId"`
+	Success   bool   `json:"Success" xml:"Success"`
 }
 
 // CreatePutMonitoringConfigRequest creates a request to invoke PutMonitoringConfig API

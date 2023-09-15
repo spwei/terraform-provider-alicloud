@@ -83,15 +83,15 @@ type DescribeDBInstanceEncryptionKeyRequest struct {
 // DescribeDBInstanceEncryptionKeyResponse is the response struct for api DescribeDBInstanceEncryptionKey
 type DescribeDBInstanceEncryptionKeyResponse struct {
 	*responses.BaseResponse
-	RequestId           string `json:"RequestId" xml:"RequestId"`
-	EncryptionKey       string `json:"EncryptionKey" xml:"EncryptionKey"`
-	Description         string `json:"Description" xml:"Description"`
-	KeyUsage            string `json:"KeyUsage" xml:"KeyUsage"`
-	DeleteDate          string `json:"DeleteDate" xml:"DeleteDate"`
-	Creator             string `json:"Creator" xml:"Creator"`
-	EncryptionKeyStatus string `json:"EncryptionKeyStatus" xml:"EncryptionKeyStatus"`
 	Origin              string `json:"Origin" xml:"Origin"`
+	Description         string `json:"Description" xml:"Description"`
+	RequestId           string `json:"RequestId" xml:"RequestId"`
+	EncryptionKeyStatus string `json:"EncryptionKeyStatus" xml:"EncryptionKeyStatus"`
 	MaterialExpireTime  string `json:"MaterialExpireTime" xml:"MaterialExpireTime"`
+	KeyUsage            string `json:"KeyUsage" xml:"KeyUsage"`
+	EncryptionKey       string `json:"EncryptionKey" xml:"EncryptionKey"`
+	Creator             string `json:"Creator" xml:"Creator"`
+	DeleteDate          string `json:"DeleteDate" xml:"DeleteDate"`
 }
 
 // CreateDescribeDBInstanceEncryptionKeyRequest creates a request to invoke DescribeDBInstanceEncryptionKey API
@@ -99,7 +99,7 @@ func CreateDescribeDBInstanceEncryptionKeyRequest() (request *DescribeDBInstance
 	request = &DescribeDBInstanceEncryptionKeyRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("Dds", "2015-12-01", "DescribeDBInstanceEncryptionKey", "Dds", "openAPI")
+	request.InitWithApiInfo("Dds", "2015-12-01", "DescribeDBInstanceEncryptionKey", "dds", "openAPI")
 	request.Method = requests.POST
 	return
 }

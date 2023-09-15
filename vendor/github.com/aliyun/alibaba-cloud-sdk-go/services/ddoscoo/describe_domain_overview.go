@@ -71,10 +71,10 @@ func (client *Client) DescribeDomainOverviewWithCallback(request *DescribeDomain
 // DescribeDomainOverviewRequest is the request struct for api DescribeDomainOverview
 type DescribeDomainOverviewRequest struct {
 	*requests.RpcRequest
-	EndTime         requests.Integer `position:"Query" name:"EndTime"`
 	StartTime       requests.Integer `position:"Query" name:"StartTime"`
 	ResourceGroupId string           `position:"Query" name:"ResourceGroupId"`
 	SourceIp        string           `position:"Query" name:"SourceIp"`
+	EndTime         requests.Integer `position:"Query" name:"EndTime"`
 	Domain          string           `position:"Query" name:"Domain"`
 }
 
@@ -82,8 +82,8 @@ type DescribeDomainOverviewRequest struct {
 type DescribeDomainOverviewResponse struct {
 	*responses.BaseResponse
 	RequestId string `json:"RequestId" xml:"RequestId"`
-	MaxHttps  int64  `json:"MaxHttps" xml:"MaxHttps"`
 	MaxHttp   int64  `json:"MaxHttp" xml:"MaxHttp"`
+	MaxHttps  int64  `json:"MaxHttps" xml:"MaxHttps"`
 }
 
 // CreateDescribeDomainOverviewRequest creates a request to invoke DescribeDomainOverview API

@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeProcessList invokes the adb.DescribeProcessList API synchronously
-// api document: https://help.aliyun.com/api/adb/describeprocesslist.html
 func (client *Client) DescribeProcessList(request *DescribeProcessListRequest) (response *DescribeProcessListResponse, err error) {
 	response = CreateDescribeProcessListResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeProcessList(request *DescribeProcessListRequest) (
 }
 
 // DescribeProcessListWithChan invokes the adb.DescribeProcessList API asynchronously
-// api document: https://help.aliyun.com/api/adb/describeprocesslist.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeProcessListWithChan(request *DescribeProcessListRequest) (<-chan *DescribeProcessListResponse, <-chan error) {
 	responseChan := make(chan *DescribeProcessListResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeProcessListWithChan(request *DescribeProcessListRe
 }
 
 // DescribeProcessListWithCallback invokes the adb.DescribeProcessList API asynchronously
-// api document: https://help.aliyun.com/api/adb/describeprocesslist.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeProcessListWithCallback(request *DescribeProcessListRequest, callback func(response *DescribeProcessListResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -93,10 +88,10 @@ type DescribeProcessListRequest struct {
 // DescribeProcessListResponse is the response struct for api DescribeProcessList
 type DescribeProcessListResponse struct {
 	*responses.BaseResponse
-	RequestId  string                     `json:"RequestId" xml:"RequestId"`
 	TotalCount string                     `json:"TotalCount" xml:"TotalCount"`
-	PageNumber string                     `json:"PageNumber" xml:"PageNumber"`
 	PageSize   string                     `json:"PageSize" xml:"PageSize"`
+	RequestId  string                     `json:"RequestId" xml:"RequestId"`
+	PageNumber string                     `json:"PageNumber" xml:"PageNumber"`
 	Items      ItemsInDescribeProcessList `json:"Items" xml:"Items"`
 }
 

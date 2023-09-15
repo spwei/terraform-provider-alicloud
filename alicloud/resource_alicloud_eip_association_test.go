@@ -40,7 +40,7 @@ func testAccCheckEIPAssociationDestroy(s *terraform.State) error {
 	return nil
 }
 
-func TestAccAlicloudEipAssociationBasic(t *testing.T) {
+func TestAccAlicloudEIPAssociationBasic(t *testing.T) {
 	var v vpc.EipAddress
 	resourceId := "alicloud_eip_association.default"
 	ra := resourceAttrInit(resourceId, testAccCheckEipAssociationBasicMap)
@@ -74,7 +74,7 @@ func TestAccAlicloudEipAssociationBasic(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudEipAssociationMulti(t *testing.T) {
+func TestAccAlicloudEIPAssociationMulti(t *testing.T) {
 	var v vpc.EipAddress
 	resourceId := "alicloud_eip_association.default.1"
 	ra := resourceAttrInit(resourceId, testAccCheckEipAssociationBasicMap)
@@ -108,7 +108,7 @@ func TestAccAlicloudEipAssociationMulti(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudEipAssociationEni(t *testing.T) {
+func TestAccAlicloudEIPAssociationEni(t *testing.T) {
 	var v vpc.EipAddress
 	resourceId := "alicloud_eip_association.default"
 	ra := resourceAttrInit(resourceId, testAccCheckEipAssociationBasicMap)
@@ -137,7 +137,7 @@ func TestAccAlicloudEipAssociationEni(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"instance_type":      "NetworkInterface",
-						"private_ip_address": "192.168.0.2",
+						"private_ip_address": CHECKSET,
 					}),
 				),
 			},
@@ -151,6 +151,7 @@ data "alicloud_zones" "default" {
 }
 
 data "alicloud_instance_types" "default" {
+	instance_type_family = "ecs.sn1ne"
  	availability_zone = "${data.alicloud_zones.default.zones.0.id}"
 }
 
@@ -163,26 +164,35 @@ variable "name" {
 	default = "tf-testAccEipAssociation%d"
 }
 
-resource "alicloud_vpc" "default" {
-  name = "${var.name}"
-  cidr_block = "10.1.0.0/21"
+data "alicloud_vpcs" "default" {
+	name_regex = "^default-NODELETING$"
 }
 
-resource "alicloud_vswitch" "default" {
-  vpc_id = "${alicloud_vpc.default.id}"
-  cidr_block = "10.1.1.0/24"
-  availability_zone = "${data.alicloud_zones.default.zones.0.id}"
-  name = "${var.name}"
+data "alicloud_vswitches" "default" {
+	vpc_id = data.alicloud_vpcs.default.ids.0
+	zone_id = data.alicloud_zones.default.zones.0.id
+}
+
+resource "alicloud_vswitch" "vswitch" {
+  count             = length(data.alicloud_vswitches.default.ids) > 0 ? 0 : 1
+  vpc_id            = data.alicloud_vpcs.default.ids.0
+  cidr_block        = cidrsubnet(data.alicloud_vpcs.default.vpcs[0].cidr_block, 8, 8)
+  zone_id           = data.alicloud_zones.default.zones.0.id
+  vswitch_name      = var.name
+}
+
+locals {
+  vswitch_id = length(data.alicloud_vswitches.default.ids) > 0 ? data.alicloud_vswitches.default.ids[0] : concat(alicloud_vswitch.vswitch.*.id, [""])[0]
 }
 
 resource "alicloud_security_group" "default" {
   name = "${var.name}"
   description = "New security group"
-  vpc_id = "${alicloud_vpc.default.id}"
+  vpc_id = data.alicloud_vpcs.default.ids.0
 }
 
 resource "alicloud_instance" "default" {
-  vswitch_id = "${alicloud_vswitch.default.id}"
+  vswitch_id = local.vswitch_id
   image_id = "${data.alicloud_images.default.images.1.id}"
   availability_zone = "${data.alicloud_zones.default.zones.0.id}"
   system_disk_category = "cloud_ssd"
@@ -200,12 +210,12 @@ resource "alicloud_instance" "default" {
   }
 }
 
-resource "alicloud_eip" "default" {
-	name = "${var.name}"
+resource "alicloud_eip_address" "default" {
+	address_name = "${var.name}"
 }
 
 resource "alicloud_eip_association" "default" {
-  allocation_id = "${alicloud_eip.default.id}"
+  allocation_id = "${alicloud_eip_address.default.id}"
   instance_id = "${alicloud_instance.default.id}"
   force = true
 }
@@ -218,6 +228,7 @@ data "alicloud_zones" "default" {
 }
 
 data "alicloud_instance_types" "default" {
+	instance_type_family = "ecs.sn1ne"
  	availability_zone = "${data.alicloud_zones.default.zones.0.id}"
 }
 
@@ -234,27 +245,36 @@ variable "number" {
 		default = "2"
 }
 
-resource "alicloud_vpc" "default" {
-  name = "${var.name}"
-  cidr_block = "10.1.0.0/21"
+data "alicloud_vpcs" "default" {
+	name_regex = "^default-NODELETING$"
 }
 
-resource "alicloud_vswitch" "default" {
-  vpc_id = "${alicloud_vpc.default.id}"
-  cidr_block = "10.1.1.0/24"
-  availability_zone = "${data.alicloud_zones.default.zones.0.id}"
-  name = "${var.name}"
+data "alicloud_vswitches" "default" {
+	vpc_id = data.alicloud_vpcs.default.ids.0
+	zone_id = data.alicloud_zones.default.zones.0.id
+}
+
+resource "alicloud_vswitch" "vswitch" {
+  count             = length(data.alicloud_vswitches.default.ids) > 0 ? 0 : 1
+  vpc_id            = data.alicloud_vpcs.default.ids.0
+  cidr_block        = cidrsubnet(data.alicloud_vpcs.default.vpcs[0].cidr_block, 8, 8)
+  zone_id           = data.alicloud_zones.default.zones.0.id
+  vswitch_name      = var.name
+}
+
+locals {
+  vswitch_id = length(data.alicloud_vswitches.default.ids) > 0 ? data.alicloud_vswitches.default.ids[0] : concat(alicloud_vswitch.vswitch.*.id, [""])[0]
 }
 
 resource "alicloud_security_group" "default" {
   name = "${var.name}"
   description = "New security group"
-  vpc_id = "${alicloud_vpc.default.id}"
+  vpc_id = data.alicloud_vpcs.default.ids.0
 }
 
 resource "alicloud_instance" "default" {
   count = "${var.number}"
-  vswitch_id = "${alicloud_vswitch.default.id}"
+  vswitch_id = local.vswitch_id
   image_id = "${data.alicloud_images.default.images.0.id}"
   availability_zone = "${data.alicloud_zones.default.zones.0.id}"
   system_disk_category = "cloud_ssd"
@@ -272,14 +292,14 @@ resource "alicloud_instance" "default" {
   }
 }
 
-resource "alicloud_eip" "default" {
+resource "alicloud_eip_address" "default" {
 	count = "${var.number}"
-	name = "${var.name}"
+	address_name = "${var.name}"
 }
 
 resource "alicloud_eip_association" "default" {
   count = "${var.number}"
-  allocation_id = "${element(alicloud_eip.default.*.id,count.index)}"
+  allocation_id = "${element(alicloud_eip_address.default.*.id,count.index)}"
   instance_id = "${element(alicloud_instance.default.*.id,count.index)}"
 }
 `, rand)
@@ -291,43 +311,52 @@ variable "name" {
   default = "tf-testAccEipAssociation%d"
 }
 
-resource "alicloud_vpc" "default" {
-    name = "${var.name}"
-    cidr_block = "192.168.0.0/24"
-}
-
 data "alicloud_zones" "default" {
     available_resource_creation= "VSwitch"
 }
 
-resource "alicloud_vswitch" "default" {
-    name = "${var.name}"
-    cidr_block = "192.168.0.0/24"
-    availability_zone = "${data.alicloud_zones.default.zones.0.id}"
-    vpc_id = "${alicloud_vpc.default.id}"
+data "alicloud_vpcs" "default" {
+	name_regex = "^default-NODELETING$"
+}
+
+data "alicloud_vswitches" "default" {
+	vpc_id = data.alicloud_vpcs.default.ids.0
+	zone_id = data.alicloud_zones.default.zones.0.id
+}
+
+resource "alicloud_vswitch" "vswitch" {
+  count             = length(data.alicloud_vswitches.default.ids) > 0 ? 0 : 1
+  vpc_id            = data.alicloud_vpcs.default.ids.0
+  cidr_block        = cidrsubnet(data.alicloud_vpcs.default.vpcs[0].cidr_block, 8, 8)
+  zone_id           = data.alicloud_zones.default.zones.0.id
+  vswitch_name      = var.name
+}
+
+locals {
+  vswitch_id = length(data.alicloud_vswitches.default.ids) > 0 ? data.alicloud_vswitches.default.ids[0] : concat(alicloud_vswitch.vswitch.*.id, [""])[0]
 }
 
 resource "alicloud_security_group" "default" {
     name = "${var.name}"
-    vpc_id = "${alicloud_vpc.default.id}"
+    vpc_id = data.alicloud_vpcs.default.ids.0
 }
 
-resource "alicloud_network_interface" "default" {
+resource "alicloud_ecs_network_interface" "default" {
 	name = "${var.name}"
-    vswitch_id = "${alicloud_vswitch.default.id}"
-	security_groups = [ "${alicloud_security_group.default.id}" ]
-	private_ip = "192.168.0.2"
+    vswitch_id = local.vswitch_id
+	security_groups = ["${alicloud_security_group.default.id}"]
+	private_ip = cidrhost(data.alicloud_vswitches.default.vswitches.0.cidr_block, 100)
 }
 
-resource "alicloud_eip" "default" {
-	name = "${var.name}"
+resource "alicloud_eip_address" "default" {
+	address_name = "${var.name}"
 }
 
 resource "alicloud_eip_association" "default" {
-  allocation_id = "${alicloud_eip.default.id}"
-  instance_id = "${alicloud_network_interface.default.id}"
+  allocation_id = "${alicloud_eip_address.default.id}"
+  instance_id = "${alicloud_ecs_network_interface.default.id}"
   instance_type = "NetworkInterface"
-  private_ip_address = "192.168.0.2"
+  private_ip_address = cidrhost(data.alicloud_vswitches.default.vswitches.0.cidr_block, 100)
 }
 `, rand)
 }
@@ -335,4 +364,73 @@ resource "alicloud_eip_association" "default" {
 var testAccCheckEipAssociationBasicMap = map[string]string{
 	"allocation_id": CHECKSET,
 	"instance_id":   CHECKSET,
+}
+
+func TestAccAlicloudEIPAssociation_basic1(t *testing.T) {
+	var v map[string]interface{}
+	resourceId := "alicloud_eip_association.default"
+	ra := resourceAttrInit(resourceId, AlicloudEIPAssociationMap1)
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
+		return &VpcService{testAccProvider.Meta().(*connectivity.AliyunClient)}
+	}, "DescribeEipAssociation")
+	rac := resourceAttrCheckInit(rc, ra)
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := acctest.RandIntRange(10000, 99999)
+	name := fmt.Sprintf("tf-testacceipaddress%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlicloudEIPAssociationBasicDependence1)
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
+		CheckDestroy:  rac.checkResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"instance_id":   "192.168.0.1",
+					"allocation_id": "${alicloud_eip_address.default.id}",
+					"instance_type": "IpAddress",
+					"vpc_id":        "${alicloud_vpc_ipv4_gateway.default.vpc_id}",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"instance_id":   "192.168.0.1",
+						"allocation_id": CHECKSET,
+						"instance_type": "IpAddress",
+						"vpc_id":        CHECKSET,
+					}),
+				),
+			},
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force"},
+			},
+		},
+	})
+}
+
+var AlicloudEIPAssociationMap1 = map[string]string{}
+
+func AlicloudEIPAssociationBasicDependence1(name string) string {
+	return fmt.Sprintf(` 
+variable "name" {
+	default = "%s"
+}
+
+resource "alicloud_eip_address" "default" {
+	address_name = "${var.name}"
+}
+data "alicloud_vpcs" "default" {
+	name_regex = "^default-NODELETING$"
+}
+resource "alicloud_vpc_ipv4_gateway" "default" {
+	ipv4_gateway_description = var.name
+	ipv4_gateway_name = var.name
+	vpc_id = data.alicloud_vpcs.default.ids.0
+}
+
+`, name)
 }

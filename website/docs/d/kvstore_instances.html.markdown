@@ -16,10 +16,10 @@ Filters support regular expression for the instance name, searches by tags, and 
 
 ```terraform
 data "alicloud_kvstore_instances" "default" {
-    name_regex = "testname"
+  name_regex = "testname"
 }
 output "first_instance_name" {
-    value = data.alicloud_kvstore_instances.default.instances.0.name
+  value = data.alicloud_kvstore_instances.default.instances.0.name
 }
 ```
 
@@ -37,7 +37,7 @@ The following arguments are supported:
 * `tags` - (Optional) Query the instance bound to the tag. The format of the incoming value is `json` string, including `TagKey` and `TagValue`. `TagKey` cannot be null, and `TagValue` can be empty. Format example `{"key1":"value1"}`.
 * `architecture_type` - (Optional, Available in 1.101.0+) The type of the architecture. Valid values: `cluster`, `standard` and `SplitRW`.
 * `edition_type` - (Optional, Available in 1.101.0+) Used to retrieve instances belong to specified `vswitch` resources.  Valid values: `Enterprise`, `Community`.
-* `engine_version` - (Optional, Available in 1.101.0+) The engine version. Valid values: `2.8`, `4.0`, `5.0`, `6.0`.
+* `engine_version` - (Optional, Available in 1.101.0+) The engine version. Valid values: `2.8`, `4.0`, `5.0`, `6.0`, `7.0`.
 * `expired` - (Optional, Available in 1.101.0+) The expiration status of the instance.
 * `global_instance` - (Optional, Available in 1.101.0+) Whether to create a distributed cache.
 * `network_type` - (Optional, Available in 1.101.0+) The type of the network. Valid values: `CLASSIC`, `VPC`.
@@ -93,5 +93,7 @@ The following attributes are exported in addition to the arguments listed above:
   * `create_time` - Creation time of the instance.
   * `user_name` - The username of the instance.
   * `connection_domain` - Instance connection domain (only Intranet access supported).
+  * `secondary_zone_id` - (Optional, Available in 1.128.0+) The ID of the secondary zone to which you want to migrate the ApsaraDB for Redis instance.
+
     
     

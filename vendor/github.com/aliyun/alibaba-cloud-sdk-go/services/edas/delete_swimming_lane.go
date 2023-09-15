@@ -71,7 +71,7 @@ func (client *Client) DeleteSwimmingLaneWithCallback(request *DeleteSwimmingLane
 // DeleteSwimmingLaneRequest is the request struct for api DeleteSwimmingLane
 type DeleteSwimmingLaneRequest struct {
 	*requests.RoaRequest
-	LaneId requests.Integer `position:"Query" name:"LaneId"`
+	LaneId string `position:"Query" name:"LaneId"`
 }
 
 // DeleteSwimmingLaneResponse is the response struct for api DeleteSwimmingLane
@@ -79,8 +79,8 @@ type DeleteSwimmingLaneResponse struct {
 	*responses.BaseResponse
 	Code      int    `json:"Code" xml:"Code"`
 	Message   string `json:"Message" xml:"Message"`
-	RequestId string `json:"RequestId" xml:"RequestId"`
 	Data      int    `json:"Data" xml:"Data"`
+	RequestId string `json:"RequestId" xml:"RequestId"`
 }
 
 // CreateDeleteSwimmingLaneRequest creates a request to invoke DeleteSwimmingLane API

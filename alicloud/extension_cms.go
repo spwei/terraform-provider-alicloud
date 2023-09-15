@@ -5,6 +5,10 @@ const (
 	Minimum          = "Minimum"
 	Maximum          = "Maximum"
 	ErrorCodeMaximum = "ErrorCodeMaximum"
+	Value            = "Value"
+	Sum              = "Sum"
+	Count            = "Count"
+	Availability     = "Availability"
 )
 
 const (
@@ -18,7 +22,7 @@ const (
 
 const (
 	SiteMonitorHTTP = "HTTP"
-	SiteMonitorPing = "Ping"
+	SiteMonitorPing = "PING"
 	SiteMonitorTCP  = "TCP"
 	SiteMonitorUDP  = "UDP"
 	SiteMonitorDNS  = "DNS"

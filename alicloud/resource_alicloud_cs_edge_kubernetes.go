@@ -54,6 +54,12 @@ func resourceAlicloudCSEdgeKubernetes() *schema.Resource {
 				ValidateFunc:  validation.StringLenBetween(0, 37),
 				ConflictsWith: []string{"name"},
 			},
+			"cluster_spec": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice([]string{"ack.standard", "ack.pro.small"}, false),
+			},
 			// worker configurations
 			"worker_vswitch_ids": {
 				Type:     schema.TypeList,
@@ -62,8 +68,7 @@ func resourceAlicloudCSEdgeKubernetes() *schema.Resource {
 					Type:         schema.TypeString,
 					ValidateFunc: validation.StringMatch(regexp.MustCompile(`^vsw-[a-z0-9]*$`), "should start with 'vsw-'."),
 				},
-				MinItems:         1,
-				DiffSuppressFunc: csForceUpdateSuppressFunc,
+				MinItems: 1,
 			},
 			"force_update": {
 				Type:     schema.TypeBool,
@@ -116,11 +121,10 @@ func resourceAlicloudCSEdgeKubernetes() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"iptables", "ipvs"}, false),
 			},
 			"worker_instance_charge_type": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				ValidateFunc:     validation.StringInSlice([]string{string(common.PrePaid), string(common.PostPaid)}, false),
-				Default:          PostPaid,
-				DiffSuppressFunc: csForceUpdateSuppressFunc,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{string(common.PostPaid)}, false),
+				Default:      PostPaid,
 			},
 			"worker_data_disks": {
 				Optional: true,
@@ -167,24 +171,40 @@ func resourceAlicloudCSEdgeKubernetes() *schema.Resource {
 					},
 				},
 			},
+			"worker_ram_role_name": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			// global configurations
 			"pod_cidr": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				DiffSuppressFunc: csForceUpdateSuppressFunc,
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"service_cidr": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				DiffSuppressFunc: csForceUpdateSuppressFunc,
+				Type:     schema.TypeString,
+				Optional: true,
 			},
-
+			"runtime": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"version": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
+			},
 			"node_cidr_mask": {
-				Type:             schema.TypeInt,
-				Optional:         true,
-				Default:          KubernetesClusterNodeCIDRMasksByDefault,
-				ValidateFunc:     validation.IntBetween(24, 28),
-				DiffSuppressFunc: csForceUpdateSuppressFunc,
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Default:      KubernetesClusterNodeCIDRMasksByDefault,
+				ValidateFunc: validation.IntBetween(24, 28),
 			},
 			"new_nat_gateway": {
 				Type:     schema.TypeBool,
@@ -192,23 +212,20 @@ func resourceAlicloudCSEdgeKubernetes() *schema.Resource {
 				Default:  true,
 			},
 			"password": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Sensitive:        true,
-				ConflictsWith:    []string{"key_name"},
-				DiffSuppressFunc: csForceUpdateSuppressFunc,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Sensitive:     true,
+				ConflictsWith: []string{"key_name"},
 			},
 			"key_name": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				ConflictsWith:    []string{"password"},
-				DiffSuppressFunc: csForceUpdateSuppressFunc,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ConflictsWith: []string{"password"},
 			},
 			"install_cloud_monitor": {
-				Type:             schema.TypeBool,
-				Optional:         true,
-				Default:          true,
-				DiffSuppressFunc: csForceUpdateSuppressFunc,
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
 			},
 			"version": {
 				Type:     schema.TypeString,
@@ -241,15 +258,20 @@ func resourceAlicloudCSEdgeKubernetes() *schema.Resource {
 				},
 			},
 			"slb_internet_enabled": {
-				Type:             schema.TypeBool,
-				Optional:         true,
-				Default:          true,
-				DiffSuppressFunc: csForceUpdateSuppressFunc,
-			},
-
-			"kube_config": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeBool,
 				Optional: true,
+				Default:  true,
+			},
+			"load_balancer_spec": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice([]string{"slb.s1.small", "slb.s2.small", "slb.s2.medium", "slb.s3.small", "slb.s3.medium", "slb.s3.large"}, false),
+			},
+			"kube_config": {
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "Field 'kube_config' has been deprecated from provider version 1.187.0. New DataSource 'alicloud_cs_cluster_credential' manage your cluster's kube config.",
 			},
 			"client_cert": {
 				Type:     schema.TypeString,
@@ -278,6 +300,7 @@ func resourceAlicloudCSEdgeKubernetes() *schema.Resource {
 			"resource_group_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			// computed parameters start
 			"certificate_authority": {
@@ -396,11 +419,18 @@ func resourceAlicloudCSEdgeKubernetes() *schema.Resource {
 						},
 					},
 				},
-				DiffSuppressFunc: csForceUpdateSuppressFunc,
+				Deprecated: "Field 'log_config' has been removed from provider version 1.103.0. New field 'addons' replaces it.",
 			},
 			"tags": {
 				Type:     schema.TypeMap,
 				Optional: true,
+			},
+			"retain_resources": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 		},
 	}

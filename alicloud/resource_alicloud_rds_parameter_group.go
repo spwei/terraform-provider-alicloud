@@ -26,13 +26,13 @@ func resourceAlicloudRdsParameterGroup() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"mariadb", "mysql"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"mariadb", "mysql", "PostgreSQL"}, false),
 			},
 			"engine_version": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"10.3", "5.1", "5.5", "5.6", "5.7", "8.0"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"10.3", "5.1", "5.5", "5.6", "5.7", "8.0", "10.0", "11.0", "12.0", "13.0", "14.0", "15.0"}, false),
 			},
 			"param_detail": {
 				Type:     schema.TypeSet,
@@ -88,9 +88,11 @@ func resourceAlicloudRdsParameterGroupCreate(d *schema.ResourceData, meta interf
 
 	request["ParameterGroupName"] = d.Get("parameter_group_name")
 	request["RegionId"] = client.RegionId
+	runtime := util.RuntimeOptions{}
+	runtime.SetAutoretry(true)
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2014-08-15"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2014-08-15"), StringPointer("AK"), nil, request, &runtime)
 		if err != nil {
 			if NeedRetry(err) {
 				wait()
@@ -142,6 +144,10 @@ func resourceAlicloudRdsParameterGroupRead(d *schema.ResourceData, meta interfac
 }
 func resourceAlicloudRdsParameterGroupUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AliyunClient)
+	conn, err := client.NewRdsClient()
+	if err != nil {
+		return WrapError(err)
+	}
 	var response map[string]interface{}
 	update := false
 	request := map[string]interface{}{
@@ -170,13 +176,11 @@ func resourceAlicloudRdsParameterGroupUpdate(d *schema.ResourceData, meta interf
 	}
 	if update {
 		action := "ModifyParameterGroup"
-		conn, err := client.NewRdsClient()
-		if err != nil {
-			return WrapError(err)
-		}
+		runtime := util.RuntimeOptions{}
+		runtime.SetAutoretry(true)
 		wait := incrementalWait(3*time.Second, 3*time.Second)
 		err = resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
-			response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2014-08-15"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+			response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2014-08-15"), StringPointer("AK"), nil, request, &runtime)
 			if err != nil {
 				if NeedRetry(err) {
 					wait()
@@ -207,9 +211,11 @@ func resourceAlicloudRdsParameterGroupDelete(d *schema.ResourceData, meta interf
 	}
 
 	request["RegionId"] = client.RegionId
+	runtime := util.RuntimeOptions{}
+	runtime.SetAutoretry(true)
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2014-08-15"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2014-08-15"), StringPointer("AK"), nil, request, &runtime)
 		if err != nil {
 			if NeedRetry(err) {
 				wait()

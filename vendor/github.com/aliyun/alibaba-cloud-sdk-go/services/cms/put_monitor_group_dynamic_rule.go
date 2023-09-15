@@ -73,17 +73,18 @@ type PutMonitorGroupDynamicRuleRequest struct {
 	*requests.RpcRequest
 	GroupRules *[]PutMonitorGroupDynamicRuleGroupRules `position:"Query" name:"GroupRules"  type:"Repeated"`
 	GroupId    requests.Integer                        `position:"Query" name:"GroupId"`
+	IsAsync    requests.Boolean                        `position:"Query" name:"IsAsync"`
 }
 
 // PutMonitorGroupDynamicRuleGroupRules is a repeated param struct in PutMonitorGroupDynamicRuleRequest
 type PutMonitorGroupDynamicRuleGroupRules struct {
-	FilterRelation string                               `name:"FilterRelation"`
-	Filters        *[]PutMonitorGroupDynamicRuleFilters `name:"Filters" type:"Repeated"`
-	Category       string                               `name:"Category"`
+	FilterRelation string                                         `name:"FilterRelation"`
+	Filters        *[]PutMonitorGroupDynamicRuleGroupRulesFilters `name:"Filters" type:"Repeated"`
+	Category       string                                         `name:"Category"`
 }
 
-// PutMonitorGroupDynamicRuleFilters is a repeated param struct in PutMonitorGroupDynamicRuleRequest
-type PutMonitorGroupDynamicRuleFilters struct {
+// PutMonitorGroupDynamicRuleGroupRulesFilters is a repeated param struct in PutMonitorGroupDynamicRuleRequest
+type PutMonitorGroupDynamicRuleGroupRulesFilters struct {
 	Function string `name:"Function"`
 	Name     string `name:"Name"`
 	Value    string `name:"Value"`
@@ -92,10 +93,10 @@ type PutMonitorGroupDynamicRuleFilters struct {
 // PutMonitorGroupDynamicRuleResponse is the response struct for api PutMonitorGroupDynamicRule
 type PutMonitorGroupDynamicRuleResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
-	Success   bool   `json:"Success" xml:"Success"`
 	Code      int    `json:"Code" xml:"Code"`
 	Message   string `json:"Message" xml:"Message"`
+	RequestId string `json:"RequestId" xml:"RequestId"`
+	Success   bool   `json:"Success" xml:"Success"`
 }
 
 // CreatePutMonitorGroupDynamicRuleRequest creates a request to invoke PutMonitorGroupDynamicRule API

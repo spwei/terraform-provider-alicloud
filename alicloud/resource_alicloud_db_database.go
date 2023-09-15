@@ -3,6 +3,7 @@ package alicloud
 import (
 	"fmt"
 	"regexp"
+	"strings"
 	"time"
 
 	util "github.com/alibabacloud-go/tea-utils/service"
@@ -42,6 +43,23 @@ func resourceAlicloudDBDatabase() *schema.Resource {
 				Optional: true,
 				Default:  "utf8",
 				ForceNew: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					if strings.ToLower(old) == strings.ToLower(new) {
+						return true
+					}
+					newArray := strings.Split(new, ",")
+					oldArray := strings.Split(old, ",")
+					if d.Id() != "" && len(oldArray) > 1 && len(newArray) == 1 && strings.ToLower(newArray[0]) == strings.ToLower(oldArray[0]) {
+						return true
+					}
+					/*
+					  SQLServer creates a database, when a non native engine character set is passed in, the SDK will assign the default character set.
+					*/
+					if old == "Chinese_PRC_CI_AS" && new == "utf8" {
+						return true
+					}
+					return false
+				},
 			},
 
 			"description": {
@@ -71,6 +89,7 @@ func resourceAlicloudDBDatabaseCreate(d *schema.ResourceData, meta interface{}) 
 		return WrapError(err)
 	}
 	runtime := util.RuntimeOptions{}
+	runtime.SetAutoretry(true)
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
 		response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2014-08-15"), StringPointer("AK"), nil, request, &runtime)
 		if err != nil {
@@ -106,7 +125,13 @@ func resourceAlicloudDBDatabaseRead(d *schema.ResourceData, meta interface{}) er
 
 	d.Set("instance_id", object["DBInstanceId"])
 	d.Set("name", object["DBName"])
-	d.Set("character_set", object["CharacterSetName"])
+	if string(PostgreSQL) == object["Engine"] {
+		var strArray = []string{object["CharacterSetName"].(string), object["Collate"].(string), object["Ctype"].(string)}
+		postgreSQLCharacterSet := strings.Join(strArray, ",")
+		d.Set("character_set", postgreSQLCharacterSet)
+	} else {
+		d.Set("character_set", object["CharacterSetName"])
+	}
 	d.Set("description", object["DBDescription"])
 
 	return nil
@@ -131,7 +156,9 @@ func resourceAlicloudDBDatabaseUpdate(d *schema.ResourceData, meta interface{}) 
 		if err != nil {
 			return WrapError(err)
 		}
-		response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2014-08-15"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+		runtime := util.RuntimeOptions{}
+		runtime.SetAutoretry(true)
+		response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2014-08-15"), StringPointer("AK"), nil, request, &runtime)
 		if err != nil {
 			return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabaCloudSdkGoERROR)
 		}
@@ -162,7 +189,9 @@ func resourceAlicloudDBDatabaseDelete(d *schema.ResourceData, meta interface{}) 
 	if err != nil {
 		return WrapError(err)
 	}
-	response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2014-08-15"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+	runtime := util.RuntimeOptions{}
+	runtime.SetAutoretry(true)
+	response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2014-08-15"), StringPointer("AK"), nil, request, &runtime)
 	if err != nil {
 		if NotFoundError(err) || IsExpectedErrors(err, []string{"InvalidDBName.NotFound"}) {
 			return nil

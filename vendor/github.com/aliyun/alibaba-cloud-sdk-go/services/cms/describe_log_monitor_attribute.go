@@ -78,9 +78,9 @@ type DescribeLogMonitorAttributeRequest struct {
 type DescribeLogMonitorAttributeResponse struct {
 	*responses.BaseResponse
 	Code       string     `json:"Code" xml:"Code"`
-	Success    bool       `json:"Success" xml:"Success"`
 	Message    string     `json:"Message" xml:"Message"`
 	RequestId  string     `json:"RequestId" xml:"RequestId"`
+	Success    bool       `json:"Success" xml:"Success"`
 	LogMonitor LogMonitor `json:"LogMonitor" xml:"LogMonitor"`
 }
 

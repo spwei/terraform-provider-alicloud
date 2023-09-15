@@ -14,7 +14,7 @@ For information about Resource Manager Policy Version and how to use it, see [Wh
 
 -> **NOTE:** Available in v1.84.0+.
 
--> **NOTE:** It is not recommended to use this resource management policy version, it is recommended to directly use the policy resource to manage your policy. Please refer to the link for usage [resource_manager_policy](https://www.terraform.io/docs/providers/alicloud/r/resource_manager_policy.html).
+-> **NOTE:** It is not recommended to use this resource management policy version, it is recommended to directly use the policy resource to manage your policy. Please refer to the link for usage [resource_manager_policy](https://www.terraform.io/docs/providers/alicloud/r/resource_manager_policy).
 
 ## Example Usage
 
@@ -22,7 +22,7 @@ Basic Usage
 
 ```terraform
 resource "alicloud_resource_manager_policy" "example" {
-  policy_name = "tftest"
+  policy_name     = "tftest"
   policy_document = <<EOF
 		{
 			"Statement": [{
@@ -36,7 +36,7 @@ resource "alicloud_resource_manager_policy" "example" {
 }
 
 resource "alicloud_resource_manager_policy_version" "example" {
-  policy_name = alicloud_resource_manager_policy.example.policy_name
+  policy_name     = alicloud_resource_manager_policy.example.policy_name
   policy_document = <<EOF
 		{
 			"Statement": [{
@@ -69,6 +69,6 @@ The following arguments are supported:
 
 Resource Manager Policy Version can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_resource_manager_policy_version.example tftest:v2
 ```

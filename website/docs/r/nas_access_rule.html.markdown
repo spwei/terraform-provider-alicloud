@@ -21,9 +21,9 @@ Basic Usage
 
 ```terraform
 resource "alicloud_nas_access_group" "foo" {
-  access_group_name  = "tf-NasConfigName"
-  access_group_type  = "Vpc"
-  description        = "tf-testAccNasConfig"
+  access_group_name = "tf-NasConfigName"
+  access_group_type = "Vpc"
+  description       = "tf-testAccNasConfig"
 }
 
 resource "alicloud_nas_access_rule" "foo" {
@@ -58,7 +58,7 @@ The following attributes are exported:
 
 Nas Access Rule can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_nas_access_rule.foo tf-testAccNasConfigName:1
 ```
 

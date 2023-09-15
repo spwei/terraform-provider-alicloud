@@ -95,8 +95,8 @@ type DescribeInstancesTag struct {
 // DescribeInstancesResponse is the response struct for api DescribeInstances
 type DescribeInstancesResponse struct {
 	*responses.BaseResponse
-	RequestId  string     `json:"RequestId" xml:"RequestId"`
 	TotalCount int64      `json:"TotalCount" xml:"TotalCount"`
+	RequestId  string     `json:"RequestId" xml:"RequestId"`
 	Instances  []Instance `json:"Instances" xml:"Instances"`
 }
 

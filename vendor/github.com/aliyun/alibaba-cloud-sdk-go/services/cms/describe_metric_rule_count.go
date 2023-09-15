@@ -78,10 +78,10 @@ type DescribeMetricRuleCountRequest struct {
 // DescribeMetricRuleCountResponse is the response struct for api DescribeMetricRuleCount
 type DescribeMetricRuleCountResponse struct {
 	*responses.BaseResponse
-	Success         bool            `json:"Success" xml:"Success"`
 	Code            string          `json:"Code" xml:"Code"`
 	Message         string          `json:"Message" xml:"Message"`
 	RequestId       string          `json:"RequestId" xml:"RequestId"`
+	Success         bool            `json:"Success" xml:"Success"`
 	MetricRuleCount MetricRuleCount `json:"MetricRuleCount" xml:"MetricRuleCount"`
 }
 

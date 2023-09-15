@@ -1,5 +1,5 @@
 ---
-subcategory: "SSL Certificates"
+subcategory: "SSL Certificates Service"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_cas_certificate"
 sidebar_current: "docs-alicloud-resource-cas-certificate"
@@ -8,6 +8,8 @@ description: |-
 ---
 
 # alicloud\_cas\_certificate
+
+-> **DEPRECATED:**  This datasource has been deprecated from version `1.129.0`. Please use new datasource [alicloud_ssl_certificates_service_certificate](https://www.terraform.io/docs/providers/alicloud/r/ssl_certificates_service_certificate).
 
 Provides a CAS Certificate resource.
 
@@ -19,7 +21,7 @@ Provides a CAS Certificate resource.
 
 ## Example Usage
 
-```
+```terraform
 # Add a new Certificate.
 resource "alicloud_cas_certificate" "cert" {
   name = "test"

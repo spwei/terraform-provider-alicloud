@@ -17,10 +17,10 @@ package ddoscoo
 
 // Conn is a nested struct in ddoscoo response
 type Conn struct {
-	Conns      int64 `json:"Conns" xml:"Conns"`
 	ActConns   int64 `json:"ActConns" xml:"ActConns"`
 	InActConns int64 `json:"InActConns" xml:"InActConns"`
-	Cps        int64 `json:"Cps" xml:"Cps"`
 	Index      int64 `json:"Index" xml:"Index"`
 	Time       int64 `json:"Time" xml:"Time"`
+	Cps        int64 `json:"Cps" xml:"Cps"`
+	Conns      int64 `json:"Conns" xml:"Conns"`
 }

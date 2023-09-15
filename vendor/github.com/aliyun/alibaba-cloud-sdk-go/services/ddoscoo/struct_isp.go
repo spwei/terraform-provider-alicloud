@@ -17,6 +17,6 @@ package ddoscoo
 
 // Isp is a nested struct in ddoscoo response
 type Isp struct {
-	IspId string `json:"IspId" xml:"IspId"`
 	Count int64  `json:"Count" xml:"Count"`
+	IspId string `json:"IspId" xml:"IspId"`
 }

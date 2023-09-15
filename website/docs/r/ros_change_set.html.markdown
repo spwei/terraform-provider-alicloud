@@ -21,11 +21,11 @@ Basic Usage
 
 ```terraform
 resource "alicloud_ros_change_set" "example" {
-  change_set_name   = "example_value"
-  stack_name        = "tf-testacc"
-  change_set_type   = "CREATE"
-  description       = "Test From Terraform"
-  template_body     = "{\"ROSTemplateFormatVersion\":\"2015-09-01\"}"
+  change_set_name = "example_value"
+  stack_name      = "tf-testacc"
+  change_set_type = "CREATE"
+  description     = "Test From Terraform"
+  template_body   = "{\"ROSTemplateFormatVersion\":\"2015-09-01\"}"
 }
 
 ```
@@ -77,6 +77,6 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/d
 
 ROS Change Set can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_ros_change_set.example <change_set_id>
 ```

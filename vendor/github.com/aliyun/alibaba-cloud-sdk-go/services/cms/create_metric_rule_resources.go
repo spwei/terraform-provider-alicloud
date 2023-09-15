@@ -79,10 +79,10 @@ type CreateMetricRuleResourcesRequest struct {
 // CreateMetricRuleResourcesResponse is the response struct for api CreateMetricRuleResources
 type CreateMetricRuleResourcesResponse struct {
 	*responses.BaseResponse
-	Success   bool   `json:"Success" xml:"Success"`
 	Code      string `json:"Code" xml:"Code"`
 	Message   string `json:"Message" xml:"Message"`
 	RequestId string `json:"RequestId" xml:"RequestId"`
+	Success   bool   `json:"Success" xml:"Success"`
 }
 
 // CreateCreateMetricRuleResourcesRequest creates a request to invoke CreateMetricRuleResources API

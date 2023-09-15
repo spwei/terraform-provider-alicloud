@@ -1,5 +1,5 @@
 ---
-subcategory: "DNS"
+subcategory: "Alidns"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_dns_instance"
 sidebar_current: "docs-alicloud-resource-dns-instance"
@@ -11,7 +11,7 @@ description: |-
 
 Create an DNS Instance resource.
 
--> DEPRECATED: This resource has been renamed to [alicloud_alidns_instance](https://www.terraform.io/docs/providers/alicloud/r/alidns_instance.html) from version 1.95.0.
+-> **DEPRECATED:** This resource has been renamed to [alicloud_alidns_instance](https://www.terraform.io/docs/providers/alicloud/r/alidns_instance) from version 1.95.0.
 
 -> **NOTE:** Available in v1.80.0+.
 
@@ -21,12 +21,12 @@ Basic Usage
 
 ```terraform
 resource "alicloud_dns_instance" "this" {
-    dns_security   = "no"
-    domain_numbers = "2"
-    period         = 1
-    renew_period   = 1
-    renewal_status = "ManualRenewal"
-    version_code   = "version_personal"
+  dns_security   = "no"
+  domain_numbers = "2"
+  period         = 1
+  renew_period   = 1
+  renewal_status = "ManualRenewal"
+  version_code   = "version_personal"
 }
 
 ```
@@ -51,6 +51,6 @@ The following arguments are supported:
 
 DNS instance be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_dns_instance.example dns-cn-v0h1ldjhfff
 ```

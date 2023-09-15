@@ -16,7 +16,7 @@ This resouce used to create a dedicated host and store its initial version. For 
 ## Example Usage
 Basic Usage
 
-```
+```terraform
 resource "alicloud_ecs_dedicated_host" "default" {
   dedicated_host_type = "ddh.g5"
   tags = {
@@ -30,20 +30,26 @@ resource "alicloud_ecs_dedicated_host" "default" {
 
 Create Prepaid DDH
 
-```
-resource "alicloud_ecs_dedicated_host" "default" {
+```terraform
+resource "alicloud_ecs_dedicated_host" "example" {
   dedicated_host_type = "ddh.g5"
   tags = {
     Create = "Terraform",
     For    = "DDH",
   }
-  description = "From_Terraform"
-  dedicated_host_name = "dedicated_host_name"
-  payment_type = "PrePaid"
-  expired_time = 1
-  sale_cycle = "Month"
+  description         = "terraform-example"
+  dedicated_host_name = "terraform-example"
+  payment_type        = "PrePaid"
+  expired_time        = 1
+  sale_cycle          = "Month"
 }
 ```
+### Deleting alicloud_ecs_dedicated_host or removing it from your configuration
+
+The alicloud_ecs_dedicated_host resource allows you to manage payment_type = "PrePaid" dedicated host, but Terraform cannot destroy it.
+Deleting the subscription resource or removing it from your configuration
+will remove it from your state file and management, but will not destroy the Dedicated Host.
+You can resume managing the subscription dedicated host via the AlibabaCloud Console.
 
 ## Argument Reference
 
@@ -68,16 +74,27 @@ The following arguments are supported:
 * `sale_cycle` - (Optional, Computed) The unit of the subscription period of the dedicated host.
 * `zone_id` - (Optional, ForceNew, Computed) The zone ID of the dedicated host. This parameter is empty by default. If you do not specify this parameter, the system automatically selects a zone.
 * `tags` - (Optional) A mapping of tags to assign to the resource.
+* `cpu_over_commit_ratio` - (Optional, Available in 1.123.1+) CPU oversold ratio. Only custom specifications g6s, c6s, r6s support setting the CPU oversold ratio.
+* `dedicated_host_cluster_id` - (Optional, Available in 1.123.1+) The dedicated host cluster ID to which the dedicated host belongs.
+* `min_quantity` - (Optional, Available in 1.123.1+) Specify the minimum purchase quantity of a dedicated host.
 
 ## Attributes Reference
 
 * `id` - The ID of the dedicated host.
 * `status` - The status of the dedicated host.
 
+### Timeouts
+
+The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
+
+* `create` - (Defaults to 11 mins) Used when create the dedicated host.
+* `delete` - (Defaults to 1 mins) Used when delete the dedicated host.
+* `update` - (Defaults to 11 mins) Used when update the dedicated host.
+
 ## Import
 
 Ecs dedicated host can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_ecs_dedicated_host.default dh-2zedmxxxx
 ```

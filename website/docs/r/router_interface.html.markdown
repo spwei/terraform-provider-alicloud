@@ -1,5 +1,5 @@
 ---
-subcategory: "VPC"
+subcategory: "Express Connect"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_router_interface"
 sidebar_current: "docs-alicloud-resource-router-interface"
@@ -11,16 +11,18 @@ description: |-
 
 Provides a VPC router interface resource aim to build a connection between two VPCs.
 
+-> **DEPRECATED:**  This resource  has been deprecated from version `1.199.0`. Please use new resource [alicloud_express_connect_router_interface](https://registry.terraform.io/providers/aliyun/alicloud/latest/docs/resources/express_connect_router_interface).
+
 -> **NOTE:** Only one pair of connected router interfaces can exist between two routers. Up to 5 router interfaces can be created for each router and each account.
 
--> **NOTE:** The router interface is not connected when it is created. It can be connected by means of resource [alicloud_router_interface_connection](https://www.terraform.io/docs/providers/alicloud/r/router_interface_connection.html).
+-> **NOTE:** The router interface is not connected when it is created. It can be connected by means of resource [alicloud_router_interface_connection](https://www.terraform.io/docs/providers/alicloud/r/router_interface_connection).
 
 
 ## Example Usage
 
-```
+```terraform
 resource "alicloud_vpc" "foo" {
-  name       = "tf_test_foo12345"
+  vpc_name   = "tf_test_foo12345"
   cidr_block = "172.16.0.0/12"
 }
 
@@ -83,7 +85,7 @@ The following attributes are exported:
 
 The router interface can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_router_interface.interface ri-abc123456
 ```
 

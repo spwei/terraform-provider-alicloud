@@ -84,10 +84,12 @@ type DescribeInstancesRequest struct {
 	InstanceType         string                  `position:"Query" name:"InstanceType"`
 	EditionType          string                  `position:"Query" name:"EditionType"`
 	Tag                  *[]DescribeInstancesTag `position:"Query" name:"Tag"  type:"Repeated"`
+	WithoutTair          requests.Boolean        `position:"Query" name:"WithoutTair"`
 	InstanceStatus       string                  `position:"Query" name:"InstanceStatus"`
 	ResourceOwnerAccount string                  `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string                  `position:"Query" name:"OwnerAccount"`
 	GlobalInstance       requests.Boolean        `position:"Query" name:"GlobalInstance"`
+	PrivateIp            string                  `position:"Query" name:"PrivateIp"`
 	OwnerId              requests.Integer        `position:"Query" name:"OwnerId"`
 	VSwitchId            string                  `position:"Query" name:"VSwitchId"`
 	VpcCloudInsInfo      requests.Integer        `position:"Query" name:"VpcCloudInsInfo"`

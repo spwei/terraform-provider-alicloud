@@ -78,8 +78,8 @@ type DeleteSceneDefensePolicyRequest struct {
 // DeleteSceneDefensePolicyResponse is the response struct for api DeleteSceneDefensePolicy
 type DeleteSceneDefensePolicyResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
 	Success   bool   `json:"Success" xml:"Success"`
+	RequestId string `json:"RequestId" xml:"RequestId"`
 }
 
 // CreateDeleteSceneDefensePolicyRequest creates a request to invoke DeleteSceneDefensePolicy API

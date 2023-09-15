@@ -1,5 +1,5 @@
 ---
-subcategory: "Auto Scaling(ESS)"
+subcategory: "Auto Scaling"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_ess_notification"
 sidebar_current: "docs-alicloud-resource-ess-notification"
@@ -7,16 +7,16 @@ description: |-
   Provides a ESS notification resource.
 ---
 
-# alicloud\_ess\_notification
+# alicloud_ess_notification
 
 Provides a ESS notification resource. More about Ess notification, see [Autoscaling Notification](https://www.alibabacloud.com/help/doc-detail/71114.htm).
 
--> **NOTE:** Available in 1.55.0+
+-> **NOTE:** Available since v1.55.0.
 
 ## Example Usage
-```
+```terraform
 variable "name" {
-  default = "tf-testAccEssNotification-%d"
+  default = "terraform-example"
 }
 
 data "alicloud_regions" "default" {
@@ -32,15 +32,15 @@ data "alicloud_zones" "default" {
 }
 
 resource "alicloud_vpc" "default" {
-  vpc_name       = var.name
+  vpc_name   = var.name
   cidr_block = "172.16.0.0/16"
 }
 
 resource "alicloud_vswitch" "default" {
-  vpc_id            = alicloud_vpc.default.id
-  cidr_block        = "172.16.0.0/24"
-  zone_id           = data.alicloud_zones.default.zones[0].id
-  vswitch_name      = var.name
+  vpc_id       = alicloud_vpc.default.id
+  cidr_block   = "172.16.0.0/24"
+  zone_id      = data.alicloud_zones.default.zones[0].id
+  vswitch_name = var.name
 }
 
 resource "alicloud_ess_scaling_group" "default" {
@@ -83,6 +83,6 @@ The following attributes are exported:
 
 Ess notification can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_ess_notification.example 'scaling_group_id:notification_arn'
 ```

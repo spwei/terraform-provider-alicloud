@@ -71,6 +71,7 @@ func (client *Client) DescribeWebRulesWithCallback(request *DescribeWebRulesRequ
 // DescribeWebRulesRequest is the request struct for api DescribeWebRules
 type DescribeWebRulesRequest struct {
 	*requests.RpcRequest
+	Cname              string           `position:"Query" name:"Cname"`
 	PageNumber         requests.Integer `position:"Query" name:"PageNumber"`
 	ResourceGroupId    string           `position:"Query" name:"ResourceGroupId"`
 	SourceIp           string           `position:"Query" name:"SourceIp"`
@@ -83,9 +84,9 @@ type DescribeWebRulesRequest struct {
 // DescribeWebRulesResponse is the response struct for api DescribeWebRules
 type DescribeWebRulesResponse struct {
 	*responses.BaseResponse
-	RequestId  string    `json:"RequestId" xml:"RequestId"`
-	TotalCount int64     `json:"TotalCount" xml:"TotalCount"`
-	WebRules   []WebRule `json:"WebRules" xml:"WebRules"`
+	TotalCount int64                       `json:"TotalCount" xml:"TotalCount"`
+	RequestId  string                      `json:"RequestId" xml:"RequestId"`
+	WebRules   []WebRuleInDescribeWebRules `json:"WebRules" xml:"WebRules"`
 }
 
 // CreateDescribeWebRulesRequest creates a request to invoke DescribeWebRules API

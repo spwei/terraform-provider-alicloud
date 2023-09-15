@@ -72,6 +72,7 @@ func (client *Client) ListSwimmingLaneGroupWithCallback(request *ListSwimmingLan
 type ListSwimmingLaneGroupRequest struct {
 	*requests.RoaRequest
 	LogicalRegionId string `position:"Query" name:"LogicalRegionId"`
+	GroupId         string `position:"Query" name:"GroupId"`
 }
 
 // ListSwimmingLaneGroupResponse is the response struct for api ListSwimmingLaneGroup

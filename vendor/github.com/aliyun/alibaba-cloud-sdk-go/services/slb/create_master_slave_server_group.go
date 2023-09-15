@@ -71,22 +71,29 @@ func (client *Client) CreateMasterSlaveServerGroupWithCallback(request *CreateMa
 // CreateMasterSlaveServerGroupRequest is the request struct for api CreateMasterSlaveServerGroup
 type CreateMasterSlaveServerGroupRequest struct {
 	*requests.RpcRequest
-	AccessKeyId                string           `position:"Query" name:"access_key_id"`
-	ResourceOwnerId            requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	MasterSlaveBackendServers  string           `position:"Query" name:"MasterSlaveBackendServers"`
-	ResourceOwnerAccount       string           `position:"Query" name:"ResourceOwnerAccount"`
-	OwnerAccount               string           `position:"Query" name:"OwnerAccount"`
-	MasterSlaveServerGroupName string           `position:"Query" name:"MasterSlaveServerGroupName"`
-	OwnerId                    requests.Integer `position:"Query" name:"OwnerId"`
-	Tags                       string           `position:"Query" name:"Tags"`
-	LoadBalancerId             string           `position:"Query" name:"LoadBalancerId"`
+	AccessKeyId                string                             `position:"Query" name:"access_key_id"`
+	ResourceOwnerId            requests.Integer                   `position:"Query" name:"ResourceOwnerId"`
+	MasterSlaveBackendServers  string                             `position:"Query" name:"MasterSlaveBackendServers"`
+	Tag                        *[]CreateMasterSlaveServerGroupTag `position:"Query" name:"Tag"  type:"Repeated"`
+	ResourceOwnerAccount       string                             `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount               string                             `position:"Query" name:"OwnerAccount"`
+	MasterSlaveServerGroupName string                             `position:"Query" name:"MasterSlaveServerGroupName"`
+	OwnerId                    requests.Integer                   `position:"Query" name:"OwnerId"`
+	Tags                       string                             `position:"Query" name:"Tags"`
+	LoadBalancerId             string                             `position:"Query" name:"LoadBalancerId"`
+}
+
+// CreateMasterSlaveServerGroupTag is a repeated param struct in CreateMasterSlaveServerGroupRequest
+type CreateMasterSlaveServerGroupTag struct {
+	Value string `name:"Value"`
+	Key   string `name:"Key"`
 }
 
 // CreateMasterSlaveServerGroupResponse is the response struct for api CreateMasterSlaveServerGroup
 type CreateMasterSlaveServerGroupResponse struct {
 	*responses.BaseResponse
-	RequestId                 string                                                  `json:"RequestId" xml:"RequestId"`
 	MasterSlaveServerGroupId  string                                                  `json:"MasterSlaveServerGroupId" xml:"MasterSlaveServerGroupId"`
+	RequestId                 string                                                  `json:"RequestId" xml:"RequestId"`
 	MasterSlaveBackendServers MasterSlaveBackendServersInCreateMasterSlaveServerGroup `json:"MasterSlaveBackendServers" xml:"MasterSlaveBackendServers"`
 }
 

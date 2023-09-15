@@ -1,5 +1,5 @@
 ---
-subcategory: "VPC"
+subcategory: "NAT Gateway"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_forward_entry"
 sidebar_current: "docs-alicloud-resource-vpc"
@@ -30,36 +30,39 @@ resource "alicloud_vpc" "default" {
 }
 
 resource "alicloud_vswitch" "default" {
-  vpc_id        = alicloud_vpc.default.id
-  cidr_block    = "172.16.0.0/21"
-  zone_id       = data.alicloud_zones.default.zones[0].id
-  vswitch_name  = var.name
+  vpc_id       = alicloud_vpc.default.id
+  cidr_block   = "172.16.0.0/21"
+  zone_id      = data.alicloud_zones.default.zones[0].id
+  vswitch_name = var.name
 }
 
 resource "alicloud_nat_gateway" "default" {
-  vpc_id        = alicloud_vpc.default.id
-  specification = "Small"
-  name          = var.name
+  vpc_id               = alicloud_vpc.default.id
+  internet_charge_type = "PayByLcu"
+  nat_gateway_name     = var.name
+  nat_type             = "Enhanced"
+  vswitch_id           = alicloud_vswitch.default.id
 }
 
-resource "alicloud_eip" "default" {
-  name = var.name
+resource "alicloud_eip_address" "default" {
+  address_name = var.name
 }
 
 resource "alicloud_eip_association" "default" {
-  allocation_id = alicloud_eip.default.id
+  allocation_id = alicloud_eip_address.default.id
   instance_id   = alicloud_nat_gateway.default.id
 }
 
 resource "alicloud_forward_entry" "default" {
   forward_table_id = alicloud_nat_gateway.default.forward_table_ids
-  external_ip      = alicloud_eip.default.ip_address
+  external_ip      = alicloud_eip_address.default.ip_address
   external_port    = "80"
   ip_protocol      = "tcp"
   internal_ip      = "172.16.0.3"
   internal_port    = "8080"
 }
 ```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -67,9 +70,9 @@ The following arguments are supported:
 * `forward_table_id` - (Required, ForceNew) The value can get from `alicloud_nat_gateway` Attributes "forward_table_ids".
 * `name` - (Optional, Available in 1.44.0+) Field `name` has been deprecated from provider version 1.119.1. New field `forward_entry_name` instead.
 * `forward_entry_name` - (Optional, Available in 1.119.1+) The name of forward entry.
-* `external_ip` - (Required, ForceNew) The external ip address, the ip must along bandwidth package public ip which `alicloud_nat_gateway` argument `bandwidth_packages`.
+* `external_ip` - (Required) The external ip address, the ip must along bandwidth package public ip which `alicloud_nat_gateway` argument `bandwidth_packages`.
 * `external_port` - (Required) The external port, valid value is 1~65535|any.
-* `ip_protocol` - (Required) The ip protocal, valid value is tcp|udp|any.
+* `ip_protocol` - (Required) The ip protocol, valid value is tcp|udp|any.
 * `internal_ip` - (Required) The internal ip, must a private ip.
 * `internal_port` - (Required) The internal port, valid value is 1~65535|any.
 * `port_break` - (Optional, Available in 1.119.1+) Specifies whether to remove limits on the port range. Default value is `false`.
@@ -97,6 +100,6 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/d
 
 Forward Entry can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_forward_entry.foo ftb-1aece3:fwd-232ce2
 ```

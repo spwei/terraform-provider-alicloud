@@ -7,13 +7,13 @@ description: |-
   Provides a Alicloud Cloud Storage Gateway Storage Bundle resource.
 ---
 
-# alicloud\_cloud\_storage\_gateway\_storage\_bundle
+# alicloud_cloud_storage_gateway_storage_bundle
 
 Provides a Cloud Storage Gateway Storage Bundle resource.
 
-For information about Cloud Storage Gateway Storage Bundle and how to use it, see [What is Storage Bundle](https://www.alibabacloud.com/help/en/doc-detail/53972.htm).
+For information about Cloud Storage Gateway Storage Bundle and how to use it, see [What is Storage Bundle](https://www.alibabacloud.com/help/en/cloud-storage-gateway/latest/createstoragebundle).
 
--> **NOTE:** Available in v1.116.0+.
+-> **NOTE:** Available since v1.116.0.
 
 ## Example Usage
 
@@ -43,6 +43,6 @@ The following attributes are exported:
 
 Cloud Storage Gateway Storage Bundle can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_cloud_storage_gateway_storage_bundle.example <id>
 ```

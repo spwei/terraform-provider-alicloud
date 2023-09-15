@@ -82,8 +82,8 @@ type CreateCmsCallNumOrderRequest struct {
 // CreateCmsCallNumOrderResponse is the response struct for api CreateCmsCallNumOrder
 type CreateCmsCallNumOrderResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
 	OrderId   string `json:"OrderId" xml:"OrderId"`
+	RequestId string `json:"RequestId" xml:"RequestId"`
 }
 
 // CreateCreateCmsCallNumOrderRequest creates a request to invoke CreateCmsCallNumOrder API

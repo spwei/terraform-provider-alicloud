@@ -90,11 +90,11 @@ type QueryEvaluateListRequest struct {
 // QueryEvaluateListResponse is the response struct for api QueryEvaluateList
 type QueryEvaluateListResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
-	Success   bool   `json:"Success" xml:"Success"`
-	Code      string `json:"Code" xml:"Code"`
-	Message   string `json:"Message" xml:"Message"`
-	Data      Data   `json:"Data" xml:"Data"`
+	Code      string                  `json:"Code" xml:"Code"`
+	Message   string                  `json:"Message" xml:"Message"`
+	RequestId string                  `json:"RequestId" xml:"RequestId"`
+	Success   bool                    `json:"Success" xml:"Success"`
+	Data      DataInQueryEvaluateList `json:"Data" xml:"Data"`
 }
 
 // CreateQueryEvaluateListRequest creates a request to invoke QueryEvaluateList API
@@ -102,7 +102,7 @@ func CreateQueryEvaluateListRequest() (request *QueryEvaluateListRequest) {
 	request = &QueryEvaluateListRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "QueryEvaluateList", "", "")
+	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "QueryEvaluateList", "bssopenapi", "openAPI")
 	request.Method = requests.POST
 	return
 }

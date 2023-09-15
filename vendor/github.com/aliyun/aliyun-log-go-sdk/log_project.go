@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -44,6 +43,7 @@ type LogProject struct {
 	SecurityToken   string
 	UsingHTTP       bool   // default https
 	UserAgent       string // default defaultLogUserAgent
+	AuthVersion     AuthVersionType
 	baseURL         string
 	retryTimeout    time.Duration
 	httpClient      *http.Client
@@ -71,7 +71,7 @@ func (p *LogProject) WithToken(token string) (*LogProject, error) {
 
 // WithRequestTimeout with custom timeout for a request
 func (p *LogProject) WithRequestTimeout(timeout time.Duration) *LogProject {
-	if p.httpClient == defaultHttpClient {
+	if p.httpClient == defaultHttpClient || p.httpClient == nil {
 		p.httpClient = &http.Client{
 			Timeout: timeout,
 		}
@@ -1079,7 +1079,9 @@ func (p *LogProject) DeleteLogging() (err error) {
 
 func (p *LogProject) init() {
 	if p.retryTimeout == time.Duration(0) {
-		p.httpClient = defaultHttpClient
+		if p.httpClient == nil {
+			p.httpClient = defaultHttpClient
+		}
 		p.retryTimeout = defaultRetryTimeout
 		p.parseEndpoint()
 	}
@@ -1111,11 +1113,17 @@ func (p *LogProject) parseEndpoint() {
 	if ipRegex.MatchString(host) { // ip format
 		// use direct ip proxy
 		url, _ := url.Parse(fmt.Sprintf("%s%s", scheme, host))
-		p.httpClient = &http.Client{
-			Transport: &http.Transport{
+		if p.httpClient == nil || p.httpClient == defaultHttpClient {
+			p.httpClient = &http.Client{
+				Transport: &http.Transport{
+					Proxy: http.ProxyURL(url),
+				},
+				Timeout: defaultRequestTimeout,
+			}
+		} else {
+			p.httpClient.Transport = &http.Transport{
 				Proxy: http.ProxyURL(url),
-			},
-			Timeout: defaultRequestTimeout,
+			}
 		}
 
 	}

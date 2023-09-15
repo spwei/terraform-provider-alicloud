@@ -80,13 +80,13 @@ type DescribeLogMonitorListRequest struct {
 // DescribeLogMonitorListResponse is the response struct for api DescribeLogMonitorList
 type DescribeLogMonitorListResponse struct {
 	*responses.BaseResponse
+	RequestId      string       `json:"RequestId" xml:"RequestId"`
+	Success        bool         `json:"Success" xml:"Success"`
 	Code           string       `json:"Code" xml:"Code"`
 	Message        string       `json:"Message" xml:"Message"`
-	Success        bool         `json:"Success" xml:"Success"`
-	RequestId      string       `json:"RequestId" xml:"RequestId"`
-	Total          int64        `json:"Total" xml:"Total"`
-	PageNumber     int          `json:"PageNumber" xml:"PageNumber"`
 	PageSize       int          `json:"PageSize" xml:"PageSize"`
+	PageNumber     int          `json:"PageNumber" xml:"PageNumber"`
+	Total          int64        `json:"Total" xml:"Total"`
 	LogMonitorList []LogMonitor `json:"LogMonitorList" xml:"LogMonitorList"`
 }
 

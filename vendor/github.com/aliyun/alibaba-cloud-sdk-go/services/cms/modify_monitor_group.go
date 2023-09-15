@@ -81,10 +81,10 @@ type ModifyMonitorGroupRequest struct {
 // ModifyMonitorGroupResponse is the response struct for api ModifyMonitorGroup
 type ModifyMonitorGroupResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
-	Success   bool   `json:"Success" xml:"Success"`
 	Code      int    `json:"Code" xml:"Code"`
 	Message   string `json:"Message" xml:"Message"`
+	RequestId string `json:"RequestId" xml:"RequestId"`
+	Success   bool   `json:"Success" xml:"Success"`
 }
 
 // CreateModifyMonitorGroupRequest creates a request to invoke ModifyMonitorGroup API

@@ -81,8 +81,8 @@ type CreateSceneDefensePolicyRequest struct {
 // CreateSceneDefensePolicyResponse is the response struct for api CreateSceneDefensePolicy
 type CreateSceneDefensePolicyResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
 	Success   bool   `json:"Success" xml:"Success"`
+	RequestId string `json:"RequestId" xml:"RequestId"`
 }
 
 // CreateCreateSceneDefensePolicyRequest creates a request to invoke CreateSceneDefensePolicy API

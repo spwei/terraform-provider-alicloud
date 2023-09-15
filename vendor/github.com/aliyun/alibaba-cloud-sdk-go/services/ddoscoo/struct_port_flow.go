@@ -17,13 +17,13 @@ package ddoscoo
 
 // PortFlow is a nested struct in ddoscoo response
 type PortFlow struct {
-	AttackBps int64  `json:"AttackBps" xml:"AttackBps"`
-	AttackPps int64  `json:"AttackPps" xml:"AttackPps"`
-	OutPps    int64  `json:"OutPps" xml:"OutPps"`
 	Index     int64  `json:"Index" xml:"Index"`
 	Time      int64  `json:"Time" xml:"Time"`
-	InBps     int64  `json:"InBps" xml:"InBps"`
-	OutBps    int64  `json:"OutBps" xml:"OutBps"`
 	InPps     int64  `json:"InPps" xml:"InPps"`
+	InBps     int64  `json:"InBps" xml:"InBps"`
 	Region    string `json:"Region" xml:"Region"`
+	OutPps    int64  `json:"OutPps" xml:"OutPps"`
+	AttackPps int64  `json:"AttackPps" xml:"AttackPps"`
+	OutBps    int64  `json:"OutBps" xml:"OutBps"`
+	AttackBps int64  `json:"AttackBps" xml:"AttackBps"`
 }

@@ -75,18 +75,18 @@ type DescribePortConnsCountRequest struct {
 	ResourceGroupId string           `position:"Query" name:"ResourceGroupId"`
 	SourceIp        string           `position:"Query" name:"SourceIp"`
 	EndTime         requests.Integer `position:"Query" name:"EndTime"`
-	InstanceIds     *[]string        `position:"Query" name:"InstanceIds"  type:"Repeated"`
 	Port            string           `position:"Query" name:"Port"`
+	InstanceIds     *[]string        `position:"Query" name:"InstanceIds"  type:"Repeated"`
 }
 
 // DescribePortConnsCountResponse is the response struct for api DescribePortConnsCount
 type DescribePortConnsCountResponse struct {
 	*responses.BaseResponse
-	RequestId  string `json:"RequestId" xml:"RequestId"`
-	Conns      int64  `json:"Conns" xml:"Conns"`
-	ActConns   int64  `json:"ActConns" xml:"ActConns"`
 	InActConns int64  `json:"InActConns" xml:"InActConns"`
+	ActConns   int64  `json:"ActConns" xml:"ActConns"`
+	RequestId  string `json:"RequestId" xml:"RequestId"`
 	Cps        int64  `json:"Cps" xml:"Cps"`
+	Conns      int64  `json:"Conns" xml:"Conns"`
 }
 
 // CreateDescribePortConnsCountRequest creates a request to invoke DescribePortConnsCount API

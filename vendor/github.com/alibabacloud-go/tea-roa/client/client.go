@@ -50,6 +50,10 @@ type Config struct {
 	// Deprecated
 	// credential type
 	Type *string `json:"type,omitempty" xml:"type,omitempty"`
+	// source ip
+	SourceIp *string `json:"sourceIp,omitempty" xml:"sourceIp,omitempty"`
+	// secure transport
+	SecureTransport *string `json:"secureTransport,omitempty" xml:"secureTransport,omitempty"`
 }
 
 func (s Config) String() string {
@@ -145,23 +149,35 @@ func (s *Config) SetType(v string) *Config {
 	return s
 }
 
+func (s *Config) SetSourceIp(v string) *Config {
+	s.SourceIp = &v
+	return s
+}
+
+func (s *Config) SetSecureTransport(v string) *Config {
+	s.SecureTransport = &v
+	return s
+}
+
 type Client struct {
-	Protocol       *string
-	ReadTimeout    *int
-	ConnectTimeout *int
-	HttpProxy      *string
-	HttpsProxy     *string
-	NoProxy        *string
-	MaxIdleConns   *int
-	EndpointHost   *string
-	Network        *string
-	EndpointRule   *string
-	EndpointMap    map[string]*string
-	Suffix         *string
-	ProductId      *string
-	RegionId       *string
-	UserAgent      *string
-	Credential     credential.Credential
+	Protocol        *string
+	ReadTimeout     *int
+	ConnectTimeout  *int
+	HttpProxy       *string
+	HttpsProxy      *string
+	NoProxy         *string
+	MaxIdleConns    *int
+	EndpointHost    *string
+	Network         *string
+	EndpointRule    *string
+	EndpointMap     map[string]*string
+	Suffix          *string
+	ProductId       *string
+	RegionId        *string
+	UserAgent       *string
+	SourceIp        *string
+	SecureTransport *string
+	Credential      credential.Credential
 }
 
 /**
@@ -215,6 +231,8 @@ func (client *Client) Init(config *Config) (_err error) {
 		return _err
 	}
 
+	client.SourceIp = config.SourceIp
+	client.SecureTransport = config.SecureTransport
 	client.RegionId = config.RegionId
 	client.Protocol = config.Protocol
 	client.EndpointHost = config.Endpoint
@@ -223,6 +241,7 @@ func (client *Client) Init(config *Config) (_err error) {
 	client.HttpProxy = config.HttpProxy
 	client.HttpsProxy = config.HttpsProxy
 	client.MaxIdleConns = config.MaxIdleConns
+	client.UserAgent = config.UserAgent
 	return nil
 }
 
@@ -288,6 +307,14 @@ func (client *Client) DoRequest(version *string, protocol *string, method *strin
 				"user-agent":              util.GetUserAgent(client.UserAgent),
 				// x-sdk-client': helper.DEFAULT_CLIENT
 			}, headers)
+			if !tea.BoolValue(util.IsUnset(client.SourceIp)) {
+				request_.Headers["x-acs-source-ip"] = client.SourceIp
+			}
+
+			if !tea.BoolValue(util.IsUnset(client.SecureTransport)) {
+				request_.Headers["x-acs-secure-transport"] = client.SecureTransport
+			}
+
 			if !tea.BoolValue(util.IsUnset(body)) {
 				request_.Body = tea.ToReader(util.ToJSONString(body))
 				request_.Headers["content-type"] = tea.String("application/json; charset=utf-8")
@@ -341,10 +368,12 @@ func (client *Client) DoRequest(version *string, protocol *string, method *strin
 
 			if tea.BoolValue(util.Is4xx(response_.StatusCode)) || tea.BoolValue(util.Is5xx(response_.StatusCode)) {
 				err := util.AssertAsMap(result)
+				err["_headers"] = response_.Headers
 				_err = tea.NewSDKError(map[string]interface{}{
-					"code":    tea.ToString(DefaultAny(err["Code"], err["code"])),
-					"message": "code: " + tea.ToString(tea.IntValue(response_.StatusCode)) + ", " + tea.ToString(DefaultAny(err["Message"], err["message"])) + " request id: " + tea.ToString(DefaultAny(err["RequestId"], err["requestId"])),
-					"data":    err,
+					"code":       tea.ToString(DefaultAny(err["Code"], err["code"])),
+					"statusCode": tea.IntValue(response_.StatusCode),
+					"message":    "code: " + tea.ToString(tea.IntValue(response_.StatusCode)) + ", " + tea.ToString(DefaultAny(err["Message"], err["message"])) + " request id: " + tea.ToString(DefaultAny(err["RequestId"], err["requestId"])),
+					"data":       err,
 				})
 				return _result, _err
 			}
@@ -354,6 +383,7 @@ func (client *Client) DoRequest(version *string, protocol *string, method *strin
 				"headers": response_.Headers,
 				"body":    result,
 			}, &_result)
+			_result["_headers"] = response_.Headers
 			return _result, _err
 		}()
 		if !tea.BoolValue(tea.Retryable(_err)) {
@@ -428,6 +458,14 @@ func (client *Client) DoRequestWithAction(action *string, version *string, proto
 				"user-agent":              util.GetUserAgent(client.UserAgent),
 				// x-sdk-client': helper.DEFAULT_CLIENT
 			}, headers)
+			if !tea.BoolValue(util.IsUnset(client.SourceIp)) {
+				request_.Headers["x-acs-source-ip"] = client.SourceIp
+			}
+
+			if !tea.BoolValue(util.IsUnset(client.SecureTransport)) {
+				request_.Headers["x-acs-secure-transport"] = client.SecureTransport
+			}
+
 			if !tea.BoolValue(util.IsUnset(body)) {
 				request_.Body = tea.ToReader(util.ToJSONString(body))
 				request_.Headers["content-type"] = tea.String("application/json; charset=utf-8")
@@ -481,10 +519,12 @@ func (client *Client) DoRequestWithAction(action *string, version *string, proto
 
 			if tea.BoolValue(util.Is4xx(response_.StatusCode)) || tea.BoolValue(util.Is5xx(response_.StatusCode)) {
 				err := util.AssertAsMap(result)
+				err["_headers"] = response_.Headers
 				_err = tea.NewSDKError(map[string]interface{}{
-					"code":    tea.ToString(DefaultAny(err["Code"], err["code"])),
-					"message": "code: " + tea.ToString(tea.IntValue(response_.StatusCode)) + ", " + tea.ToString(DefaultAny(err["Message"], err["message"])) + " request id: " + tea.ToString(DefaultAny(err["RequestId"], err["requestId"])),
-					"data":    err,
+					"code":       tea.ToString(DefaultAny(err["Code"], err["code"])),
+					"statusCode": tea.IntValue(response_.StatusCode),
+					"message":    "code: " + tea.ToString(tea.IntValue(response_.StatusCode)) + ", " + tea.ToString(DefaultAny(err["Message"], err["message"])) + " request id: " + tea.ToString(DefaultAny(err["RequestId"], err["requestId"])),
+					"data":       err,
 				})
 				return _result, _err
 			}
@@ -494,6 +534,7 @@ func (client *Client) DoRequestWithAction(action *string, version *string, proto
 				"headers": response_.Headers,
 				"body":    result,
 			}, &_result)
+			_result["_headers"] = response_.Headers
 			return _result, _err
 		}()
 		if !tea.BoolValue(tea.Retryable(_err)) {
@@ -566,6 +607,14 @@ func (client *Client) DoRequestWithForm(version *string, protocol *string, metho
 				"user-agent":              util.GetUserAgent(client.UserAgent),
 				// x-sdk-client': helper.DEFAULT_CLIENT
 			}, headers)
+			if !tea.BoolValue(util.IsUnset(client.SourceIp)) {
+				request_.Headers["x-acs-source-ip"] = client.SourceIp
+			}
+
+			if !tea.BoolValue(util.IsUnset(client.SecureTransport)) {
+				request_.Headers["x-acs-secure-transport"] = client.SecureTransport
+			}
+
 			if !tea.BoolValue(util.IsUnset(body)) {
 				request_.Body = tea.ToReader(roautil.ToForm(body))
 				request_.Headers["content-type"] = tea.String("application/x-www-form-urlencoded")
@@ -619,10 +668,12 @@ func (client *Client) DoRequestWithForm(version *string, protocol *string, metho
 
 			if tea.BoolValue(util.Is4xx(response_.StatusCode)) || tea.BoolValue(util.Is5xx(response_.StatusCode)) {
 				err := util.AssertAsMap(result)
+				err["_headers"] = response_.Headers
 				_err = tea.NewSDKError(map[string]interface{}{
-					"code":    tea.ToString(DefaultAny(err["Code"], err["code"])),
-					"message": "code: " + tea.ToString(tea.IntValue(response_.StatusCode)) + ", " + tea.ToString(DefaultAny(err["Message"], err["message"])) + " request id: " + tea.ToString(DefaultAny(err["RequestId"], err["requestId"])),
-					"data":    err,
+					"code":       tea.ToString(DefaultAny(err["Code"], err["code"])),
+					"statusCode": tea.IntValue(response_.StatusCode),
+					"message":    "code: " + tea.ToString(tea.IntValue(response_.StatusCode)) + ", " + tea.ToString(DefaultAny(err["Message"], err["message"])) + " request id: " + tea.ToString(DefaultAny(err["RequestId"], err["requestId"])),
+					"data":       err,
 				})
 				return _result, _err
 			}
@@ -632,6 +683,7 @@ func (client *Client) DoRequestWithForm(version *string, protocol *string, metho
 				"headers": response_.Headers,
 				"body":    result,
 			}, &_result)
+			_result["_headers"] = response_.Headers
 			return _result, _err
 		}()
 		if !tea.BoolValue(tea.Retryable(_err)) {

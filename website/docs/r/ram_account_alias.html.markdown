@@ -7,14 +7,15 @@ description: |-
   Provides a RAM cloud account alias.
 ---
 
-# alicloud\_ram\_account\_alias
+# alicloud_ram_account_alias
 
 Provides a RAM cloud account alias.
 
+-> **NOTE:** Available since v1.0.0+.
 
 ## Example Usage
 
-```
+```terraform
 # Create a alias for cloud account.
 resource "alicloud_ram_account_alias" "alias" {
   account_alias = "hallo"
@@ -31,10 +32,9 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `id` - The account alias ID, it's set to `account_alias`.
-* `account_alias` - The account alias.
 
 ## Import
 RAM account alias can be imported using the id, e.g.
-```
+```shell
 $ terraform import alicloud_ram_account_alias.example my-alias
 ```

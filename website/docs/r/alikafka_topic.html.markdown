@@ -1,5 +1,5 @@
 ---
-subcategory: "Alikafka"
+subcategory: "AliKafka"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_alikafka_topic"
 sidebar_current: "docs-alicloud-resource-alikafka-topic"
@@ -7,20 +7,20 @@ description: |-
   Provides a Alicloud ALIKAFKA Topic resource.
 ---
 
-# alicloud\_alikafka\_topic
+# alicloud_alikafka_topic
 
-Provides an ALIKAFKA topic resource.
+Provides an ALIKAFKA topic resource, see [What is Alikafka topic ](https://www.alibabacloud.com/help/en/message-queue-for-apache-kafka/latest/api-doc-alikafka-2019-09-16-api-doc-createtopic).
 
--> **NOTE:** Available in 1.56.0+
+-> **NOTE:** Available since v1.56.0.
 
 -> **NOTE:**  Only the following regions support create alikafka topic.
-[`cn-hangzhou`,`cn-beijing`,`cn-shenzhen`,`cn-shanghai`,`cn-qingdao`,`cn-hongkong`,`cn-huhehaote`,`cn-zhangjiakou`,`ap-southeast-1`,`ap-south-1`,`ap-southeast-5`]
+[`cn-hangzhou`,`cn-beijing`,`cn-shenzhen`,`cn-shanghai`,`cn-qingdao`,`cn-hongkong`,`cn-huhehaote`,`cn-zhangjiakou`,`cn-chengdu`,`cn-heyuan`,`ap-southeast-1`,`ap-southeast-3`,`ap-southeast-5`,`ap-south-1`,`ap-northeast-1`,`eu-central-1`,`eu-west-1`,`us-west-1`,`us-east-1`]
 
 ## Example Usage
 
 Basic Usage
 
-```
+```terraform
 data "alicloud_zones" "default" {
   available_resource_creation = "VSwitch"
 }
@@ -30,28 +30,24 @@ resource "alicloud_vpc" "default" {
 }
 
 resource "alicloud_vswitch" "default" {
-  vpc_id            = alicloud_vpc.default.id
-  cidr_block        = "172.16.0.0/24"
-  zone_id           = data.alicloud_zones.default.zones[0].id
+  vpc_id     = alicloud_vpc.default.id
+  cidr_block = "172.16.0.0/24"
+  zone_id    = data.alicloud_zones.default.zones[0].id
 }
 
 resource "alicloud_alikafka_instance" "default" {
-  name        = "tf-testacc-alikafkainstance"
-  topic_quota = "50"
-  disk_type   = "1"
-  disk_size   = "500"
-  deploy_type = "5"
-  io_max      = "20"
-  vswitch_id  = alicloud_vswitch.default.id
-}
-
-variable "topic" {
-  default = "alikafkaTopicName"
+  name          = "tf-example"
+  partition_num = "50"
+  disk_type     = "1"
+  disk_size     = "500"
+  deploy_type   = "5"
+  io_max        = "20"
+  vswitch_id    = alicloud_vswitch.default.id
 }
 
 resource "alicloud_alikafka_topic" "default" {
   instance_id   = alicloud_alikafka_instance.default.id
-  topic         = var.topic
+  topic         = "example-topic"
   local_topic   = "false"
   compact_topic = "false"
   partition_num = "12"
@@ -81,13 +77,13 @@ The following attributes are exported:
 
 ALIKAFKA TOPIC can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_alikafka_topic.topic alikafka_post-cn-123455abc:topicName
 ```
 
-### Timeouts
+## Timeouts
 
--> **NOTE:** Available in v1.119.0+.
+-> **NOTE:** Available since v1.119.0.
 
 The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
 

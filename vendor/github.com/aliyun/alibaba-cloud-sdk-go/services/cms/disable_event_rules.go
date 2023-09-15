@@ -77,10 +77,10 @@ type DisableEventRulesRequest struct {
 // DisableEventRulesResponse is the response struct for api DisableEventRules
 type DisableEventRulesResponse struct {
 	*responses.BaseResponse
-	Success   bool   `json:"Success" xml:"Success"`
 	Code      string `json:"Code" xml:"Code"`
 	Message   string `json:"Message" xml:"Message"`
 	RequestId string `json:"RequestId" xml:"RequestId"`
+	Success   bool   `json:"Success" xml:"Success"`
 }
 
 // CreateDisableEventRulesRequest creates a request to invoke DisableEventRules API

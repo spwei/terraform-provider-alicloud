@@ -1,5 +1,5 @@
 ---
-subcategory: "Smart Access Gateway"
+subcategory: "Smart Access Gateway (Smartag)"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_sag_qos_car"
 sidebar_current: "docs-alicloud-resource-sag-qos-car"
@@ -7,14 +7,14 @@ description: |-
   Provides a Sag Qos Car resource.
 ---
 
-# alicloud\_sag\_qos\_car
+# alicloud_sag_qos_car
 
 Provides a Sag qos car resource. 
 You need to create a QoS car to set priorities, rate limits, and quintuple rules for different messages.
 
-For information about Sag Qos Car and how to use it, see [What is Qos Car](https://www.alibabacloud.com/help/doc-detail/140065.htm).
+For information about Sag Qos Car and how to use it, see [What is Qos Car](https://www.alibabacloud.com/help/en/smart-access-gateway/latest/createqoscar).
 
--> **NOTE:** Available in 1.60.0+
+-> **NOTE:** Available since v1.60.0.
 
 -> **NOTE:** Only the following regions support. [`cn-shanghai`, `cn-shanghai-finance-1`, `cn-hongkong`, `ap-southeast-1`, `ap-southeast-2`, `ap-southeast-3`, `ap-southeast-5`, `ap-northeast-1`, `eu-central-1`]
 
@@ -22,14 +22,21 @@ For information about Sag Qos Car and how to use it, see [What is Qos Car](https
 
 Basic Usage
 
-```
-resource "alicloud_sag_qos" "default" {
-  name = "tf-testAccSagQosName"
+```terraform
+variable "name" {
+  default = "tf_example"
 }
+provider "alicloud" {
+  region = "cn-shanghai"
+}
+resource "alicloud_sag_qos" "default" {
+  name = var.name
+}
+
 resource "alicloud_sag_qos_car" "default" {
   qos_id                = alicloud_sag_qos.default.id
-  name                  = "tf-testSagQosCarName"
-  description           = "tf-testSagQosCarDescription"
+  name                  = var.name
+  description           = var.name
   priority              = "1"
   limit_type            = "Absolute"
   min_bandwidth_abs     = "10"
@@ -65,7 +72,7 @@ The following attributes are exported:
 
 The Sag Qos Car can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_sag_qos_car.example qos-abc123456:qoscar-abc123456
 ```
 

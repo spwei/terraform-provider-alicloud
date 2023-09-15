@@ -71,11 +71,18 @@ func (client *Client) CreateScalingGroupWithCallback(request *CreateScalingGroup
 // CreateScalingGroupRequest is the request struct for api CreateScalingGroup
 type CreateScalingGroupRequest struct {
 	*requests.RpcRequest
+	AzBalance                           requests.Boolean                            `position:"Query" name:"AzBalance"`
 	VSwitchIds                          *[]string                                   `position:"Query" name:"VSwitchIds"  type:"Repeated"`
+	MaxInstanceLifetime                 requests.Integer                            `position:"Query" name:"MaxInstanceLifetime"`
 	SpotInstanceRemedy                  requests.Boolean                            `position:"Query" name:"SpotInstanceRemedy"`
 	ScaleOutAmountCheck                 requests.Boolean                            `position:"Query" name:"ScaleOutAmountCheck"`
+	ResourceGroupId                     string                                      `position:"Query" name:"ResourceGroupId"`
+	GroupType                           string                                      `position:"Query" name:"GroupType"`
+	SyncAlarmRuleToCms                  requests.Boolean                            `position:"Query" name:"SyncAlarmRuleToCms"`
+	CustomPolicyARN                     string                                      `position:"Query" name:"CustomPolicyARN"`
 	Tag                                 *[]CreateScalingGroupTag                    `position:"Query" name:"Tag"  type:"Repeated"`
 	DefaultCooldown                     requests.Integer                            `position:"Query" name:"DefaultCooldown"`
+	ContainerGroupId                    string                                      `position:"Query" name:"ContainerGroupId"`
 	MultiAZPolicy                       string                                      `position:"Query" name:"MultiAZPolicy"`
 	DBInstanceIds                       string                                      `position:"Query" name:"DBInstanceIds"`
 	LaunchTemplateId                    string                                      `position:"Query" name:"LaunchTemplateId"`
@@ -84,16 +91,20 @@ type CreateScalingGroupRequest struct {
 	CompensateWithOnDemand              requests.Boolean                            `position:"Query" name:"CompensateWithOnDemand"`
 	MinSize                             requests.Integer                            `position:"Query" name:"MinSize"`
 	OwnerId                             requests.Integer                            `position:"Query" name:"OwnerId"`
+	AlbServerGroup                      *[]CreateScalingGroupAlbServerGroup         `position:"Query" name:"AlbServerGroup"  type:"Repeated"`
 	VSwitchId                           string                                      `position:"Query" name:"VSwitchId"`
 	InstanceId                          string                                      `position:"Query" name:"InstanceId"`
 	MaxSize                             requests.Integer                            `position:"Query" name:"MaxSize"`
 	LifecycleHook                       *[]CreateScalingGroupLifecycleHook          `position:"Query" name:"LifecycleHook"  type:"Repeated"`
 	LoadBalancerIds                     string                                      `position:"Query" name:"LoadBalancerIds"`
 	ClientToken                         string                                      `position:"Query" name:"ClientToken"`
+	SystemTag                           *[]CreateScalingGroupSystemTag              `position:"Query" name:"SystemTag"  type:"Repeated"`
 	OnDemandBaseCapacity                requests.Integer                            `position:"Query" name:"OnDemandBaseCapacity"`
 	OnDemandPercentageAboveBaseCapacity requests.Integer                            `position:"Query" name:"OnDemandPercentageAboveBaseCapacity"`
+	SpotAllocationStrategy              string                                      `position:"Query" name:"SpotAllocationStrategy"`
 	RemovalPolicy1                      string                                      `position:"Query" name:"RemovalPolicy.1"`
 	RemovalPolicy2                      string                                      `position:"Query" name:"RemovalPolicy.2"`
+	RemovalPolicy3                      string                                      `position:"Query" name:"RemovalPolicy.3"`
 	HealthCheckType                     string                                      `position:"Query" name:"HealthCheckType"`
 	ResourceOwnerAccount                string                                      `position:"Query" name:"ResourceOwnerAccount"`
 	ScalingGroupName                    string                                      `position:"Query" name:"ScalingGroupName"`
@@ -102,19 +113,29 @@ type CreateScalingGroupRequest struct {
 	GroupDeletionProtection             requests.Boolean                            `position:"Query" name:"GroupDeletionProtection"`
 	LaunchTemplateVersion               string                                      `position:"Query" name:"LaunchTemplateVersion"`
 	ScalingPolicy                       string                                      `position:"Query" name:"ScalingPolicy"`
+	AllocationStrategy                  string                                      `position:"Query" name:"AllocationStrategy"`
 	VServerGroup                        *[]CreateScalingGroupVServerGroup           `position:"Query" name:"VServerGroup"  type:"Repeated"`
 }
 
 // CreateScalingGroupTag is a repeated param struct in CreateScalingGroupRequest
 type CreateScalingGroupTag struct {
-	Value string `name:"Value"`
-	Key   string `name:"Key"`
+	Propagate string `name:"Propagate"`
+	Value     string `name:"Value"`
+	Key       string `name:"Key"`
 }
 
 // CreateScalingGroupLaunchTemplateOverride is a repeated param struct in CreateScalingGroupRequest
 type CreateScalingGroupLaunchTemplateOverride struct {
 	WeightedCapacity string `name:"WeightedCapacity"`
 	InstanceType     string `name:"InstanceType"`
+	SpotPriceLimit   string `name:"SpotPriceLimit"`
+}
+
+// CreateScalingGroupAlbServerGroup is a repeated param struct in CreateScalingGroupRequest
+type CreateScalingGroupAlbServerGroup struct {
+	AlbServerGroupId string `name:"AlbServerGroupId"`
+	Port             string `name:"Port"`
+	Weight           string `name:"Weight"`
 }
 
 // CreateScalingGroupLifecycleHook is a repeated param struct in CreateScalingGroupRequest
@@ -127,14 +148,22 @@ type CreateScalingGroupLifecycleHook struct {
 	LifecycleTransition  string `name:"LifecycleTransition"`
 }
 
-// CreateScalingGroupVServerGroup is a repeated param struct in CreateScalingGroupRequest
-type CreateScalingGroupVServerGroup struct {
-	LoadBalancerId        string                                     `name:"LoadBalancerId"`
-	VServerGroupAttribute *[]CreateScalingGroupVServerGroupAttribute `name:"VServerGroupAttribute" type:"Repeated"`
+// CreateScalingGroupSystemTag is a repeated param struct in CreateScalingGroupRequest
+type CreateScalingGroupSystemTag struct {
+	Scope  string `name:"Scope"`
+	Value  string `name:"Value"`
+	Key    string `name:"Key"`
+	Spread string `name:"Spread"`
 }
 
-// CreateScalingGroupVServerGroupAttribute is a repeated param struct in CreateScalingGroupRequest
-type CreateScalingGroupVServerGroupAttribute struct {
+// CreateScalingGroupVServerGroup is a repeated param struct in CreateScalingGroupRequest
+type CreateScalingGroupVServerGroup struct {
+	LoadBalancerId        string                                                 `name:"LoadBalancerId"`
+	VServerGroupAttribute *[]CreateScalingGroupVServerGroupVServerGroupAttribute `name:"VServerGroupAttribute" type:"Repeated"`
+}
+
+// CreateScalingGroupVServerGroupVServerGroupAttribute is a repeated param struct in CreateScalingGroupRequest
+type CreateScalingGroupVServerGroupVServerGroupAttribute struct {
 	VServerGroupId string `name:"VServerGroupId"`
 	Port           string `name:"Port"`
 	Weight         string `name:"Weight"`
@@ -143,8 +172,8 @@ type CreateScalingGroupVServerGroupAttribute struct {
 // CreateScalingGroupResponse is the response struct for api CreateScalingGroup
 type CreateScalingGroupResponse struct {
 	*responses.BaseResponse
-	ScalingGroupId string `json:"ScalingGroupId" xml:"ScalingGroupId"`
 	RequestId      string `json:"RequestId" xml:"RequestId"`
+	ScalingGroupId string `json:"ScalingGroupId" xml:"ScalingGroupId"`
 }
 
 // CreateCreateScalingGroupRequest creates a request to invoke CreateScalingGroup API

@@ -17,7 +17,7 @@ Provides a Alikms Key Version resource. For information about Alikms Key Version
 
 Basic Usage
 
-```
+```terraform
 resource "alicloud_kms_key" "this" {}
 
 resource "alicloud_kms_key_version" "keyversion" {
@@ -35,7 +35,7 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-* `creation_date` - The date and time (UTC time) when the Alikms key version was created.
+* `creation_date` - (Removed from v1.124.4) The date and time (UTC time) when the Alikms key version was created.
 * `key_id` - The id of the master key (CMK).
 * `key_version_id` - The id of the Alikms key version.
 
@@ -44,6 +44,6 @@ The following arguments are supported:
 
 Alikms key version can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_kms_key_version.example 72da539a-2fa8-4f2d-b854-*****	
 ```

@@ -17,6 +17,6 @@ package ddoscoo
 
 // EventAttackType is a nested struct in ddoscoo response
 type EventAttackType struct {
-	AttackType string `json:"AttackType" xml:"AttackType"`
 	InPkts     int64  `json:"InPkts" xml:"InPkts"`
+	AttackType string `json:"AttackType" xml:"AttackType"`
 }

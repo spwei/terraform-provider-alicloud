@@ -1,5 +1,5 @@
 ---
-subcategory: "Datahub Service"
+subcategory: "Datahub Service (DataHub)"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_datahub_subscription"
 sidebar_current: "docs-alicloud-resource-datahub-subscription"
@@ -7,18 +7,37 @@ description: |-
   Provides a Alicloud datahub subscription resource.
 ---
 
-# alicloud\_datahub\_subscription
+# alicloud_datahub_subscription
 
-The subscription is the basic unit of resource usage in Datahub Service under Publish/Subscribe model. You can manage the relationships between user and topics by using subscriptions. [Refer to details](https://help.aliyun.com/document_detail/47440.html).
+The subscription is the basic unit of resource usage in Datahub Service under Publish/Subscribe model. You can manage the relationships between user and topics by using subscriptions. [Refer to details](https://www.alibabacloud.com/help/en/datahub/latest/nerbcz).
+
+-> **NOTE:** Available since v1.19.0.
 
 ## Example Usage
 
 Basic Usage
 
-```
+```terraform
+variable "name" {
+  default = "terraform_example"
+}
+resource "alicloud_datahub_project" "example" {
+  name    = var.name
+  comment = "created by terraform"
+}
+
+resource "alicloud_datahub_topic" "example" {
+  name         = var.name
+  project_name = alicloud_datahub_project.example.name
+  record_type  = "BLOB"
+  shard_count  = 3
+  life_cycle   = 7
+  comment      = "created by terraform"
+}
+
 resource "alicloud_datahub_subscription" "example" {
-  project_name = "tf_datahub_project"
-  topic_name   = "tf_datahub_topic"
+  project_name = alicloud_datahub_project.example.name
+  topic_name   = alicloud_datahub_topic.example.name
   comment      = "created by terraform"
 }
 ```
@@ -35,8 +54,8 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `id` - The ID of the datahub subscritpion as terraform resource. It was composed of project name, topic name and practical subscription ID generated from server side. Format to `<project_name>:<topic_name>:<sub_id>`.
-* `sub_id` - The identidy of the subscritpion, generate from server side.
+* `id` - The ID of the datahub subscription as terraform resource. It was composed of project name, topic name and practical subscription ID generated from server side. Format to `<project_name>:<topic_name>:<sub_id>`.
+* `sub_id` - The identidy of the subscription, generate from server side.
 * `create_time` - Create time of the datahub subscription. It is a human-readable string rather than 64-bits UTC.
 * `last_modify_time` - Last modify time of the datahub subscription. It is the same as *create_time* at the beginning. It is also a human-readable string rather than 64-bits UTC.
 
@@ -44,6 +63,6 @@ The following attributes are exported:
 
 Datahub subscription can be imported using the ID, e.g.
 
-```
+```shell
 $ terraform import alicloud_datahub_subscription.example tf_datahub_project:tf_datahub_topic:1539073399567UgCzY
 ```

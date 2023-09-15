@@ -71,20 +71,21 @@ func (client *Client) DescribeSiteMonitorListWithCallback(request *DescribeSiteM
 // DescribeSiteMonitorListRequest is the request struct for api DescribeSiteMonitorList
 type DescribeSiteMonitorListRequest struct {
 	*requests.RpcRequest
-	TaskType string           `position:"Query" name:"TaskType"`
-	PageSize requests.Integer `position:"Query" name:"PageSize"`
-	Page     requests.Integer `position:"Query" name:"Page"`
-	Keyword  string           `position:"Query" name:"Keyword"`
-	TaskId   string           `position:"Query" name:"TaskId"`
+	TaskType  string           `position:"Query" name:"TaskType"`
+	TaskState string           `position:"Query" name:"TaskState"`
+	PageSize  requests.Integer `position:"Query" name:"PageSize"`
+	Page      requests.Integer `position:"Query" name:"Page"`
+	Keyword   string           `position:"Query" name:"Keyword"`
+	TaskId    string           `position:"Query" name:"TaskId"`
 }
 
 // DescribeSiteMonitorListResponse is the response struct for api DescribeSiteMonitorList
 type DescribeSiteMonitorListResponse struct {
 	*responses.BaseResponse
+	RequestId    string                                `json:"RequestId" xml:"RequestId"`
+	Success      string                                `json:"Success" xml:"Success"`
 	Code         string                                `json:"Code" xml:"Code"`
 	Message      string                                `json:"Message" xml:"Message"`
-	Success      string                                `json:"Success" xml:"Success"`
-	RequestId    string                                `json:"RequestId" xml:"RequestId"`
 	PageNumber   int                                   `json:"PageNumber" xml:"PageNumber"`
 	PageSize     int                                   `json:"PageSize" xml:"PageSize"`
 	TotalCount   int                                   `json:"TotalCount" xml:"TotalCount"`

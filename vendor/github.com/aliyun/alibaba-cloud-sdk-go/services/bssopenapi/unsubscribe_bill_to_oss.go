@@ -78,10 +78,10 @@ type UnsubscribeBillToOSSRequest struct {
 // UnsubscribeBillToOSSResponse is the response struct for api UnsubscribeBillToOSS
 type UnsubscribeBillToOSSResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
-	Success   bool   `json:"Success" xml:"Success"`
 	Code      string `json:"Code" xml:"Code"`
 	Message   string `json:"Message" xml:"Message"`
+	RequestId string `json:"RequestId" xml:"RequestId"`
+	Success   bool   `json:"Success" xml:"Success"`
 }
 
 // CreateUnsubscribeBillToOSSRequest creates a request to invoke UnsubscribeBillToOSS API
@@ -89,7 +89,7 @@ func CreateUnsubscribeBillToOSSRequest() (request *UnsubscribeBillToOSSRequest) 
 	request = &UnsubscribeBillToOSSRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "UnsubscribeBillToOSS", "", "")
+	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "UnsubscribeBillToOSS", "bssopenapi", "openAPI")
 	request.Method = requests.POST
 	return
 }

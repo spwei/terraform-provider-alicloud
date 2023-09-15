@@ -82,8 +82,8 @@ type CreateCmsSmspackageOrderRequest struct {
 // CreateCmsSmspackageOrderResponse is the response struct for api CreateCmsSmspackageOrder
 type CreateCmsSmspackageOrderResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
 	OrderId   string `json:"OrderId" xml:"OrderId"`
+	RequestId string `json:"RequestId" xml:"RequestId"`
 }
 
 // CreateCreateCmsSmspackageOrderRequest creates a request to invoke CreateCmsSmspackageOrder API

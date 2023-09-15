@@ -76,8 +76,8 @@ type OpenCmsServiceRequest struct {
 // OpenCmsServiceResponse is the response struct for api OpenCmsService
 type OpenCmsServiceResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
 	OrderId   string `json:"OrderId" xml:"OrderId"`
+	RequestId string `json:"RequestId" xml:"RequestId"`
 }
 
 // CreateOpenCmsServiceRequest creates a request to invoke OpenCmsService API

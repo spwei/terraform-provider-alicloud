@@ -14,6 +14,8 @@ For information about Resource Manager Account and how to use it, see [What is R
 
 -> **NOTE:** Available in v1.83.0+.
 
+-> **NOTE:** From version 1.188.0, the resource can be destroyed. The member deletion feature is in invitational preview. You can contact the service manager of Alibaba Cloud to apply for a trial. see [how to destroy it](https://www.alibabacloud.com/help/en/resource-management/latest/delete-account).
+
 ## Example Usage
 
 ```terraform
@@ -27,6 +29,14 @@ resource "alicloud_resource_manager_account" "example" {
   folder_id    = alicloud_resource_manager_folder.f1.id
 }
 ```
+
+### Deleting `alicloud_resource_manager_account` or removing it from your configuration
+
+Deleting the resource manager account or removing it from your configuration will remove it from your state file and management, 
+but may not destroy the account. If there are some dependent resource in the account, 
+the deleting account will enter a silence period of 45 days. After the silence period ends, 
+the system automatically starts to delete the member. [See More Details](https://www.alibabacloud.com/help/en/resource-management/latest/delete-resource-account).
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -34,7 +44,11 @@ The following arguments are supported:
 * `account_name_prefix` - (Optional, ForceNew, Available in v1.114.0) The name prefix of account.
 * `display_name` - (Required) Member name. The length is 2 ~ 50 characters or Chinese characters, which can include Chinese characters, English letters, numbers, underscores (_), dots (.) And dashes (-).
 * `folder_id` - (Optional) The ID of the parent folder.
-* `payer_account_id` - (Optional, ForceNew) Settlement account ID. If the value is empty, the current account will be used for settlement.
+* `payer_account_id` - (Optional, ForceNew) The ID of the billing account. If you leave this parameter empty, the current account is used as the billing account.
+* `abandon_able_check_id` - (Optional, Available in v1.188.0+) The IDs of the check items that you can choose to ignore for the member deletion. 
+  If you want to delete the account, please use datasource `alicloud_resource_manager_account_deletion_check_task` 
+  to get check ids and set them.
+* `tags` - (Optional, Available in v1.181.0+) A mapping of tags to assign to the resource.
 
 -> **NOTE:** The member name must be unique within the resource directory.
 
@@ -50,10 +64,20 @@ The following attributes are exported:
 * `status` - Member joining status. Valid values: `CreateSuccess`,`CreateVerifying`,`CreateFailed`,`CreateExpired`,`CreateCancelled`,`PromoteVerifying`,`PromoteFailed`,`PromoteExpired`,`PromoteCancelled`,`PromoteSuccess`,`InviteSuccess`,`Removed`. 
 * `type` - Member type. The value of `ResourceAccount` indicates the resource account. 
 
+### Timeouts
+
+-> **NOTE:** Available in 1.188.0+.
+
+The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
+
+* `create` - (Defaults to 3 mins) Used when create the Resource Manager Account.
+* `update` - (Defaults to 3 mins) Used when update the Resource Manager Account.
+* `delete` - (Defaults to 3 mins) Used when delete the Resource Manager Account.
+
 ## Import
 
 Resource Manager Account can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_resource_manager_account.example 13148890145*****
 ```

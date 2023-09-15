@@ -83,8 +83,8 @@ type DescribeNetworkRulesRequest struct {
 // DescribeNetworkRulesResponse is the response struct for api DescribeNetworkRules
 type DescribeNetworkRulesResponse struct {
 	*responses.BaseResponse
-	RequestId    string        `json:"RequestId" xml:"RequestId"`
 	TotalCount   int64         `json:"TotalCount" xml:"TotalCount"`
+	RequestId    string        `json:"RequestId" xml:"RequestId"`
 	NetworkRules []NetworkRule `json:"NetworkRules" xml:"NetworkRules"`
 }
 

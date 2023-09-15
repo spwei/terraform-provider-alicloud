@@ -23,8 +23,8 @@ type Config struct {
 	RegionBlockSwitch  string     `json:"RegionBlockSwitch" xml:"RegionBlockSwitch"`
 	Countries          []string   `json:"Countries" xml:"Countries"`
 	Provinces          []string   `json:"Provinces" xml:"Provinces"`
-	Sla                Sla        `json:"Sla" xml:"Sla"`
-	Slimit             Slimit     `json:"Slimit" xml:"Slimit"`
 	PayloadLen         PayloadLen `json:"PayloadLen" xml:"PayloadLen"`
 	Cc                 Cc         `json:"Cc" xml:"Cc"`
+	Sla                Sla        `json:"Sla" xml:"Sla"`
+	Slimit             Slimit     `json:"Slimit" xml:"Slimit"`
 }

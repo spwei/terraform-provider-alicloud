@@ -21,7 +21,6 @@ import (
 )
 
 // ModifyDBCluster invokes the adb.ModifyDBCluster API synchronously
-// api document: https://help.aliyun.com/api/adb/modifydbcluster.html
 func (client *Client) ModifyDBCluster(request *ModifyDBClusterRequest) (response *ModifyDBClusterResponse, err error) {
 	response = CreateModifyDBClusterResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ModifyDBCluster(request *ModifyDBClusterRequest) (response
 }
 
 // ModifyDBClusterWithChan invokes the adb.ModifyDBCluster API asynchronously
-// api document: https://help.aliyun.com/api/adb/modifydbcluster.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyDBClusterWithChan(request *ModifyDBClusterRequest) (<-chan *ModifyDBClusterResponse, <-chan error) {
 	responseChan := make(chan *ModifyDBClusterResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ModifyDBClusterWithChan(request *ModifyDBClusterRequest) (
 }
 
 // ModifyDBClusterWithCallback invokes the adb.ModifyDBCluster API asynchronously
-// api document: https://help.aliyun.com/api/adb/modifydbcluster.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyDBClusterWithCallback(request *ModifyDBClusterRequest, callback func(response *ModifyDBClusterResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,18 +71,23 @@ func (client *Client) ModifyDBClusterWithCallback(request *ModifyDBClusterReques
 // ModifyDBClusterRequest is the request struct for api ModifyDBCluster
 type ModifyDBClusterRequest struct {
 	*requests.RpcRequest
-	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	StorageResource      string           `position:"Query" name:"StorageResource"`
-	DBNodeClass          string           `position:"Query" name:"DBNodeClass"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	DBClusterId          string           `position:"Query" name:"DBClusterId"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
-	DBNodeGroupCount     string           `position:"Query" name:"DBNodeGroupCount"`
-	DBNodeStorage        string           `position:"Query" name:"DBNodeStorage"`
-	ExecutorCount        string           `position:"Query" name:"ExecutorCount"`
-	ModifyType           string           `position:"Query" name:"ModifyType"`
-	ComputeResource      string           `position:"Query" name:"ComputeResource"`
+	ElasticIOResourceSize string           `position:"Query" name:"ElasticIOResourceSize"`
+	ResourceOwnerId       requests.Integer `position:"Query" name:"ResourceOwnerId"`
+	Mode                  string           `position:"Query" name:"Mode"`
+	StorageResource       string           `position:"Query" name:"StorageResource"`
+	DBNodeClass           string           `position:"Query" name:"DBNodeClass"`
+	DBClusterCategory     string           `position:"Query" name:"DBClusterCategory"`
+	DiskPerformanceLevel  string           `position:"Query" name:"DiskPerformanceLevel"`
+	ResourceOwnerAccount  string           `position:"Query" name:"ResourceOwnerAccount"`
+	DBClusterId           string           `position:"Query" name:"DBClusterId"`
+	OwnerAccount          string           `position:"Query" name:"OwnerAccount"`
+	OwnerId               requests.Integer `position:"Query" name:"OwnerId"`
+	DBNodeGroupCount      string           `position:"Query" name:"DBNodeGroupCount"`
+	DBNodeStorage         string           `position:"Query" name:"DBNodeStorage"`
+	ExecutorCount         string           `position:"Query" name:"ExecutorCount"`
+	ModifyType            string           `position:"Query" name:"ModifyType"`
+	ComputeResource       string           `position:"Query" name:"ComputeResource"`
+	ElasticIOResource     requests.Integer `position:"Query" name:"ElasticIOResource"`
 }
 
 // ModifyDBClusterResponse is the response struct for api ModifyDBCluster

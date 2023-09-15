@@ -1,5 +1,5 @@
 ---
-subcategory: "VPN"
+subcategory: "VPN Gateway"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_ssl_vpn_client_cert"
 sidebar_current: "docs-alicloud-resource-ssl-vpn-client-cert"
@@ -18,7 +18,7 @@ It depends on VPN instance and SSL VPN Server.
 
 Basic Usage
 
-```
+```terraform
 resource "alicloud_ssl_vpn_client_cert" "foo" {
   ssl_vpn_server_id = "ssl_vpn_server_fake_id"
   name              = "sslVpnClientCertExample"
@@ -47,6 +47,6 @@ The following attributes are exported:
 
 SSL-VPN client certificates can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_ssl_vpn_client_cert.example vsc-abc123456
 ```

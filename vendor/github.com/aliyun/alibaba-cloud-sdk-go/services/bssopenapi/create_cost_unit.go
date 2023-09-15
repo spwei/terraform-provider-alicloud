@@ -84,11 +84,11 @@ type CreateCostUnitUnitEntityList struct {
 // CreateCostUnitResponse is the response struct for api CreateCostUnit
 type CreateCostUnitResponse struct {
 	*responses.BaseResponse
-	RequestId string               `json:"RequestId" xml:"RequestId"`
-	Message   string               `json:"Message" xml:"Message"`
-	Code      string               `json:"Code" xml:"Code"`
-	Success   bool                 `json:"Success" xml:"Success"`
-	Data      DataInCreateCostUnit `json:"Data" xml:"Data"`
+	Code      string `json:"Code" xml:"Code"`
+	Message   string `json:"Message" xml:"Message"`
+	RequestId string `json:"RequestId" xml:"RequestId"`
+	Success   bool   `json:"Success" xml:"Success"`
+	Data      Data   `json:"Data" xml:"Data"`
 }
 
 // CreateCreateCostUnitRequest creates a request to invoke CreateCostUnit API
@@ -96,7 +96,7 @@ func CreateCreateCostUnitRequest() (request *CreateCostUnitRequest) {
 	request = &CreateCostUnitRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "CreateCostUnit", "", "")
+	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "CreateCostUnit", "bssopenapi", "openAPI")
 	request.Method = requests.POST
 	return
 }

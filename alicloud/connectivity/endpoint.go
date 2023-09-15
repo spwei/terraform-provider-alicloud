@@ -60,7 +60,6 @@ const (
 	DDSCode             = ServiceCode("DDS")
 	GPDBCode            = ServiceCode("GPDB")
 	STSCode             = ServiceCode("STS")
-	CENCode             = ServiceCode("CEN")
 	KVSTORECode         = ServiceCode("KVSTORE")
 	POLARDBCode         = ServiceCode("POLARDB")
 	DATAHUBCode         = ServiceCode("DATAHUB")
@@ -159,30 +158,37 @@ func loadEndpoint(region string, serviceCode ServiceCode) string {
 	return ""
 }
 
+// irregularProductCode specially records those product codes that
+// cannot be parsed out by the location service.
+// The priority of this configuration is higher than location service, lower than user environment variable configuration
+var irregularProductCode = map[string]string{
+	"tablestore": "tablestore.%s.aliyuncs.com",
+}
+
 // NOTE: The productCode must be lower.
 func (client *AliyunClient) loadEndpoint(productCode string) error {
-	loadSdkEndpointMutex.Lock()
-	defer loadSdkEndpointMutex.Unlock()
 	// Firstly, load endpoint from environment variables
 	endpoint := strings.TrimSpace(os.Getenv(fmt.Sprintf("%s_ENDPOINT", strings.ToUpper(productCode))))
 	if endpoint != "" {
-		client.config.Endpoints[productCode] = endpoint
+		client.config.Endpoints.Store(productCode, endpoint)
 		return nil
 	}
 
 	// Secondly, load endpoint from known rules
-	// Currently, this way is not pass.
-	// if _, ok := irregularProductCode[productCode]; !ok {
-	// 	client.config.Endpoints[productCode] = regularEndpoint
-	// 	return nil
-	// }
+	if endpointFmt, ok := irregularProductCode[productCode]; ok {
+		client.config.Endpoints.Store(productCode, fmt.Sprintf(endpointFmt, client.RegionId))
+		return nil
+	}
 
 	// Thirdly, load endpoint from location
 	serviceCode := serviceCodeMapping[productCode]
 	if serviceCode == "" {
 		serviceCode = productCode
 	}
-	_, err := client.describeEndpointForService(serviceCode)
+	endpoint, err := client.describeEndpointForService(serviceCode)
+	if err == nil {
+		client.config.Endpoints.Store(strings.ToLower(serviceCode), endpoint)
+	}
 	return err
 }
 
@@ -204,7 +210,7 @@ func (config *Config) loadEndpointFromLocal() error {
 	for _, endpoint := range endpoints.Endpoint {
 		if endpoint.RegionIds.RegionId == string(config.RegionId) {
 			for _, product := range endpoint.Products.Product {
-				config.Endpoints[strings.ToLower(product.ProductName)] = strings.TrimSpace(product.DomainName)
+				config.Endpoints.Store(strings.ToLower(product.ProductName), strings.TrimSpace(product.DomainName))
 			}
 		}
 	}
@@ -233,7 +239,7 @@ func (client *AliyunClient) describeEndpointForService(serviceCode string) (stri
 		args.Domain = loadEndpoint(client.RegionId, LOCATIONCode)
 	}
 	if args.Domain == "" {
-		args.Domain = "location-readonly.aliyuncs.com"
+		args.Domain = "location.aliyuncs.com"
 	}
 
 	locationClient, err := location.NewClientWithOptions(client.config.RegionId, client.getSdkConfig(), client.config.getAuthCredential(true))
@@ -241,7 +247,8 @@ func (client *AliyunClient) describeEndpointForService(serviceCode string) (stri
 		return "", fmt.Errorf("Unable to initialize the location client: %#v", err)
 
 	}
-	locationClient.AppendUserAgent(Terraform, terraformVersion)
+	defer locationClient.Shutdown()
+	locationClient.AppendUserAgent(Terraform, client.config.TerraformVersion)
 	locationClient.AppendUserAgent(Provider, providerVersion)
 	locationClient.AppendUserAgent(Module, client.config.ConfigurationSource)
 	wait := incrementalWait(3*time.Second, 5*time.Second)
@@ -252,6 +259,7 @@ func (client *AliyunClient) describeEndpointForService(serviceCode string) (stri
 			re := regexp.MustCompile("^Post [\"]*https://.*")
 			if err.Error() != "" && re.MatchString(err.Error()) {
 				wait()
+				args.Domain = "location-readonly.aliyuncs.com"
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
@@ -259,7 +267,6 @@ func (client *AliyunClient) describeEndpointForService(serviceCode string) (stri
 		if endpointsResponse != nil && len(endpointsResponse.Endpoints.Endpoint) > 0 {
 			for _, e := range endpointsResponse.Endpoints.Endpoint {
 				if e.Type == "openAPI" {
-					client.config.Endpoints[strings.ToLower(serviceCode)] = e.Endpoint
 					endpointResult = e.Endpoint
 					return nil
 				}
@@ -282,12 +289,10 @@ var serviceCodeMapping = map[string]string{
 
 const (
 	OpenApiGatewayService          = "apigateway.cn-hangzhou.aliyuncs.com"
-	OpenSlsService                 = "sls.aliyuncs.com"
 	OpenOtsService                 = "ots.cn-hangzhou.aliyuncs.com"
 	OpenOssService                 = "oss-admin.aliyuncs.com"
 	OpenNasService                 = "nas.cn-hangzhou.aliyuncs.com"
 	OpenCdnService                 = "cdn.aliyuncs.com"
-	OpenBssService                 = "business.aliyuncs.com"
 	OpenKmsService                 = "kms.cn-hangzhou.aliyuncs.com"
 	OpenSaeService                 = "sae.cn-hangzhou.aliyuncs.com"
 	OpenCmsService                 = "metrics.cn-hangzhou.aliyuncs.com"
@@ -304,4 +309,12 @@ const (
 	OpenMaxcomputeService          = "maxcompute.aliyuncs.com"
 	OpenCloudStorageGatewayService = "sgw.cn-shanghai.aliyuncs.com"
 	DataWorksService               = "dataworks.aliyuncs.com"
+	OpenHbrService                 = "hbr.aliyuncs.com"
+)
+
+const (
+	BssOpenAPIEndpointDomestic                = "business.aliyuncs.com"
+	BssOpenAPIEndpointInternational           = "business.ap-southeast-1.aliyuncs.com"
+	EcdOpenAPIEndpointUser                    = "eds-user.ap-southeast-1.aliyuncs.com"
+	CloudFirewallOpenAPIEndpointControlPolicy = "cloudfw.ap-southeast-1.aliyuncs.com"
 )

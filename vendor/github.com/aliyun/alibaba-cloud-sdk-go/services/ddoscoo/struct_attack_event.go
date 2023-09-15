@@ -17,11 +17,13 @@ package ddoscoo
 
 // AttackEvent is a nested struct in ddoscoo response
 type AttackEvent struct {
-	Pps       int64  `json:"Pps" xml:"Pps"`
-	EventType string `json:"EventType" xml:"EventType"`
-	Port      string `json:"Port" xml:"Port"`
-	Ip        string `json:"Ip" xml:"Ip"`
-	StartTime int64  `json:"StartTime" xml:"StartTime"`
 	EndTime   int64  `json:"EndTime" xml:"EndTime"`
+	StartTime int64  `json:"StartTime" xml:"StartTime"`
+	EventType string `json:"EventType" xml:"EventType"`
+	Region    string `json:"Region" xml:"Region"`
 	Mbps      int64  `json:"Mbps" xml:"Mbps"`
+	Ip        string `json:"Ip" xml:"Ip"`
+	Area      string `json:"Area" xml:"Area"`
+	Port      string `json:"Port" xml:"Port"`
+	Pps       int64  `json:"Pps" xml:"Pps"`
 }

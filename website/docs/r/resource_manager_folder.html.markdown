@@ -22,7 +22,7 @@ Basic Usage
 
 ```terraform
 resource "alicloud_resource_manager_folder" "example" {
-    folder_name = "test"
+  folder_name = "test"
 }
 ```
 ## Argument Reference
@@ -40,6 +40,6 @@ The following arguments are supported:
 
 Resource Manager Folder can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_resource_manager_folder.example fd-u8B321****	
 ```

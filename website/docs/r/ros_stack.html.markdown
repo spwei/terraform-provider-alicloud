@@ -21,8 +21,8 @@ Basic Usage
 
 ```terraform
 resource "alicloud_ros_stack" "example" {
-  stack_name = "tf-testaccstack"
-  template_body = <<EOF
+  stack_name        = "tf-testaccstack"
+  template_body     = <<EOF
     {
     	"ROSTemplateFormatVersion": "2015-09-01"
     }
@@ -93,6 +93,6 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/d
 
 ROS Stack can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_ros_stack.example <stack_id>
 ```

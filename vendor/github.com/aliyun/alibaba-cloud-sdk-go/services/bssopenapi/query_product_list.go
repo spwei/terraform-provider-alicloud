@@ -79,11 +79,11 @@ type QueryProductListRequest struct {
 // QueryProductListResponse is the response struct for api QueryProductList
 type QueryProductListResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
-	Success   bool   `json:"Success" xml:"Success"`
-	Code      string `json:"Code" xml:"Code"`
-	Message   string `json:"Message" xml:"Message"`
-	Data      Data   `json:"Data" xml:"Data"`
+	Code      string                 `json:"Code" xml:"Code"`
+	Message   string                 `json:"Message" xml:"Message"`
+	RequestId string                 `json:"RequestId" xml:"RequestId"`
+	Success   bool                   `json:"Success" xml:"Success"`
+	Data      DataInQueryProductList `json:"Data" xml:"Data"`
 }
 
 // CreateQueryProductListRequest creates a request to invoke QueryProductList API
@@ -91,7 +91,7 @@ func CreateQueryProductListRequest() (request *QueryProductListRequest) {
 	request = &QueryProductListRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "QueryProductList", "", "")
+	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "QueryProductList", "bssopenapi", "openAPI")
 	request.Method = requests.POST
 	return
 }

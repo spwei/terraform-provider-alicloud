@@ -84,8 +84,8 @@ type DeleteNodeRequest struct {
 // DeleteNodeResponse is the response struct for api DeleteNode
 type DeleteNodeResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
 	TaskId    int    `json:"TaskId" xml:"TaskId"`
+	RequestId string `json:"RequestId" xml:"RequestId"`
 	OrderId   string `json:"OrderId" xml:"OrderId"`
 }
 
@@ -94,7 +94,7 @@ func CreateDeleteNodeRequest() (request *DeleteNodeRequest) {
 	request = &DeleteNodeRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("Dds", "2015-12-01", "DeleteNode", "Dds", "openAPI")
+	request.InitWithApiInfo("Dds", "2015-12-01", "DeleteNode", "dds", "openAPI")
 	request.Method = requests.POST
 	return
 }

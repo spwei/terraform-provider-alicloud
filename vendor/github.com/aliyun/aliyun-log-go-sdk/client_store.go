@@ -16,7 +16,7 @@ import (
 
 func convertLogstore(c *Client, project, logstore string) *LogStore {
 	c.accessKeyLock.RLock()
-	proj := convert(c, project)
+	proj := convertLocked(c, project)
 	c.accessKeyLock.RUnlock()
 	return &LogStore{
 		project: proj,
@@ -32,13 +32,27 @@ func (c *Client) ListShards(project, logstore string) (shardIDs []*Shard, err er
 
 // SplitShard https://help.aliyun.com/document_detail/29021.html
 func (c *Client) SplitShard(project, logstore string, shardID int, splitKey string) (shards []*Shard, err error) {
+	return c.splitShard(project, logstore, shardID, 0, splitKey)
+}
+
+// SplitNumShard https://help.aliyun.com/document_detail/29021.html
+func (c *Client) SplitNumShard(project, logstore string, shardID, shardsNum int) (shards []*Shard, err error) {
+	return c.splitShard(project, logstore, shardID, shardsNum, "")
+}
+
+func (c *Client) splitShard(project, logstore string, shardID, shardsNum int, splitKey string) (shards []*Shard, err error) {
 	h := map[string]string{
 		"x-log-bodyrawsize": "0",
 	}
 
 	urlVal := url.Values{}
 	urlVal.Add("action", "split")
-	urlVal.Add("key", splitKey)
+	if splitKey != "" {
+		urlVal.Add("key", splitKey)
+	}
+	if shardsNum > 0 {
+		urlVal.Add("shardCount", strconv.Itoa(shardsNum))
+	}
 	uri := fmt.Sprintf("/logstores/%v/shards/%v?%v", logstore, shardID, urlVal.Encode())
 	r, err := c.request(project, "POST", uri, h, nil)
 	if err != nil {
@@ -183,6 +197,12 @@ func (c *Client) GetHistograms(project, logstore string, topic string, from int6
 	return ls.GetHistograms(topic, from, to, queryExp)
 }
 
+// GetHistogramsToCompleted query logs with [from, to) time range to completed
+func (c *Client) GetHistogramsToCompleted(project, logstore string, topic string, from int64, to int64, queryExp string) (*GetHistogramsResponse, error) {
+	ls := convertLogstore(c, project, logstore)
+	return ls.GetHistogramsToCompleted(topic, from, to, queryExp)
+}
+
 // GetLogs query logs with [from, to) time range
 func (c *Client) GetLogs(project, logstore string, topic string, from int64, to int64, queryExp string,
 	maxLineNum int64, offset int64, reverse bool) (*GetLogsResponse, error) {
@@ -190,11 +210,36 @@ func (c *Client) GetLogs(project, logstore string, topic string, from int64, to 
 	return ls.GetLogs(topic, from, to, queryExp, maxLineNum, offset, reverse)
 }
 
+// GetLogsToCompleted query logs with [from, to) time range to completed
+func (c *Client) GetLogsToCompleted(project, logstore string, topic string, from int64, to int64, queryExp string,
+	maxLineNum int64, offset int64, reverse bool) (*GetLogsResponse, error) {
+	ls := convertLogstore(c, project, logstore)
+	return ls.GetLogsToCompleted(topic, from, to, queryExp, maxLineNum, offset, reverse)
+}
+
 // GetLogLines ...
 func (c *Client) GetLogLines(project, logstore string, topic string, from int64, to int64, queryExp string,
 	maxLineNum int64, offset int64, reverse bool) (*GetLogLinesResponse, error) {
 	ls := convertLogstore(c, project, logstore)
 	return ls.GetLogLines(topic, from, to, queryExp, maxLineNum, offset, reverse)
+}
+
+// GetLogsV2 ...
+func (c *Client) GetLogsV2(project, logstore string, req *GetLogRequest) (*GetLogsResponse, error) {
+	ls := convertLogstore(c, project, logstore)
+	return ls.GetLogsV2(req)
+}
+
+// GetLogsToCompletedV2 ...
+func (c *Client) GetLogsToCompletedV2(project, logstore string, req *GetLogRequest) (*GetLogsResponse, error) {
+	ls := convertLogstore(c, project, logstore)
+	return ls.GetLogsToCompletedV2(req)
+}
+
+// GetLogLinesV2 ...
+func (c *Client) GetLogLinesV2(project, logstore string, req *GetLogRequest) (*GetLogLinesResponse, error) {
+	ls := convertLogstore(c, project, logstore)
+	return ls.GetLogLinesV2(req)
 }
 
 // CreateIndex ...

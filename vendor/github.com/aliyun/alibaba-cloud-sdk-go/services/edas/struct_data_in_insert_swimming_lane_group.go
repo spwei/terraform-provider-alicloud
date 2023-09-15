@@ -17,9 +17,9 @@ package edas
 
 // DataInInsertSwimmingLaneGroup is a nested struct in edas response
 type DataInInsertSwimmingLaneGroup struct {
-	Id               int64                                    `json:"Id" xml:"Id"`
-	Name             string                                   `json:"Name" xml:"Name"`
 	NamespaceId      string                                   `json:"NamespaceId" xml:"NamespaceId"`
+	Name             string                                   `json:"Name" xml:"Name"`
+	Id               int64                                    `json:"Id" xml:"Id"`
 	EntryApplication EntryApplication                         `json:"EntryApplication" xml:"EntryApplication"`
 	ApplicationList  ApplicationListInInsertSwimmingLaneGroup `json:"ApplicationList" xml:"ApplicationList"`
 }

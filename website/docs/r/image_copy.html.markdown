@@ -2,7 +2,7 @@
 subcategory: "ECS"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_image_copy"
-sidebar_current: "docs-alicloud-resource-image-cpoy"
+sidebar_current: "docs-alicloud-resource-image-copy"
 description: |-
   Provides an ECS image copy resource.
 ---
@@ -21,15 +21,79 @@ Copies a custom image from one region to another. You can use copied images to p
 
 ## Example Usage
 
-```
+```terraform
+provider "alicloud" {
+  alias  = "sh"
+  region = "cn-shanghai"
+}
+provider "alicloud" {
+  alias  = "hz"
+  region = "cn-hangzhou"
+}
+
+data "alicloud_zones" "default" {
+  provider                    = alicloud.hz
+  available_resource_creation = "Instance"
+}
+
+data "alicloud_instance_types" "default" {
+  provider             = alicloud.hz
+  instance_type_family = "ecs.sn1ne"
+}
+
+data "alicloud_images" "default" {
+  provider   = alicloud.hz
+  name_regex = "^ubuntu_[0-9]+_[0-9]+_x64*"
+  owners     = "system"
+}
+
+resource "alicloud_vpc" "default" {
+  provider   = alicloud.hz
+  vpc_name   = "terraform-example"
+  cidr_block = "172.17.3.0/24"
+}
+
+resource "alicloud_vswitch" "default" {
+  provider     = alicloud.hz
+  vswitch_name = "terraform-example"
+  cidr_block   = "172.17.3.0/24"
+  vpc_id       = alicloud_vpc.default.id
+  zone_id      = data.alicloud_zones.default.zones.0.id
+}
+
+resource "alicloud_security_group" "default" {
+  provider = alicloud.hz
+  name     = "terraform-example"
+  vpc_id   = alicloud_vpc.default.id
+}
+
+resource "alicloud_instance" "default" {
+  provider                   = alicloud.hz
+  availability_zone          = data.alicloud_zones.default.zones.0.id
+  instance_name              = "terraform-example"
+  security_groups            = [alicloud_security_group.default.id]
+  vswitch_id                 = alicloud_vswitch.default.id
+  instance_type              = data.alicloud_instance_types.default.ids[0]
+  image_id                   = data.alicloud_images.default.ids[0]
+  internet_max_bandwidth_out = 10
+}
+
+resource "alicloud_image" "default" {
+  provider    = alicloud.hz
+  instance_id = alicloud_instance.default.id
+  image_name  = "terraform-example"
+  description = "terraform-example"
+}
+
 resource "alicloud_image_copy" "default" {
-  source_image_id    = "m-bp1gxyhdswlsn18tu***"
-  source_region_id   = "cn-hangzhou"
-  image_name         = "test-image"
-  description        = "test-image"
-  tags               = {
-         FinanceDept = "FinanceDeptJoshua"
-     }
+  provider         = alicloud.sh
+  source_image_id  = alicloud_image.default.id
+  source_region_id = "cn-hangzhou"
+  image_name       = "terraform-example"
+  description      = "terraform-example"
+  tags = {
+    FinanceDept = "FinanceDeptJoshua"
+  }
 }
 ```
 
@@ -47,7 +111,7 @@ The following arguments are supported:
 * `force` - (Optional) Indicates whether to force delete the custom image, Default is `false`. 
   - true：Force deletes the custom image, regardless of whether the image is currently being used by other instances.
   - false：Verifies that the image is not currently in use by any other instances before deleting the image.
-   
+  
 ## Timeouts
 
 The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
@@ -66,6 +130,6 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/d
  
 image can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_image_copy.default m-uf66871ape***yg1q***
 ```

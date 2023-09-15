@@ -1,5 +1,5 @@
 ---
-subcategory: "DNS"
+subcategory: "Alidns"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_dns_record"
 sidebar_current: "docs-alicloud-resource-dns-record"
@@ -11,13 +11,13 @@ description: |-
 
 Provides a DNS Record resource.
 
--> **DEPRECATED:**  This resource  has been deprecated from version `1.85.0`. Please use new resource [alicloud_alidns_record](https://www.terraform.io/docs/providers/alicloud/r/alidns_record.html).
+-> **DEPRECATED:**  This resource  has been deprecated from version `1.85.0`. Please use new resource [alicloud_alidns_record](https://www.terraform.io/docs/providers/alicloud/r/alidns_record).
 
 -> **NOTE:** When the site is an international site, the `type` neither supports `REDIRECT_URL` nor `REDIRECT_URL`
 
 ## Example Usage
 
-```
+```terraform
 # Create a new Domain record
 resource "alicloud_dns_record" "record" {
   name        = "domainname"
@@ -58,6 +58,6 @@ The following attributes are exported:
 
 RDS record can be imported using the id, e.g.
 
-```
-$ terraform import alicloud_dns_record.example abc123456
+```shell
+$ terraform import alicloud_dns_record.example <id>
 ```

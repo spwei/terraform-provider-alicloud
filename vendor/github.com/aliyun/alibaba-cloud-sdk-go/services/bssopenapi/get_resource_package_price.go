@@ -85,11 +85,11 @@ type GetResourcePackagePriceRequest struct {
 // GetResourcePackagePriceResponse is the response struct for api GetResourcePackagePrice
 type GetResourcePackagePriceResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
-	Success   bool   `json:"Success" xml:"Success"`
-	Code      string `json:"Code" xml:"Code"`
-	Message   string `json:"Message" xml:"Message"`
-	Data      Data   `json:"Data" xml:"Data"`
+	Code      string                        `json:"Code" xml:"Code"`
+	Message   string                        `json:"Message" xml:"Message"`
+	RequestId string                        `json:"RequestId" xml:"RequestId"`
+	Success   bool                          `json:"Success" xml:"Success"`
+	Data      DataInGetResourcePackagePrice `json:"Data" xml:"Data"`
 }
 
 // CreateGetResourcePackagePriceRequest creates a request to invoke GetResourcePackagePrice API
@@ -97,7 +97,7 @@ func CreateGetResourcePackagePriceRequest() (request *GetResourcePackagePriceReq
 	request = &GetResourcePackagePriceRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "GetResourcePackagePrice", "", "")
+	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "GetResourcePackagePrice", "bssopenapi", "openAPI")
 	request.Method = requests.POST
 	return
 }

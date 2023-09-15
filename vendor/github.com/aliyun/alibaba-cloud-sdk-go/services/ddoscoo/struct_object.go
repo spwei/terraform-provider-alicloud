@@ -17,7 +17,7 @@ package ddoscoo
 
 // Object is a nested struct in ddoscoo response
 type Object struct {
-	PolicyId string `json:"PolicyId" xml:"PolicyId"`
 	Domain   string `json:"Domain" xml:"Domain"`
+	PolicyId string `json:"PolicyId" xml:"PolicyId"`
 	Vip      string `json:"Vip" xml:"Vip"`
 }

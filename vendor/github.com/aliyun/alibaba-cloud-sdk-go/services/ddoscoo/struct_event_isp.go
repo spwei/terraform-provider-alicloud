@@ -17,6 +17,6 @@ package ddoscoo
 
 // EventIsp is a nested struct in ddoscoo response
 type EventIsp struct {
-	Isp    string `json:"Isp" xml:"Isp"`
 	InPkts int64  `json:"InPkts" xml:"InPkts"`
+	Isp    string `json:"Isp" xml:"Isp"`
 }

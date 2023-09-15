@@ -79,10 +79,10 @@ type QueryCashCouponsRequest struct {
 // QueryCashCouponsResponse is the response struct for api QueryCashCoupons
 type QueryCashCouponsResponse struct {
 	*responses.BaseResponse
-	RequestId string                 `json:"RequestId" xml:"RequestId"`
-	Success   bool                   `json:"Success" xml:"Success"`
 	Code      string                 `json:"Code" xml:"Code"`
 	Message   string                 `json:"Message" xml:"Message"`
+	RequestId string                 `json:"RequestId" xml:"RequestId"`
+	Success   bool                   `json:"Success" xml:"Success"`
 	Data      DataInQueryCashCoupons `json:"Data" xml:"Data"`
 }
 
@@ -91,7 +91,7 @@ func CreateQueryCashCouponsRequest() (request *QueryCashCouponsRequest) {
 	request = &QueryCashCouponsRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "QueryCashCoupons", "", "")
+	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "QueryCashCoupons", "bssopenapi", "openAPI")
 	request.Method = requests.POST
 	return
 }

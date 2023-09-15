@@ -7,8 +7,8 @@ import (
 
 	util "github.com/alibabacloud-go/tea-utils/service"
 	"github.com/aliyun/terraform-provider-alicloud/alicloud/connectivity"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 )
 
 func resourceAlicloudGaAccelerator() *schema.Resource {
@@ -23,32 +23,78 @@ func resourceAlicloudGaAccelerator() *schema.Resource {
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(1 * time.Minute),
 			Update: schema.DefaultTimeout(6 * time.Minute),
+			Delete: schema.DefaultTimeout(3 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
-			"accelerator_name": {
-				Type:     schema.TypeString,
+			"spec": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: StringInSlice([]string{"1", "2", "3", "5", "8", "10"}, false),
+			},
+			"bandwidth_billing_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Computed:     true,
+				ValidateFunc: StringInSlice([]string{"BandwidthPackage", "CDT"}, false),
+			},
+			"payment_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Computed:     true,
+				ValidateFunc: StringInSlice([]string{"PayAsYouGo", "Subscription"}, false),
+			},
+			"cross_border_status": {
+				Type:     schema.TypeBool,
 				Optional: true,
+			},
+			"cross_border_mode": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: StringInSlice([]string{"bgpPro", "private"}, false),
+			},
+			"duration": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ValidateFunc: IntBetween(1, 9),
+			},
+			"pricing_cycle": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: StringInSlice([]string{"Month", "Year"}, false),
 			},
 			"auto_use_coupon": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+			},
+			"auto_renew_duration": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+			"renewal_status": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ValidateFunc: StringInSlice([]string{
+					string(RenewAutoRenewal),
+					string(RenewNormal),
+					string(RenewNotRenewal)}, false),
+			},
+			"promotion_option_no": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"accelerator_name": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"duration": {
-				Type:         schema.TypeInt,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.IntBetween(1, 9),
-			},
-			"spec": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.StringInSlice([]string{"1", "10", "2", "3", "5", "8"}, false),
-			},
+			"tags": tagsSchema(),
 			"status": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -67,15 +113,44 @@ func resourceAlicloudGaAcceleratorCreate(d *schema.ResourceData, meta interface{
 	if err != nil {
 		return WrapError(err)
 	}
+	// there is an api bug that the name can not effect
+	//if v, ok := d.GetOk("accelerator_name"); ok {
+	//	request["Name"] = v
+	//}
+
+	request["RegionId"] = client.RegionId
 	request["AutoPay"] = true
+
+	if v, ok := d.GetOk("spec"); ok {
+		request["Spec"] = v
+	}
+
+	if v, ok := d.GetOk("bandwidth_billing_type"); ok {
+		request["BandwidthBillingType"] = v
+	}
+
+	if v, ok := d.GetOk("payment_type"); ok {
+		request["InstanceChargeType"] = convertGaAcceleratorPaymentTypeRequest(v.(string))
+	}
+
+	if v, ok := d.GetOkExists("duration"); ok {
+		request["Duration"] = v
+	}
+
+	if v, ok := d.GetOk("pricing_cycle"); ok {
+		request["PricingCycle"] = v
+	} else {
+		request["PricingCycle"] = "Month"
+	}
+
 	if v, ok := d.GetOkExists("auto_use_coupon"); ok {
 		request["AutoUseCoupon"] = v
 	}
 
-	request["Duration"] = d.Get("duration")
-	request["PricingCycle"] = "Month"
-	request["RegionId"] = client.RegionId
-	request["Spec"] = d.Get("spec")
+	if v, ok := d.GetOk("promotion_option_no"); ok {
+		request["PromotionOptionNo"] = v
+	}
+
 	runtime := util.RuntimeOptions{}
 	runtime.SetAutoretry(true)
 	request["ClientToken"] = buildClientToken("CreateAccelerator")
@@ -86,6 +161,7 @@ func resourceAlicloudGaAcceleratorCreate(d *schema.ResourceData, meta interface{
 	addDebug(action, response, request)
 
 	d.SetId(fmt.Sprint(response["AcceleratorId"]))
+
 	stateConf := BuildStateConf([]string{}, []string{"active"}, d.Timeout(schema.TimeoutCreate), 30*time.Second, gaService.GaAcceleratorStateRefreshFunc(d.Id(), []string{}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return WrapErrorf(err, IdMsg, d.Id())
@@ -93,74 +169,352 @@ func resourceAlicloudGaAcceleratorCreate(d *schema.ResourceData, meta interface{
 
 	return resourceAlicloudGaAcceleratorUpdate(d, meta)
 }
+
 func resourceAlicloudGaAcceleratorRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AliyunClient)
 	gaService := GaService{client}
+
 	object, err := gaService.DescribeGaAccelerator(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if !d.IsNewResource() && NotFoundError(err) {
 			log.Printf("[DEBUG] Resource alicloud_ga_accelerator gaService.DescribeGaAccelerator Failed!!! %s", err)
 			d.SetId("")
 			return nil
 		}
 		return WrapError(err)
 	}
+
+	d.Set("spec", object["Spec"])
+	d.Set("bandwidth_billing_type", object["BandwidthBillingType"])
+	d.Set("payment_type", convertGaAcceleratorPaymentTypeResponse(object["InstanceChargeType"]))
+	d.Set("cross_border_status", object["CrossBorderStatus"])
+	d.Set("cross_border_mode", object["CrossBorderMode"])
 	d.Set("accelerator_name", object["Name"])
 	d.Set("description", object["Description"])
-	d.Set("spec", object["Spec"])
 	d.Set("status", object["State"])
-	if val, ok := d.GetOk("auto_use_coupon"); ok {
-		d.Set("auto_use_coupon", val)
+
+	describeAcceleratorAutoRenewAttributeObject, err := gaService.DescribeAcceleratorAutoRenewAttribute(d.Id())
+	if err != nil {
+		return WrapError(err)
 	}
+
+	if v, ok := describeAcceleratorAutoRenewAttributeObject["AutoRenewDuration"]; ok && fmt.Sprint(v) != "0" {
+		d.Set("auto_renew_duration", formatInt(v))
+	}
+
+	d.Set("renewal_status", describeAcceleratorAutoRenewAttributeObject["RenewalStatus"])
+
+	listTagResourcesObject, err := gaService.ListTagResources(d.Id(), "accelerator")
+	if err != nil {
+		return WrapError(err)
+	}
+
+	d.Set("tags", tagsToMap(listTagResourcesObject))
+
 	return nil
 }
+
 func resourceAlicloudGaAcceleratorUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AliyunClient)
 	gaService := GaService{client}
 	var response map[string]interface{}
+	d.Partial(true)
+
+	if d.HasChange("tags") {
+		if err := gaService.SetResourceTags(d, "accelerator"); err != nil {
+			return WrapError(err)
+		}
+		d.SetPartial("tags")
+	}
+
 	update := false
 	request := map[string]interface{}{
+		"RegionId":      client.RegionId,
+		"ClientToken":   buildClientToken("UpdateAcceleratorAutoRenewAttribute"),
 		"AcceleratorId": d.Id(),
 	}
-	if d.HasChange("accelerator_name") {
+
+	if d.HasChange("auto_renew_duration") {
 		update = true
-		request["Name"] = d.Get("accelerator_name")
 	}
-	request["AutoPay"] = true
-	if d.HasChange("description") {
+	if v, ok := d.GetOk("auto_renew_duration"); ok {
+		request["AutoRenewDuration"] = v
+	}
+
+	if d.HasChange("renewal_status") {
 		update = true
-		request["Description"] = d.Get("description")
 	}
-	request["RegionId"] = client.RegionId
+	if v, ok := d.GetOk("renewal_status"); ok {
+		request["RenewalStatus"] = v
+	}
+
+	if update {
+		action := "UpdateAcceleratorAutoRenewAttribute"
+		conn, err := client.NewGaplusClient()
+		if err != nil {
+			return WrapError(err)
+		}
+
+		runtime := util.RuntimeOptions{}
+		runtime.SetAutoretry(true)
+		wait := incrementalWait(3*time.Second, 3*time.Second)
+		err = resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutUpdate)), func() *resource.RetryError {
+			response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-11-20"), StringPointer("AK"), nil, request, &runtime)
+			if err != nil {
+				if NeedRetry(err) {
+					wait()
+					return resource.RetryableError(err)
+				}
+				return resource.NonRetryableError(err)
+			}
+			return nil
+		})
+		addDebug(action, response, request)
+
+		if err != nil {
+			return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabaCloudSdkGoERROR)
+		}
+
+		d.SetPartial("auto_renew_duration")
+		d.SetPartial("renewal_status")
+	}
+
+	update = false
+	updateAcceleratorReq := map[string]interface{}{
+		"RegionId":      client.RegionId,
+		"ClientToken":   buildClientToken("UpdateAccelerator"),
+		"AcceleratorId": d.Id(),
+		"AutoPay":       true,
+	}
+
 	if !d.IsNewResource() && d.HasChange("spec") {
 		update = true
-		request["Spec"] = d.Get("spec")
+		updateAcceleratorReq["Spec"] = d.Get("spec")
 	}
-	if update {
-		if _, ok := d.GetOkExists("auto_use_coupon"); ok {
-			request["AutoUseCoupon"] = d.Get("auto_use_coupon")
+
+	if d.HasChange("accelerator_name") {
+		update = true
+		if v, ok := d.GetOk("accelerator_name"); ok {
+			updateAcceleratorReq["Name"] = v
 		}
+	}
+
+	if d.HasChange("description") {
+		update = true
+		if v, ok := d.GetOk("description"); ok {
+			updateAcceleratorReq["Description"] = v
+		}
+	}
+
+	if update {
+		if v, ok := d.GetOkExists("auto_use_coupon"); ok {
+			updateAcceleratorReq["AutoUseCoupon"] = v
+		}
+
 		action := "UpdateAccelerator"
 		conn, err := client.NewGaplusClient()
 		if err != nil {
 			return WrapError(err)
 		}
+
 		runtime := util.RuntimeOptions{}
 		runtime.SetAutoretry(true)
-		request["ClientToken"] = buildClientToken("UpdateAccelerator")
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-11-20"), StringPointer("AK"), nil, request, &runtime)
-		addDebug(action, response, request)
+		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-11-20"), StringPointer("AK"), nil, updateAcceleratorReq, &runtime)
+		addDebug(action, response, updateAcceleratorReq)
+
 		if err != nil {
 			return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabaCloudSdkGoERROR)
 		}
+
 		stateConf := BuildStateConf([]string{}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 30*time.Second, gaService.GaAcceleratorStateRefreshFunc(d.Id(), []string{}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return WrapErrorf(err, IdMsg, d.Id())
 		}
+
+		d.SetPartial("spec")
+		d.SetPartial("accelerator_name")
+		d.SetPartial("description")
 	}
+
+	update = false
+	updateAcceleratorCrossBorderStatusReq := map[string]interface{}{
+		"RegionId":      client.RegionId,
+		"ClientToken":   buildClientToken("UpdateAcceleratorCrossBorderStatus"),
+		"AcceleratorId": d.Id(),
+	}
+
+	if d.HasChange("cross_border_status") {
+		update = true
+	}
+	if v, ok := d.GetOkExists("cross_border_status"); ok {
+		updateAcceleratorCrossBorderStatusReq["CrossBorderStatus"] = v
+	}
+
+	if update {
+		action := "UpdateAcceleratorCrossBorderStatus"
+		conn, err := client.NewGaplusClient()
+		if err != nil {
+			return WrapError(err)
+		}
+
+		runtime := util.RuntimeOptions{}
+		runtime.SetAutoretry(true)
+		wait := incrementalWait(3*time.Second, 3*time.Second)
+		err = resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutUpdate)), func() *resource.RetryError {
+			response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-11-20"), StringPointer("AK"), nil, updateAcceleratorCrossBorderStatusReq, &runtime)
+			if err != nil {
+				if NeedRetry(err) {
+					wait()
+					return resource.RetryableError(err)
+				}
+				return resource.NonRetryableError(err)
+			}
+			return nil
+		})
+		addDebug(action, response, updateAcceleratorCrossBorderStatusReq)
+
+		if err != nil {
+			return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabaCloudSdkGoERROR)
+		}
+
+		stateConf := BuildStateConf([]string{}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 30*time.Second, gaService.GaAcceleratorStateRefreshFunc(d.Id(), []string{}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return WrapErrorf(err, IdMsg, d.Id())
+		}
+
+		d.SetPartial("cross_border_status")
+	}
+
+	update = false
+	updateAcceleratorCrossBorderModeReq := map[string]interface{}{
+		"RegionId":      client.RegionId,
+		"ClientToken":   buildClientToken("UpdateAcceleratorCrossBorderMode"),
+		"AcceleratorId": d.Id(),
+	}
+
+	if d.HasChange("cross_border_mode") {
+		update = true
+	}
+	if v, ok := d.GetOk("cross_border_mode"); ok {
+		updateAcceleratorCrossBorderModeReq["CrossBorderMode"] = v
+	}
+
+	if update {
+		action := "UpdateAcceleratorCrossBorderMode"
+		conn, err := client.NewGaplusClient()
+		if err != nil {
+			return WrapError(err)
+		}
+
+		runtime := util.RuntimeOptions{}
+		runtime.SetAutoretry(true)
+		wait := incrementalWait(3*time.Second, 3*time.Second)
+		err = resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutUpdate)), func() *resource.RetryError {
+			response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-11-20"), StringPointer("AK"), nil, updateAcceleratorCrossBorderModeReq, &runtime)
+			if err != nil {
+				if IsExpectedErrors(err, []string{"StateError.Accelerator"}) || NeedRetry(err) {
+					wait()
+					return resource.RetryableError(err)
+				}
+				return resource.NonRetryableError(err)
+			}
+			return nil
+		})
+		addDebug(action, response, updateAcceleratorCrossBorderModeReq)
+
+		if err != nil {
+			return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabaCloudSdkGoERROR)
+		}
+
+		stateConf := BuildStateConf([]string{}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 30*time.Second, gaService.GaAcceleratorStateRefreshFunc(d.Id(), []string{}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return WrapErrorf(err, IdMsg, d.Id())
+		}
+
+		d.SetPartial("cross_border_mode")
+	}
+
+	d.Partial(false)
+
 	return resourceAlicloudGaAcceleratorRead(d, meta)
 }
+
 func resourceAlicloudGaAcceleratorDelete(d *schema.ResourceData, meta interface{}) error {
-	log.Printf("[WARN] Cannot destroy resourceAlicloudGaAccelerator. Terraform will remove this resource from the state file, however resources may remain.")
+	client := meta.(*connectivity.AliyunClient)
+	gaService := GaService{client}
+	action := "DeleteAccelerator"
+	var response map[string]interface{}
+
+	conn, err := client.NewGaplusClient()
+	if err != nil {
+		return WrapError(err)
+	}
+
+	object, err := gaService.DescribeGaAccelerator(d.Id())
+	if err != nil {
+		if NotFoundError(err) {
+			d.SetId("")
+			return nil
+		}
+		return WrapError(err)
+	}
+
+	if fmt.Sprint(object["InstanceChargeType"]) == "PREPAY" {
+		log.Printf("[WARN] Cannot destroy resourceAlicloudGaAccelerator. Terraform will remove this resource from the state file, however resources may remain.")
+		return nil
+	}
+
+	request := map[string]interface{}{
+		"RegionId":      client.RegionId,
+		"AcceleratorId": d.Id(),
+	}
+
+	runtime := util.RuntimeOptions{}
+	runtime.SetAutoretry(true)
+	wait := incrementalWait(3*time.Second, 3*time.Second)
+	err = resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutDelete)), func() *resource.RetryError {
+		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-11-20"), StringPointer("AK"), nil, request, &runtime)
+		if err != nil {
+			if NeedRetry(err) {
+				wait()
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
+		}
+		return nil
+	})
+	addDebug(action, response, request)
+
+	if err != nil {
+		return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabaCloudSdkGoERROR)
+	}
+
+	stateConf := BuildStateConf([]string{}, []string{}, d.Timeout(schema.TimeoutDelete), 5*time.Second, gaService.GaAcceleratorStateRefreshFunc(d.Id(), []string{}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return WrapErrorf(err, IdMsg, d.Id())
+	}
+
 	return nil
+}
+
+func convertGaAcceleratorPaymentTypeRequest(source interface{}) interface{} {
+	switch source {
+	case "PayAsYouGo":
+		return "POSTPAY"
+	case "Subscription":
+		return "PREPAY"
+	}
+
+	return source
+}
+
+func convertGaAcceleratorPaymentTypeResponse(source interface{}) interface{} {
+	switch source {
+	case "POSTPAY":
+		return "PayAsYouGo"
+	case "PREPAY":
+		return "Subscription"
+	}
+
+	return source
 }

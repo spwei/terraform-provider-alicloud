@@ -48,17 +48,18 @@ func testSweepCassandraCluster(region string) error {
 		id := v.ClusterId
 		name := v.ClusterName
 		skip := true
-		for _, prefix := range prefixes {
-			if strings.HasPrefix(strings.ToLower(name), strings.ToLower(prefix)) {
-				skip = false
-				break
+		if !sweepAll() {
+			for _, prefix := range prefixes {
+				if strings.HasPrefix(strings.ToLower(name), strings.ToLower(prefix)) {
+					skip = false
+					break
+				}
+			}
+			if skip {
+				log.Printf("[INFO] Skipping Cassandra Clusters: %s (%s)", name, id)
+				continue
 			}
 		}
-		if skip {
-			log.Printf("[INFO] Skipping Cassandra Clusters: %s (%s)", name, id)
-			continue
-		}
-
 		sweeped = true
 		log.Printf("[INFO] Deleting Cassandra Clusters: %s (%s)", name, id)
 		req := cassandra.CreateDeleteClusterRequest()
@@ -86,7 +87,8 @@ func testSweepCassandraCluster(region string) error {
 	return nil
 }
 
-func TestAccAlicloudCassandraCluster_basic(t *testing.T) {
+func SkipTestAccAlicloudCassandraCluster_basic(t *testing.T) {
+	t.Skip("The cloud database Cassandra has been closed for sale. For the use of Cassandra in the future, Lindorm is recommended")
 	var v cassandra.Cluster
 	resourceId := "alicloud_cassandra_cluster.default"
 	ra := resourceAttrInit(resourceId, CassandraClusterMap)
@@ -101,7 +103,6 @@ func TestAccAlicloudCassandraCluster_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckWithNoDefaultVpc(t)
 		},
 
 		IDRefreshName: resourceId,
@@ -268,7 +269,7 @@ func CassandraClusterBasicdependence(name string) string {
 		}
 		
 		data "alicloud_vpcs" "default" {
-			is_default = true
+			name_regex = "^default-NODELETING$"
 		}
 		
 		data "alicloud_vswitches" "default" {

@@ -77,7 +77,7 @@ func resourceAlicloudRamPolicy() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      "None",
-				ValidateFunc: validation.StringInSlice([]string{"DeleteOldestNonDefaultVersionWhenLimitExceeded", "None"}, false),
+				ValidateFunc: StringInSlice([]string{"DeleteOldestNonDefaultVersionWhenLimitExceeded", "None"}, false),
 			},
 			"version_id": {
 				Type:     schema.TypeString,
@@ -93,7 +93,7 @@ func resourceAlicloudRamPolicy() *schema.Resource {
 						"effect": {
 							Type:         schema.TypeString,
 							Required:     true,
-							ValidateFunc: validation.StringInSlice([]string{"Allow", "Deny"}, false),
+							ValidateFunc: StringInSlice([]string{"Allow", "Deny"}, false),
 						},
 						"action": {
 							Type:     schema.TypeList,
@@ -119,7 +119,7 @@ func resourceAlicloudRamPolicy() *schema.Resource {
 				Default:       "1",
 				ConflictsWith: []string{"document"},
 				// can only be '1' so far.
-				ValidateFunc: validation.StringInSlice([]string{"1"}, false),
+				ValidateFunc: StringInSlice([]string{"1"}, false),
 				Deprecated:   "Field 'version' has been deprecated from version 1.49.0, and use field 'document' to replace. ",
 			},
 			"force": {
@@ -174,9 +174,11 @@ func resourceAlicloudRamPolicyCreate(d *schema.ResourceData, meta interface{}) e
 		request["PolicyName"] = v
 	}
 
+	runtime := util.RuntimeOptions{}
+	runtime.SetAutoretry(true)
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2015-05-01"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2015-05-01"), StringPointer("AK"), nil, request, &runtime)
 		if err != nil {
 			if NeedRetry(err) {
 				wait()
@@ -259,9 +261,11 @@ func resourceAlicloudRamPolicyUpdate(d *schema.ResourceData, meta interface{}) e
 		if err != nil {
 			return WrapError(err)
 		}
+		runtime := util.RuntimeOptions{}
+		runtime.SetAutoretry(true)
 		wait := incrementalWait(3*time.Second, 3*time.Second)
 		err = resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
-			response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2015-05-01"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+			response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2015-05-01"), StringPointer("AK"), nil, request, &runtime)
 			if err != nil {
 				if NeedRetry(err) {
 					wait()
@@ -296,9 +300,30 @@ func resourceAlicloudRamPolicyDelete(d *schema.ResourceData, meta interface{}) e
 			"PolicyType": "Custom",
 		}
 		listAction := "ListEntitiesForPolicy"
-		response, err = conn.DoRequest(StringPointer(listAction), nil, StringPointer("POST"), StringPointer("2015-05-01"), StringPointer("AK"), nil, listRequest, &util.RuntimeOptions{})
+		runtime := util.RuntimeOptions{}
+		runtime.SetAutoretry(true)
+		wait := incrementalWait(3*time.Second, 3*time.Second)
+		err = resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
+			response, err = conn.DoRequest(StringPointer(listAction), nil, StringPointer("POST"), StringPointer("2015-05-01"), StringPointer("AK"), nil, listRequest, &runtime)
+			if err != nil {
+				if NeedRetry(err) {
+					wait()
+					return resource.RetryableError(err)
+				}
+				return resource.NonRetryableError(err)
+			}
+			addDebug(listAction, response, listRequest)
+			return nil
+		})
+		if err != nil {
+			return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabaCloudSdkGoERROR)
+		}
+
 		userResp, err := jsonpath.Get("$.Users.User", response)
-		if len(userResp.([]interface{})) > 0 {
+		if err != nil {
+			return WrapErrorf(err, FailedGetAttributeMsg, action, "$.Users.User", response)
+		}
+		if userResp != nil && len(userResp.([]interface{})) > 0 {
 			for _, v := range userResp.([]interface{}) {
 				userAction := "DetachPolicyFromUser"
 				userRequest := map[string]interface{}{
@@ -306,9 +331,11 @@ func resourceAlicloudRamPolicyDelete(d *schema.ResourceData, meta interface{}) e
 					"UserName":   v.(map[string]interface{})["UserName"],
 					"PolicyType": "Custom",
 				}
+				runtime := util.RuntimeOptions{}
+				runtime.SetAutoretry(true)
 				wait := incrementalWait(3*time.Second, 3*time.Second)
 				err = resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-					response, err = conn.DoRequest(StringPointer(userAction), nil, StringPointer("POST"), StringPointer("2015-05-01"), StringPointer("AK"), nil, userRequest, &util.RuntimeOptions{})
+					response, err = conn.DoRequest(StringPointer(userAction), nil, StringPointer("POST"), StringPointer("2015-05-01"), StringPointer("AK"), nil, userRequest, &runtime)
 					if err != nil {
 						if NeedRetry(err) {
 							wait()
@@ -328,7 +355,10 @@ func resourceAlicloudRamPolicyDelete(d *schema.ResourceData, meta interface{}) e
 			}
 		}
 		groupResp, err := jsonpath.Get("$.Groups.Group", response)
-		if len(groupResp.([]interface{})) > 0 {
+		if err != nil {
+			return WrapErrorf(err, FailedGetAttributeMsg, action, "$.Groups.Group", response)
+		}
+		if groupResp != nil && len(groupResp.([]interface{})) > 0 {
 			for _, v := range groupResp.([]interface{}) {
 				groupAction := "DetachPolicyFromGroup"
 				groupRequest := map[string]interface{}{
@@ -336,9 +366,11 @@ func resourceAlicloudRamPolicyDelete(d *schema.ResourceData, meta interface{}) e
 					"GroupName":  v.(map[string]interface{})["GroupName"],
 					"PolicyType": "Custom",
 				}
+				runtime := util.RuntimeOptions{}
+				runtime.SetAutoretry(true)
 				wait := incrementalWait(3*time.Second, 3*time.Second)
 				err = resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-					response, err = conn.DoRequest(StringPointer(groupAction), nil, StringPointer("POST"), StringPointer("2015-05-01"), StringPointer("AK"), nil, groupRequest, &util.RuntimeOptions{})
+					response, err = conn.DoRequest(StringPointer(groupAction), nil, StringPointer("POST"), StringPointer("2015-05-01"), StringPointer("AK"), nil, groupRequest, &runtime)
 					if err != nil {
 						if NeedRetry(err) {
 							wait()
@@ -358,7 +390,10 @@ func resourceAlicloudRamPolicyDelete(d *schema.ResourceData, meta interface{}) e
 			}
 		}
 		roleResp, err := jsonpath.Get("$.Roles.Role", response)
-		if len(roleResp.([]interface{})) > 0 {
+		if err != nil {
+			return WrapErrorf(err, FailedGetAttributeMsg, action, "$.Roles.Role", response)
+		}
+		if roleResp != nil && len(roleResp.([]interface{})) > 0 {
 			for _, v := range roleResp.([]interface{}) {
 				roleAction := "DetachPolicyFromRole"
 				roleRequest := map[string]interface{}{
@@ -366,9 +401,11 @@ func resourceAlicloudRamPolicyDelete(d *schema.ResourceData, meta interface{}) e
 					"RoleName":   v.(map[string]interface{})["RoleName"],
 					"PolicyType": "Custom",
 				}
+				runtime := util.RuntimeOptions{}
+				runtime.SetAutoretry(true)
 				wait := incrementalWait(3*time.Second, 3*time.Second)
 				err = resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-					response, err = conn.DoRequest(StringPointer(roleAction), nil, StringPointer("POST"), StringPointer("2015-05-01"), StringPointer("AK"), nil, roleRequest, &util.RuntimeOptions{})
+					response, err = conn.DoRequest(StringPointer(roleAction), nil, StringPointer("POST"), StringPointer("2015-05-01"), StringPointer("AK"), nil, roleRequest, &runtime)
 					if err != nil {
 						if NeedRetry(err) {
 							wait()
@@ -393,11 +430,32 @@ func resourceAlicloudRamPolicyDelete(d *schema.ResourceData, meta interface{}) e
 			"PolicyType": "Custom",
 		}
 		listVersionsAction := "ListPolicyVersions"
-		response, err = conn.DoRequest(StringPointer(listVersionsAction), nil, StringPointer("POST"), StringPointer("2015-05-01"), StringPointer("AK"), nil, listVersionsRequest, &util.RuntimeOptions{})
-		versionsResp, err := jsonpath.Get("$.PolicyVersions.PolicyVersion", response)
-
+		runtime = util.RuntimeOptions{}
+		runtime.SetAutoretry(true)
+		wait = incrementalWait(3*time.Second, 3*time.Second)
+		err = resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutDelete)), func() *resource.RetryError {
+			response, err = conn.DoRequest(StringPointer(listVersionsAction), nil, StringPointer("POST"), StringPointer("2015-05-01"), StringPointer("AK"), nil, listVersionsRequest, &runtime)
+			if err != nil {
+				if NeedRetry(err) {
+					wait()
+					return resource.RetryableError(err)
+				}
+				return resource.NonRetryableError(err)
+			}
+			return nil
+		})
+		if err != nil {
+			if IsExpectedErrors(err, []string{"EntityNotExist.Policy"}) {
+				return nil
+			}
+			return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabaCloudSdkGoERROR)
+		}
+		versionsResp, er := jsonpath.Get("$.PolicyVersions.PolicyVersion", response)
+		if er != nil {
+			return WrapErrorf(er, FailedGetAttributeMsg, action, "$.PolicyVersions.PolicyVersion", response)
+		}
 		// More than one means there are other versions besides the default version
-		if len(versionsResp.([]interface{})) > 1 {
+		if versionsResp != nil && len(versionsResp.([]interface{})) > 1 {
 			for _, v := range versionsResp.([]interface{}) {
 				if !v.(map[string]interface{})["IsDefaultVersion"].(bool) {
 					versionAction := "DeletePolicyVersion"
@@ -405,6 +463,8 @@ func resourceAlicloudRamPolicyDelete(d *schema.ResourceData, meta interface{}) e
 						"PolicyName": d.Id(),
 						"VersionId":  v.(map[string]interface{})["VersionId"],
 					}
+					runtime := util.RuntimeOptions{}
+					runtime.SetAutoretry(true)
 					wait := incrementalWait(3*time.Second, 3*time.Second)
 					err = resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
 						response, err = conn.DoRequest(StringPointer(versionAction), nil, StringPointer("POST"), StringPointer("2015-05-01"), StringPointer("AK"), nil, versionRequest, &util.RuntimeOptions{})
@@ -423,9 +483,11 @@ func resourceAlicloudRamPolicyDelete(d *schema.ResourceData, meta interface{}) e
 		}
 	}
 
+	runtime := util.RuntimeOptions{}
+	runtime.SetAutoretry(true)
 	wait := incrementalWait(3*time.Second, 5*time.Second)
 	err = resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2015-05-01"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2015-05-01"), StringPointer("AK"), nil, request, &runtime)
 		if err != nil {
 			if IsExpectedErrors(err, []string{"DeleteConflict.Policy.Group", "DeleteConflict.Policy.User", "DeleteConflict.Policy.Version", "DeleteConflict.Role.Policy"}) || NeedRetry(err) {
 				wait()

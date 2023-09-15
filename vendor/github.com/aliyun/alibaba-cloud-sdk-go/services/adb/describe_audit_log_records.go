@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeAuditLogRecords invokes the adb.DescribeAuditLogRecords API synchronously
-// api document: https://help.aliyun.com/api/adb/describeauditlogrecords.html
 func (client *Client) DescribeAuditLogRecords(request *DescribeAuditLogRecordsRequest) (response *DescribeAuditLogRecordsResponse, err error) {
 	response = CreateDescribeAuditLogRecordsResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeAuditLogRecords(request *DescribeAuditLogRecordsRe
 }
 
 // DescribeAuditLogRecordsWithChan invokes the adb.DescribeAuditLogRecords API asynchronously
-// api document: https://help.aliyun.com/api/adb/describeauditlogrecords.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeAuditLogRecordsWithChan(request *DescribeAuditLogRecordsRequest) (<-chan *DescribeAuditLogRecordsResponse, <-chan error) {
 	responseChan := make(chan *DescribeAuditLogRecordsResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeAuditLogRecordsWithChan(request *DescribeAuditLogR
 }
 
 // DescribeAuditLogRecordsWithCallback invokes the adb.DescribeAuditLogRecords API asynchronously
-// api document: https://help.aliyun.com/api/adb/describeauditlogrecords.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeAuditLogRecordsWithCallback(request *DescribeAuditLogRecordsRequest, callback func(response *DescribeAuditLogRecordsResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -81,11 +76,12 @@ type DescribeAuditLogRecordsRequest struct {
 	PageNumber           requests.Integer `position:"Query" name:"PageNumber"`
 	HostAddress          string           `position:"Query" name:"HostAddress"`
 	PageSize             requests.Integer `position:"Query" name:"PageSize"`
+	Order                string           `position:"Query" name:"Order"`
 	SqlType              string           `position:"Query" name:"SqlType"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	DBClusterId          string           `position:"Query" name:"DBClusterId"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	QueryKeyword         string           `position:"Query" name:"QueryKeyword"`
+	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	EndTime              string           `position:"Query" name:"EndTime"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 	DBName               string           `position:"Query" name:"DBName"`
@@ -97,10 +93,10 @@ type DescribeAuditLogRecordsRequest struct {
 // DescribeAuditLogRecordsResponse is the response struct for api DescribeAuditLogRecords
 type DescribeAuditLogRecordsResponse struct {
 	*responses.BaseResponse
-	RequestId   string          `json:"RequestId" xml:"RequestId"`
 	TotalCount  string          `json:"TotalCount" xml:"TotalCount"`
-	PageNumber  string          `json:"PageNumber" xml:"PageNumber"`
 	PageSize    string          `json:"PageSize" xml:"PageSize"`
+	RequestId   string          `json:"RequestId" xml:"RequestId"`
+	PageNumber  string          `json:"PageNumber" xml:"PageNumber"`
 	DBClusterId string          `json:"DBClusterId" xml:"DBClusterId"`
 	Items       []SlowLogRecord `json:"Items" xml:"Items"`
 }

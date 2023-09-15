@@ -77,10 +77,10 @@ type DeleteEventRulesRequest struct {
 // DeleteEventRulesResponse is the response struct for api DeleteEventRules
 type DeleteEventRulesResponse struct {
 	*responses.BaseResponse
-	Success   bool   `json:"Success" xml:"Success"`
 	Code      string `json:"Code" xml:"Code"`
 	Message   string `json:"Message" xml:"Message"`
 	RequestId string `json:"RequestId" xml:"RequestId"`
+	Success   bool   `json:"Success" xml:"Success"`
 }
 
 // CreateDeleteEventRulesRequest creates a request to invoke DeleteEventRules API

@@ -19,6 +19,6 @@ package ddoscoo
 type Condition struct {
 	MatchMethod string `json:"MatchMethod" xml:"MatchMethod"`
 	Field       string `json:"Field" xml:"Field"`
-	HeaderName  string `json:"HeaderName" xml:"HeaderName"`
 	Content     string `json:"Content" xml:"Content"`
+	HeaderName  string `json:"HeaderName" xml:"HeaderName"`
 }

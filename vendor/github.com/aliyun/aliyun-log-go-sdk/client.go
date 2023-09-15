@@ -20,6 +20,10 @@ var RetryOnServerErrorEnabled = true
 
 var GlobalDebugLevel = 0
 
+var MaxCompletedRetryCount = 20
+
+var MaxCompletedRetryLatency = 5 * time.Minute
+
 // compress type
 const (
 	Compress_LZ4  = iota // 0
@@ -29,7 +33,17 @@ const (
 
 var InvalidCompressError = errors.New("Invalid Compress Type")
 
-const defaultLogUserAgent = "golang-sdk-v0.1.0"
+const DefaultLogUserAgent = "golang-sdk-v0.1.0"
+
+// AuthVersionType the version of auth
+type AuthVersionType string
+
+const (
+	// AuthV1 v1
+	AuthV1 AuthVersionType = "v1"
+	// AuthV4 v4
+	AuthV4 AuthVersionType = "v4"
+)
 
 // Error defines sls error
 type Error struct {
@@ -88,6 +102,9 @@ type Client struct {
 	UserAgent       string // default defaultLogUserAgent
 	RequestTimeOut  time.Duration
 	RetryTimeOut    time.Duration
+	HTTPClient      *http.Client
+	Region          string
+	AuthVersion     AuthVersionType //  v1 or v4 signature,default is v1
 
 	accessKeyLock sync.RWMutex
 }
@@ -95,9 +112,18 @@ type Client struct {
 func convert(c *Client, projName string) *LogProject {
 	c.accessKeyLock.RLock()
 	defer c.accessKeyLock.RUnlock()
+	return convertLocked(c, projName)
+}
+
+func convertLocked(c *Client, projName string) *LogProject {
 	p, _ := NewLogProject(projName, c.Endpoint, c.AccessKeyID, c.AccessKeySecret)
 	p.SecurityToken = c.SecurityToken
 	p.UserAgent = c.UserAgent
+	p.AuthVersion = c.AuthVersion
+	p.Region = c.Region
+	if c.HTTPClient != nil {
+		p.httpClient = c.HTTPClient
+	}
 	if c.RequestTimeOut != time.Duration(0) {
 		p.WithRequestTimeout(c.RequestTimeOut)
 	}
@@ -106,6 +132,30 @@ func convert(c *Client, projName string) *LogProject {
 	}
 
 	return p
+}
+
+// SetUserAgent set a custom userAgent
+func (c *Client) SetUserAgent(userAgent string) {
+	c.UserAgent = userAgent
+}
+
+// SetHTTPClient set a custom http client, all request will send to sls by this client
+func (c *Client) SetHTTPClient(client *http.Client) {
+	c.HTTPClient = client
+}
+
+// SetAuthVersion set signature version that the client used
+func (c *Client) SetAuthVersion(version AuthVersionType) {
+	c.accessKeyLock.Lock()
+	c.AuthVersion = version
+	c.accessKeyLock.Unlock()
+}
+
+// SetRegion set a region, must be set if using signature version v4
+func (c *Client) SetRegion(region string) {
+	c.accessKeyLock.Lock()
+	c.Region = region
+	c.accessKeyLock.Unlock()
 }
 
 // ResetAccessKeyToken reset client's access key token

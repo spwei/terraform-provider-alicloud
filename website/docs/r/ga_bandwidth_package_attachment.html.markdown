@@ -7,13 +7,13 @@ description: |-
   Provides a Alicloud Global Accelerator (GA) Bandwidth Package Attachment resource.
 ---
 
-# alicloud\_ga\_bandwidth\_package\_attachment
+# alicloud_ga_bandwidth_package_attachment
 
 Provides a Global Accelerator (GA) Bandwidth Package Attachment resource.
 
-For information about Global Accelerator (GA) Bandwidth Package Attachment and how to use it, see [What is Bandwidth Package Attachment](https://www.alibabacloud.com/help/en/doc-detail/153241.htm).
+For information about Global Accelerator (GA) Bandwidth Package Attachment and how to use it, see [What is Bandwidth Package Attachment](https://www.alibabacloud.com/help/en/global-accelerator/latest/api-ga-2019-11-20-bandwidthpackageaddaccelerator).
 
--> **NOTE:** Available in v1.113.0+.
+-> **NOTE:** Available since v1.113.0.
 
 ## Example Usage
 
@@ -25,6 +25,7 @@ resource "alicloud_ga_accelerator" "example" {
   auto_use_coupon = true
   spec            = "1"
 }
+
 resource "alicloud_ga_bandwidth_package" "example" {
   bandwidth      = 20
   type           = "Basic"
@@ -33,19 +34,19 @@ resource "alicloud_ga_bandwidth_package" "example" {
   auto_pay       = true
   ratio          = 30
 }
+
 resource "alicloud_ga_bandwidth_package_attachment" "example" {
   accelerator_id       = alicloud_ga_accelerator.example.id
   bandwidth_package_id = alicloud_ga_bandwidth_package.example.id
 }
-
 ```
 
 ## Argument Reference
 
 The following arguments are supported:
 
-* `accelerator_id` - (Required) The ID of the Global Accelerator instance from which you want to disassociate the bandwidth plan.
-* `bandwidth_package_id` - (Required, ForceNew) The ID of the bandwidth plan to disassociate.
+* `accelerator_id` - (Required, ForceNew) The ID of the Global Accelerator instance from which you want to disassociate the bandwidth plan.
+* `bandwidth_package_id` - (Required) The ID of the bandwidth plan to disassociate. **NOTE:** From version 1.192.0, `bandwidth_package_id` can be modified.
 
 ## Attributes Reference
 
@@ -55,17 +56,18 @@ The following attributes are exported:
 * `accelerators` - Accelerators bound with current Bandwidth Package.
 * `status` - State of Bandwidth Package.
 
-### Timeouts
+## Timeouts
 
 The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
 
-* `create` - (Defaults to 1 mins) Used when create the Bandwidth Package Attachment.
-* `delete` - (Defaults to 1 mins) Used when delete the Bandwidth Package Attachment.
+* `create` - (Defaults to 5 mins) Used when create the Bandwidth Package Attachment.
+* `update` - (Defaults to 5 mins) Used when update the Bandwidth Package Attachment.
+* `delete` - (Defaults to 5 mins) Used when delete the Bandwidth Package Attachment.
 
 ## Import
 
-Ga Bandwidth Package Attachment can be imported using the id, e.g.
+Ga Bandwidth Package Attachment can be imported using the id. Format to `<accelerator_id>:<bandwidth_package_id>`, e.g.
 
-```
-$ terraform import alicloud_ga_bandwidth_package_attachment.example <accelerator_id>:<bandwidth_package_id>
+```shell
+$ terraform import alicloud_ga_bandwidth_package_attachment.example your_accelerator_id:your_bandwidth_package_id
 ```

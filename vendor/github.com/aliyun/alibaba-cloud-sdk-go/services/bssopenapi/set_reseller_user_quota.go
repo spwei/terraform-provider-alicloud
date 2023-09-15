@@ -80,11 +80,11 @@ type SetResellerUserQuotaRequest struct {
 // SetResellerUserQuotaResponse is the response struct for api SetResellerUserQuota
 type SetResellerUserQuotaResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
 	Code      string `json:"Code" xml:"Code"`
 	Message   string `json:"Message" xml:"Message"`
-	Success   bool   `json:"Success" xml:"Success"`
 	Data      bool   `json:"Data" xml:"Data"`
+	RequestId string `json:"RequestId" xml:"RequestId"`
+	Success   bool   `json:"Success" xml:"Success"`
 }
 
 // CreateSetResellerUserQuotaRequest creates a request to invoke SetResellerUserQuota API
@@ -92,7 +92,7 @@ func CreateSetResellerUserQuotaRequest() (request *SetResellerUserQuotaRequest) 
 	request = &SetResellerUserQuotaRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "SetResellerUserQuota", "", "")
+	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "SetResellerUserQuota", "bssopenapi", "openAPI")
 	request.Method = requests.POST
 	return
 }

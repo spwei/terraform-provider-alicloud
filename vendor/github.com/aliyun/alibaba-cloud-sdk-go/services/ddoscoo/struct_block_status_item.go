@@ -17,8 +17,8 @@ package ddoscoo
 
 // BlockStatusItem is a nested struct in ddoscoo response
 type BlockStatusItem struct {
+	EndTime     int64  `json:"EndTime" xml:"EndTime"`
 	StartTime   int64  `json:"StartTime" xml:"StartTime"`
 	Line        string `json:"Line" xml:"Line"`
-	EndTime     int64  `json:"EndTime" xml:"EndTime"`
 	BlockStatus string `json:"BlockStatus" xml:"BlockStatus"`
 }

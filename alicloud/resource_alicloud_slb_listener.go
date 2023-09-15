@@ -80,10 +80,11 @@ func resourceAliyunSlbListener() *schema.Resource {
 					validation.IntBetween(1, 1000),
 					validation.IntInSlice([]int{-1})),
 				Optional: true,
+				Computed: true,
 			},
 			"scheduler": {
 				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"wrr", "wlc", "rr", "sch"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"wrr", "wlc", "rr", "sch", "tch", "qch"}, false),
 				Optional:     true,
 				Default:      WRRScheduler,
 			},
@@ -146,7 +147,7 @@ func resourceAliyunSlbListener() *schema.Resource {
 			//tcp & udp
 			"persistence_timeout": {
 				Type:             schema.TypeInt,
-				ValidateFunc:     validation.IntBetween(1, 3600),
+				ValidateFunc:     validation.IntBetween(0, 3600),
 				Optional:         true,
 				Default:          0,
 				DiffSuppressFunc: tcpUdpDiffSuppressFunc,
@@ -194,7 +195,7 @@ func resourceAliyunSlbListener() *schema.Resource {
 			"health_check_connect_port": {
 				Type: schema.TypeInt,
 				ValidateFunc: validation.Any(
-					validation.IntBetween(1, 65535),
+					validation.IntBetween(0, 65535),
 					validation.IntInSlice([]int{-520})),
 				Optional:         true,
 				Computed:         true,
@@ -235,7 +236,7 @@ func resourceAliyunSlbListener() *schema.Resource {
 				ValidateFunc: validateAllowedSplitStringValue([]string{
 					string(HTTP_2XX), string(HTTP_3XX), string(HTTP_4XX), string(HTTP_5XX)}, ","),
 				Optional:         true,
-				Default:          HTTP_2XX,
+				Computed:         true,
 				DiffSuppressFunc: httpHttpsTcpDiffSuppressFunc,
 			},
 			//https
@@ -357,7 +358,11 @@ func resourceAliyunSlbListener() *schema.Resource {
 			"delete_protection_validation": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+			},
+			"proxy_protocol_v2_enabled": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
 			},
 		},
 	}
@@ -369,7 +374,7 @@ func resourceAliyunSlbListenerCreate(d *schema.ResourceData, meta interface{}) e
 	slbService := SlbService{client}
 	httpForward := false
 	protocol := d.Get("protocol").(string)
-	lb_id := d.Get("load_balancer_id").(string)
+	lbId := d.Get("load_balancer_id").(string)
 	frontend := d.Get("frontend_port").(int)
 	if listenerForward, ok := d.GetOk("listener_forward"); ok && listenerForward.(string) == string(OnFlag) {
 		httpForward = true
@@ -417,7 +422,7 @@ func resourceAliyunSlbListenerCreate(d *schema.ResourceData, meta interface{}) e
 		return WrapErrorf(err, DefaultErrorMsg, "alicloud_slb_listener", request.GetActionName(), AlibabaCloudSdkGoERROR)
 	}
 	addDebug(request.GetActionName(), raw, request, request.QueryParams)
-	d.SetId(lb_id + ":" + protocol + ":" + strconv.Itoa(frontend))
+	d.SetId(lbId + ":" + protocol + ":" + strconv.Itoa(frontend))
 
 	if err := slbService.WaitForSlbListener(d.Id(), Stopped, DefaultTimeout); err != nil {
 		return WrapError(err)
@@ -425,7 +430,7 @@ func resourceAliyunSlbListenerCreate(d *schema.ResourceData, meta interface{}) e
 
 	startLoadBalancerListenerRequest := slb.CreateStartLoadBalancerListenerRequest()
 	startLoadBalancerListenerRequest.RegionId = client.RegionId
-	startLoadBalancerListenerRequest.LoadBalancerId = lb_id
+	startLoadBalancerListenerRequest.LoadBalancerId = lbId
 	startLoadBalancerListenerRequest.ListenerPort = requests.NewInteger(frontend)
 	startLoadBalancerListenerRequest.ListenerProtocol = protocol
 
@@ -560,6 +565,11 @@ func resourceAliyunSlbListenerUpdate(d *schema.ResourceData, meta interface{}) e
 		update = true
 	}
 
+	if d.HasChange("proxy_protocol_v2_enabled") {
+		commonRequest.QueryParams["ProxyProtocolV2Enabled"] = convertBoolToString(d.Get("proxy_protocol_v2_enabled").(bool))
+		update = true
+	}
+
 	httpArgs, err := buildHttpListenerArgs(d, commonRequest)
 	if (protocol == Https || protocol == Http) && err != nil {
 		return WrapError(err)
@@ -663,18 +673,19 @@ func resourceAliyunSlbListenerUpdate(d *schema.ResourceData, meta interface{}) e
 
 	// http https tcp
 	if d.HasChange("health_check_domain") {
-		if domain, ok := d.GetOk("health_check_domain"); ok {
-			httpArgs.QueryParams["HealthCheckDomain"] = domain.(string)
-			tcpArgs.QueryParams["HealthCheckDomain"] = domain.(string)
-			update = true
-		}
+		update = true
+	}
+	// todo: depends on Api fixing the default value
+	if domain, ok := d.GetOk("health_check_domain"); ok {
+		httpArgs.QueryParams["HealthCheckDomain"] = domain.(string)
+		tcpArgs.QueryParams["HealthCheckDomain"] = domain.(string)
 	}
 	if d.HasChange("health_check_uri") {
 		tcpArgs.QueryParams["HealthCheckURI"] = d.Get("health_check_uri").(string)
 		update = true
 	}
 	if d.HasChange("health_check_http_code") {
-		tcpArgs.QueryParams["HealthCheckHttpCode"] = d.Get("health_check_http_code").(string)
+		tcpArgs.QueryParams["HealthCheckHttpCode"] = getHealthCheckHttpCodeValue(d)
 		update = true
 	}
 
@@ -747,13 +758,22 @@ func resourceAliyunSlbListenerUpdate(d *schema.ResourceData, meta interface{}) e
 		default:
 			request = httpArgs
 		}
-		raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
-			return slbClient.ProcessCommonRequest(request)
+		err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+			raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
+				return slbClient.ProcessCommonRequest(request)
+			})
+			if err != nil {
+				if IsExpectedErrors(err, []string{"OperationFailed.ListenerStatusNotSupport"}) {
+					return resource.RetryableError(err)
+				}
+				return resource.NonRetryableError(err)
+			}
+			addDebug(request.GetActionName(), raw, request.QueryParams, request)
+			return nil
 		})
 		if err != nil {
 			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabaCloudSdkGoERROR)
 		}
-		addDebug(request.GetActionName(), raw, request, request.QueryParams)
 	}
 
 	d.Partial(false)
@@ -773,7 +793,7 @@ func resourceAliyunSlbListenerDelete(d *schema.ResourceData, meta interface{}) e
 		}
 		return WrapError(err)
 	}
-	if d.Get("delete_protection_validation").(bool) {
+	if v, ok := d.GetOkExists("delete_protection_validation"); ok && v.(bool) {
 		lbInstance, err := slbService.DescribeSlb(lbId)
 		if err != nil {
 			if NotFoundError(err) {
@@ -851,7 +871,14 @@ func buildListenerCommonArgs(d *schema.ResourceData, meta interface{}) (*request
 	if description, ok := d.GetOk("description"); ok && description.(string) != "" {
 		request.QueryParams["Description"] = description.(string)
 	}
+	// scheduler
+	if scheduler, ok := d.GetOk("scheduler"); ok && scheduler.(string) != "" {
+		request.QueryParams["Scheduler"] = scheduler.(string)
+	}
 
+	if v, ok := d.GetOkExists("proxy_protocol_v2_enabled"); ok && v.(bool) {
+		request.QueryParams["ProxyProtocolV2Enabled"] = convertBoolToString(v.(bool))
+	}
 	return request, nil
 
 }
@@ -895,10 +922,10 @@ func buildHttpListenerArgs(d *schema.ResourceData, req *requests.CommonRequest) 
 		req.QueryParams["UnhealthyThreshold"] = string(requests.NewInteger(d.Get("unhealthy_threshold").(int)))
 		req.QueryParams["HealthCheckTimeout"] = string(requests.NewInteger(d.Get("health_check_timeout").(int)))
 		req.QueryParams["HealthCheckInterval"] = string(requests.NewInteger(d.Get("health_check_interval").(int)))
-		req.QueryParams["HealthCheckHttpCode"] = d.Get("health_check_http_code").(string)
+		req.QueryParams["HealthCheckHttpCode"] = getHealthCheckHttpCodeValue(d)
 		if d.Get("protocol").(string) == "http" || d.Get("protocol").(string) == "https" {
-			if health_check_method, ok := d.GetOk("health_check_method"); ok && health_check_method.(string) != "" {
-				req.QueryParams["HealthCheckMethod"] = health_check_method.(string)
+			if healthCheckMethod, ok := d.GetOk("health_check_method"); ok && healthCheckMethod.(string) != "" {
+				req.QueryParams["HealthCheckMethod"] = healthCheckMethod.(string)
 			}
 		}
 	}
@@ -1107,5 +1134,17 @@ func readListener(d *schema.ResourceData, listener map[string]interface{}) {
 		d.Set("description", val.(string))
 	}
 
+	if val, ok := listener["ProxyProtocolV2Enabled"]; ok {
+		d.Set("proxy_protocol_v2_enabled", val)
+	}
+
 	return
+}
+
+func getHealthCheckHttpCodeValue(d *schema.ResourceData) string {
+	if v, ok := d.GetOk("health_check_http_code"); ok && v.(string) != "" {
+		return v.(string)
+	}
+	// After the version 1.144.0, removes health_check_http_code Default and using Computed instead.
+	return string(HTTP_2XX)
 }

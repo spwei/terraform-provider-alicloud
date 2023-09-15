@@ -81,8 +81,8 @@ type DescribeAutoCcBlacklistRequest struct {
 // DescribeAutoCcBlacklistResponse is the response struct for api DescribeAutoCcBlacklist
 type DescribeAutoCcBlacklistResponse struct {
 	*responses.BaseResponse
-	RequestId       string                `json:"RequestId" xml:"RequestId"`
 	TotalCount      int64                 `json:"TotalCount" xml:"TotalCount"`
+	RequestId       string                `json:"RequestId" xml:"RequestId"`
 	AutoCcBlacklist []AutoCcBlacklistItem `json:"AutoCcBlacklist" xml:"AutoCcBlacklist"`
 }
 

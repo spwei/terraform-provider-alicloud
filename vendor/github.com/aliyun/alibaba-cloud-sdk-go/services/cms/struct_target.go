@@ -17,9 +17,11 @@ package cms
 
 // Target is a nested struct in cms response
 type Target struct {
-	Arn    string `json:"Arn" xml:"Arn"`
-	Level  string `json:"Level" xml:"Level"`
-	Id     string `json:"Id" xml:"Id"`
-	RuleId string `json:"RuleId" xml:"RuleId"`
-	Result Result `json:"Result" xml:"Result"`
+	JsonParams string `json:"JsonParams" xml:"JsonParams"`
+	Arn        string `json:"Arn" xml:"Arn"`
+	Level      string `json:"Level" xml:"Level"`
+	Id         string `json:"Id" xml:"Id"`
+	RuleId     string `json:"RuleId" xml:"RuleId"`
+	JsonParmas string `json:"JsonParmas" xml:"JsonParmas"`
+	Result     Result `json:"Result" xml:"Result"`
 }

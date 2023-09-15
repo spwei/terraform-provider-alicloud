@@ -7,40 +7,36 @@ description: |-
   Provides an RDS database resource.
 ---
 
-# alicloud\_db\_database
+# alicloud_db_database
 
-Provides an RDS database resource. A DB database deployed in a DB instance. A DB instance can own multiple databases.
+Provides an RDS database resource. A DB database deployed in a DB instance. A DB instance can own multiple databases, see [What is DB Database](https://www.alibabacloud.com/help/en/apsaradb-for-rds/latest/api-rds-2014-08-15-createdatabase).
 
--> **NOTE:** This resource does not support creating 'PPAS' database. You have to login RDS instance to create manually.
+-> **NOTE:** Available since v1.5.0.
 
 ## Example Usage
 
-```
-variable "creation" {
-  default = "Rds"
-}
-
+```terraform
 variable "name" {
-  default = "dbdatabasebasic"
+  default = "tf-example"
 }
-
-data "alicloud_zones" "default" {
-  available_resource_creation = var.creation
+data "alicloud_db_zones" "default" {
+  engine         = "MySQL"
+  engine_version = "5.6"
 }
 
 resource "alicloud_vpc" "default" {
-  name       = var.name
+  vpc_name   = var.name
   cidr_block = "172.16.0.0/16"
 }
 
 resource "alicloud_vswitch" "default" {
-  vpc_id            = alicloud_vpc.default.id
-  cidr_block        = "172.16.0.0/24"
-  zone_id           = data.alicloud_zones.default.zones[0].id
-  vswitch_name      = var.name
+  vpc_id       = alicloud_vpc.default.id
+  cidr_block   = "172.16.0.0/24"
+  zone_id      = data.alicloud_db_zones.default.zones.0.id
+  vswitch_name = var.name
 }
 
-resource "alicloud_db_instance" "instance" {
+resource "alicloud_db_instance" "default" {
   engine           = "MySQL"
   engine_version   = "5.6"
   instance_type    = "rds.mysql.s1.small"
@@ -50,8 +46,8 @@ resource "alicloud_db_instance" "instance" {
 }
 
 resource "alicloud_db_database" "default" {
-  instance_id = alicloud_db_instance.instance.id
-  name        = "tftestdatabase"
+  instance_id = alicloud_db_instance.default.id
+  name        = var.name
 }
 ```
 
@@ -60,16 +56,19 @@ resource "alicloud_db_database" "default" {
 The following arguments are supported:
 
 * `instance_id` - (Required, ForceNew) The Id of instance that can run database.
-* `name` - (Required, ForceNew) Name of the database requiring a uniqueness check. It may consist of lower case letters, numbers, and underlines, and must start with a letter
-                      and have no more than 64 characters.
-* `character_set` - (Required) Character set. The value range is limited to the following:
+* `name` - (Required, ForceNew) Name of the database requiring a uniqueness check. It may consist of lower case letters, numbers, and underlines, and must start with a letter and have no more than 64 characters.
+* `character_set` - (Optional, ForceNew) Character set. The value range is limited to the following:
     - MySQL: [ utf8, gbk, latin1, utf8mb4 ] \(`utf8mb4` only supports versions 5.5 and 5.6\).
     - SQLServer: [ Chinese_PRC_CI_AS, Chinese_PRC_CS_AS, SQL_Latin1_General_CP1_CI_AS, SQL_Latin1_General_CP1_CS_AS, Chinese_PRC_BIN ]
-    - PostgreSQL: [ KOI8U、UTF8、WIN866、WIN874、WIN1250、WIN1251、WIN1252、WIN1253、WIN1254、WIN1255、WIN1256、WIN1257、WIN1258、EUC_CN、EUC_KR、EUC_TW、EUC_JP、EUC_JIS_2004、KOI8R、MULE_INTERNAL、LATIN1、LATIN2、LATIN3、LATIN4、LATIN5、LATIN6、LATIN7、LATIN8、LATIN9、LATIN10、ISO_8859_5、ISO_8859_6、ISO_8859_7、ISO_8859_8、SQL_ASCII ]
+    - PostgreSQL: Valid values for PostgreSQL databases: a value in the `character set,<Collate>,<Ctype>` format. Example: `UTF8,C,en_US.utf8`.
+    > - Valid values for the character set : [ KOI8U, UTF8, WIN866, WIN874, WIN1250, WIN1251, WIN1252, WIN1253, WIN1254, WIN1255, WIN1256, WIN1257, WIN1258, EUC_CN, EUC_KR, EUC_TW, EUC_JP, EUC_JIS_2004, KOI8R, MULE_INTERNAL, LATIN1, LATIN2, LATIN3, LATIN4, LATIN5, LATIN6, LATIN7, LATIN8, LATIN9, LATIN10, ISO_8859_5, ISO_8859_6, ISO_8859_7, ISO_8859_8, SQL_ASCII ]
+    > - Valid values for the Collate field: You can execute the `SELECT DISTINCT collname FROM pg_collation;` statement to obtain the field value. The default value is `C`.
+    > - Valid values for the Ctype field: You can execute the `SELECT DISTINCT collctype FROM pg_collation;` statement to obtain the field value. The default value is `en_US.utf8`.
+    - MariaDB: [ utf8, gbk, latin1, utf8mb4 ]
   
    More details refer to [API Docs](https://www.alibabacloud.com/help/zh/doc-detail/26258.htm)
 
-* `description` - (ForceNew) Database description. It cannot begin with https://. It must start with a Chinese character or English letter. It can include Chinese and English characters, underlines (_), hyphens (-), and numbers. The length may be 2-256 characters.
+* `description` - (Optional) Database description. It cannot begin with https://. It must start with a Chinese character or English letter. It can include Chinese and English characters, underlines (_), hyphens (-), and numbers. The length may be 2-256 characters.
 
 -> **NOTE:** The value of "name" or "character_set"  does not support modification.
 
@@ -84,6 +83,6 @@ The following attributes are exported:
 
 RDS database can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_db_database.example "rm-12345:tf_database"
 ```

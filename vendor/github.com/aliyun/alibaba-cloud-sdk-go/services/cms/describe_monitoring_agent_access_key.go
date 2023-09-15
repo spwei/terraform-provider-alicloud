@@ -76,12 +76,12 @@ type DescribeMonitoringAgentAccessKeyRequest struct {
 // DescribeMonitoringAgentAccessKeyResponse is the response struct for api DescribeMonitoringAgentAccessKey
 type DescribeMonitoringAgentAccessKeyResponse struct {
 	*responses.BaseResponse
-	Code      int    `json:"Code" xml:"Code"`
-	Message   string `json:"Message" xml:"Message"`
-	Success   bool   `json:"Success" xml:"Success"`
-	RequestId string `json:"RequestId" xml:"RequestId"`
 	AccessKey string `json:"AccessKey" xml:"AccessKey"`
 	SecretKey string `json:"SecretKey" xml:"SecretKey"`
+	RequestId string `json:"RequestId" xml:"RequestId"`
+	Success   bool   `json:"Success" xml:"Success"`
+	Code      int    `json:"Code" xml:"Code"`
+	Message   string `json:"Message" xml:"Message"`
 }
 
 // CreateDescribeMonitoringAgentAccessKeyRequest creates a request to invoke DescribeMonitoringAgentAccessKey API

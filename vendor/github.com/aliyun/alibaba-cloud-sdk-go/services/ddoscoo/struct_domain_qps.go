@@ -17,13 +17,13 @@ package ddoscoo
 
 // DomainQPS is a nested struct in ddoscoo response
 type DomainQPS struct {
-	MaxQps       int64 `json:"MaxQps" xml:"MaxQps"`
-	MaxAttackQps int64 `json:"MaxAttackQps" xml:"MaxAttackQps"`
-	MaxNormalQps int64 `json:"MaxNormalQps" xml:"MaxNormalQps"`
-	AttackQps    int64 `json:"AttackQps" xml:"AttackQps"`
-	TotalQps     int64 `json:"TotalQps" xml:"TotalQps"`
-	CacheHits    int64 `json:"CacheHits" xml:"CacheHits"`
-	TotalCount   int64 `json:"TotalCount" xml:"TotalCount"`
 	Index        int64 `json:"Index" xml:"Index"`
 	Time         int64 `json:"Time" xml:"Time"`
+	MaxAttackQps int64 `json:"MaxAttackQps" xml:"MaxAttackQps"`
+	AttackQps    int64 `json:"AttackQps" xml:"AttackQps"`
+	MaxQps       int64 `json:"MaxQps" xml:"MaxQps"`
+	MaxNormalQps int64 `json:"MaxNormalQps" xml:"MaxNormalQps"`
+	TotalQps     int64 `json:"TotalQps" xml:"TotalQps"`
+	TotalCount   int64 `json:"TotalCount" xml:"TotalCount"`
+	CacheHits    int64 `json:"CacheHits" xml:"CacheHits"`
 }

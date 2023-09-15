@@ -17,10 +17,10 @@ package ddoscoo
 
 // DefenseRecord is a nested struct in ddoscoo response
 type DefenseRecord struct {
-	StartTime  int64  `json:"StartTime" xml:"StartTime"`
 	EndTime    int64  `json:"EndTime" xml:"EndTime"`
-	InstanceId string `json:"InstanceId" xml:"InstanceId"`
 	Status     int    `json:"Status" xml:"Status"`
-	AttackPeak int64  `json:"AttackPeak" xml:"AttackPeak"`
+	StartTime  int64  `json:"StartTime" xml:"StartTime"`
 	EventCount int    `json:"EventCount" xml:"EventCount"`
+	InstanceId string `json:"InstanceId" xml:"InstanceId"`
+	AttackPeak int64  `json:"AttackPeak" xml:"AttackPeak"`
 }

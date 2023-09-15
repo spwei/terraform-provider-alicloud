@@ -78,9 +78,9 @@ type DeleteLogMonitorRequest struct {
 type DeleteLogMonitorResponse struct {
 	*responses.BaseResponse
 	Code      string `json:"Code" xml:"Code"`
-	Success   bool   `json:"Success" xml:"Success"`
 	Message   string `json:"Message" xml:"Message"`
 	RequestId string `json:"RequestId" xml:"RequestId"`
+	Success   bool   `json:"Success" xml:"Success"`
 }
 
 // CreateDeleteLogMonitorRequest creates a request to invoke DeleteLogMonitor API

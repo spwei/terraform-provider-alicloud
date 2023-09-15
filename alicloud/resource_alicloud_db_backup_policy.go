@@ -167,6 +167,24 @@ func resourceAlicloudDBBackupPolicy() *schema.Resource {
 				Optional:         true,
 				DiffSuppressFunc: enableBackupLogDiffSuppressFunc,
 			},
+			"released_keep_policy": {
+				Type:         schema.TypeString,
+				ValidateFunc: validation.StringInSlice([]string{"None", "Lastest", "All"}, false),
+				Optional:     true,
+				Computed:     true,
+			},
+			"category": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice([]string{"Flash", "Standard"}, false),
+			},
+			"backup_interval": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice([]string{"-1", "15", "30", "60", "120", "180", "240", "360", "480", "720"}, false),
+			},
 		},
 	}
 }
@@ -202,6 +220,8 @@ func resourceAlicloudDBBackupPolicyRead(d *schema.ResourceData, meta interface{}
 	d.Set("log_backup_retention_period", formatInt(object["LogBackupRetentionPeriod"]))
 	d.Set("local_log_retention_hours", formatInt(object["LocalLogRetentionHours"]))
 	d.Set("local_log_retention_space", formatInt(object["LocalLogRetentionSpace"]))
+	d.Set("released_keep_policy", object["ReleasedKeepPolicy"])
+	d.Set("category", object["Category"])
 	instance, err := rdsService.DescribeDBInstance(d.Id())
 	if err != nil {
 		if NotFoundError(err) {
@@ -215,6 +235,7 @@ func resourceAlicloudDBBackupPolicyRead(d *schema.ResourceData, meta interface{}
 		d.Set("high_space_usage_protection", "Enable")
 	} else {
 		d.Set("high_space_usage_protection", object["HighSpaceUsageProtection"])
+		d.Set("backup_interval", object["BackupInterval"])
 	}
 	d.Set("log_backup_frequency", object["LogBackupFrequency"])
 	d.Set("compress_type", object["CompressType"])
@@ -233,7 +254,7 @@ func resourceAlicloudDBBackupPolicyUpdate(d *schema.ResourceData, meta interface
 	if d.HasChange("backup_period") || d.HasChange("backup_time") || d.HasChange("retention_period") ||
 		d.HasChange("preferred_backup_period") || d.HasChange("preferred_backup_time") || d.HasChange("backup_retention_period") ||
 		d.HasChange("compress_type") || d.HasChange("log_backup_frequency") || d.HasChange("archive_backup_retention_period") ||
-		d.HasChange("archive_backup_keep_count") || d.HasChange("archive_backup_keep_policy") {
+		d.HasChange("archive_backup_keep_count") || d.HasChange("archive_backup_keep_policy") || d.HasChange("released_keep_policy") || d.HasChange("category") || d.HasChange("backup_interval") {
 		updateForData = true
 	}
 
@@ -266,6 +287,12 @@ func resourceAlicloudDBBackupPolicyUpdate(d *schema.ResourceData, meta interface
 func resourceAlicloudDBBackupPolicyDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AliyunClient)
 	rdsService := RdsService{client}
+
+	stateConf := BuildStateConf([]string{}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 60*time.Second, rdsService.RdsDBInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return WrapErrorf(err, IdMsg, d.Id())
+	}
+
 	conn, err := client.NewRdsClient()
 	if err != nil {
 		return err
@@ -295,7 +322,9 @@ func resourceAlicloudDBBackupPolicyDelete(d *schema.ResourceData, meta interface
 		request["ArchiveBackupKeepCount"] = "1"
 		request["ArchiveBackupKeepPolicy"] = "ByMonth"
 	}
-	response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2014-08-15"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+	runtime := util.RuntimeOptions{}
+	runtime.SetAutoretry(true)
+	response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2014-08-15"), StringPointer("AK"), nil, request, &runtime)
 	if err != nil {
 		return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabaCloudSdkGoERROR)
 	}

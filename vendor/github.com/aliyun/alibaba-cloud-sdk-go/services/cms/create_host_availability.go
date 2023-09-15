@@ -72,11 +72,14 @@ func (client *Client) CreateHostAvailabilityWithCallback(request *CreateHostAvai
 type CreateHostAvailabilityRequest struct {
 	*requests.RpcRequest
 	TaskOptionHttpMethod               string                                             `position:"Query" name:"TaskOption.HttpMethod"`
+	TaskOptionHttpHeader               string                                             `position:"Query" name:"TaskOption.HttpHeader"`
 	AlertConfigEscalationList          *[]CreateHostAvailabilityAlertConfigEscalationList `position:"Query" name:"AlertConfigEscalationList"  type:"Repeated"`
 	TaskName                           string                                             `position:"Query" name:"TaskName"`
 	AlertConfigSilenceTime             requests.Integer                                   `position:"Query" name:"AlertConfig.SilenceTime"`
+	AlertConfigTargetList              *[]CreateHostAvailabilityAlertConfigTargetList     `position:"Query" name:"AlertConfigTargetList"  type:"Repeated"`
 	TaskOptionHttpResponseCharset      string                                             `position:"Query" name:"TaskOption.HttpResponseCharset"`
 	TaskOptionHttpNegative             requests.Boolean                                   `position:"Query" name:"TaskOption.HttpNegative"`
+	TaskOptionInterval                 requests.Integer                                   `position:"Query" name:"TaskOption.Interval"`
 	AlertConfigNotifyType              requests.Integer                                   `position:"Query" name:"AlertConfig.NotifyType"`
 	TaskOptionTelnetOrPingHost         string                                             `position:"Query" name:"TaskOption.TelnetOrPingHost"`
 	TaskOptionHttpResponseMatchContent string                                             `position:"Query" name:"TaskOption.HttpResponseMatchContent"`
@@ -89,6 +92,14 @@ type CreateHostAvailabilityRequest struct {
 	TaskOptionHttpPostContent          string                                             `position:"Query" name:"TaskOption.HttpPostContent"`
 	AlertConfigStartTime               requests.Integer                                   `position:"Query" name:"AlertConfig.StartTime"`
 	AlertConfigWebHook                 string                                             `position:"Query" name:"AlertConfig.WebHook"`
+}
+
+// CreateHostAvailabilityAlertConfigTargetList is a repeated param struct in CreateHostAvailabilityRequest
+type CreateHostAvailabilityAlertConfigTargetList struct {
+	Level      string `name:"Level"`
+	Id         string `name:"Id"`
+	Arn        string `name:"Arn"`
+	JsonParams string `name:"JsonParams"`
 }
 
 // CreateHostAvailabilityAlertConfigEscalationList is a repeated param struct in CreateHostAvailabilityRequest
@@ -105,9 +116,9 @@ type CreateHostAvailabilityResponse struct {
 	*responses.BaseResponse
 	Code      string `json:"Code" xml:"Code"`
 	Message   string `json:"Message" xml:"Message"`
-	Success   bool   `json:"Success" xml:"Success"`
 	RequestId string `json:"RequestId" xml:"RequestId"`
 	TaskId    int64  `json:"TaskId" xml:"TaskId"`
+	Success   bool   `json:"Success" xml:"Success"`
 }
 
 // CreateCreateHostAvailabilityRequest creates a request to invoke CreateHostAvailability API

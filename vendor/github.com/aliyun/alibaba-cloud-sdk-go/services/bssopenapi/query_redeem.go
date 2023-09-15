@@ -81,10 +81,10 @@ type QueryRedeemRequest struct {
 // QueryRedeemResponse is the response struct for api QueryRedeem
 type QueryRedeemResponse struct {
 	*responses.BaseResponse
-	RequestId string            `json:"RequestId" xml:"RequestId"`
-	Success   bool              `json:"Success" xml:"Success"`
 	Code      string            `json:"Code" xml:"Code"`
 	Message   string            `json:"Message" xml:"Message"`
+	RequestId string            `json:"RequestId" xml:"RequestId"`
+	Success   bool              `json:"Success" xml:"Success"`
 	Data      DataInQueryRedeem `json:"Data" xml:"Data"`
 }
 
@@ -93,7 +93,7 @@ func CreateQueryRedeemRequest() (request *QueryRedeemRequest) {
 	request = &QueryRedeemRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "QueryRedeem", "", "")
+	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "QueryRedeem", "bssopenapi", "openAPI")
 	request.Method = requests.GET
 	return
 }

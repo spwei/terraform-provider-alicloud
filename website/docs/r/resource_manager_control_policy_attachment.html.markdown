@@ -7,29 +7,28 @@ description: |-
   Provides a Alicloud Resource Manager Control Policy Attachment resource.
 ---
 
-# alicloud\_resource\_manager\_control\_policy\_attachment
+# alicloud_resource_manager_control_policy_attachment
 
 Provides a Resource Manager Control Policy Attachment resource.
 
-For information about Resource Manager Control Policy Attachment and how to use it, see [What is Control Policy Attachment](https://help.aliyun.com/document_detail/208330.html).
+For information about Resource Manager Control Policy Attachment and how to use it, see [What is Control Policy Attachment](https://www.alibabacloud.com/help/en/resource-management/latest/api-doc-resourcedirectorymaster-2022-04-19-api-doc-attachcontrolpolicy).
 
--> **NOTE:** Available in v1.120.0+.
+-> **NOTE:** Available since v1.120.0.
 
 ## Example Usage
 
 Basic Usage
 
 ```terraform
-// Enable the control policy
-resource "alicloud_resource_manager_resource_directory" "example" {
-  status = "Enabled"
+variable "name" {
+  default = "tf-example"
 }
 
 resource "alicloud_resource_manager_control_policy" "example" {
-  control_policy_name = "tf-testAccName"
-  description = "tf-testAccRDControlPolicy"
-  effect_scope = "RAM"
-  policy_document = <<EOF
+  control_policy_name = var.name
+  description         = var.name
+  effect_scope        = "RAM"
+  policy_document     = <<EOF
   {
     "Version": "1",
     "Statement": [
@@ -49,15 +48,13 @@ resource "alicloud_resource_manager_control_policy" "example" {
 }
 
 resource "alicloud_resource_manager_folder" "example" {
-  folder_name = "tf-testAccName"
+  folder_name = var.name
 }
 
 resource "alicloud_resource_manager_control_policy_attachment" "example" {
-   policy_id  = alicloud_resource_manager_control_policy.example.id
-   target_id  = alicloud_resource_manager_folder.example.id
-   depends_on = [alicloud_resource_manager_resource_directory.example]
+  policy_id = alicloud_resource_manager_control_policy.example.id
+  target_id = alicloud_resource_manager_folder.example.id
 }
-
 ```
 
 ## Argument Reference
@@ -77,6 +74,6 @@ The following attributes are exported:
 
 Resource Manager Control Policy Attachment can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_resource_manager_control_policy_attachment.example <policy_id>:<target_id>
 ```

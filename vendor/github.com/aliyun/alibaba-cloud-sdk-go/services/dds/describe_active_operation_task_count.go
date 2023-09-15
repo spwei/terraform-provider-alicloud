@@ -83,8 +83,8 @@ type DescribeActiveOperationTaskCountRequest struct {
 type DescribeActiveOperationTaskCountResponse struct {
 	*responses.BaseResponse
 	RequestId string `json:"RequestId" xml:"RequestId"`
-	TaskCount int    `json:"TaskCount" xml:"TaskCount"`
 	NeedPop   int    `json:"NeedPop" xml:"NeedPop"`
+	TaskCount int    `json:"TaskCount" xml:"TaskCount"`
 }
 
 // CreateDescribeActiveOperationTaskCountRequest creates a request to invoke DescribeActiveOperationTaskCount API
@@ -92,7 +92,7 @@ func CreateDescribeActiveOperationTaskCountRequest() (request *DescribeActiveOpe
 	request = &DescribeActiveOperationTaskCountRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("Dds", "2015-12-01", "DescribeActiveOperationTaskCount", "Dds", "openAPI")
+	request.InitWithApiInfo("Dds", "2015-12-01", "DescribeActiveOperationTaskCount", "dds", "openAPI")
 	request.Method = requests.POST
 	return
 }

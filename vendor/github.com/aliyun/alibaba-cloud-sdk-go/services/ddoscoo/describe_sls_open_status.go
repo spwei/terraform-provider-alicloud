@@ -79,8 +79,8 @@ type DescribeSlsOpenStatusRequest struct {
 // DescribeSlsOpenStatusResponse is the response struct for api DescribeSlsOpenStatus
 type DescribeSlsOpenStatusResponse struct {
 	*responses.BaseResponse
-	RequestId     string `json:"RequestId" xml:"RequestId"`
 	SlsOpenStatus bool   `json:"SlsOpenStatus" xml:"SlsOpenStatus"`
+	RequestId     string `json:"RequestId" xml:"RequestId"`
 }
 
 // CreateDescribeSlsOpenStatusRequest creates a request to invoke DescribeSlsOpenStatus API

@@ -79,8 +79,8 @@ type DescribeMetricRuleTargetsResponse struct {
 	*responses.BaseResponse
 	Code      string                             `json:"Code" xml:"Code"`
 	Message   string                             `json:"Message" xml:"Message"`
-	Success   bool                               `json:"Success" xml:"Success"`
 	RequestId string                             `json:"RequestId" xml:"RequestId"`
+	Success   bool                               `json:"Success" xml:"Success"`
 	Targets   TargetsInDescribeMetricRuleTargets `json:"Targets" xml:"Targets"`
 }
 

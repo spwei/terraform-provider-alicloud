@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	otsTunnel "github.com/aliyun/aliyun-tablestore-go-sdk/tunnel"
+
 	"log"
 	"strings"
 	"time"
@@ -68,20 +70,20 @@ func testSweepOtsInstances(region string) error {
 			req.PageNum = page
 		}
 	}
-	sweeped := false
-
 	for _, v := range insts {
 		name := v.InstanceName
 		skip := true
-		for _, prefix := range prefixes {
-			if strings.HasPrefix(strings.ToLower(name), strings.ToLower(prefix)) {
-				skip = false
-				break
+		if !sweepAll() {
+			for _, prefix := range prefixes {
+				if strings.HasPrefix(strings.ToLower(name), strings.ToLower(prefix)) {
+					skip = false
+					break
+				}
 			}
-		}
-		if skip {
-			log.Printf("[INFO] Skipping OTS Instance: %s", name)
-			continue
+			if skip {
+				log.Printf("[INFO] Skipping OTS Instance: %s", name)
+				continue
+			}
 		}
 		log.Printf("[INFO] Deleting OTS Instance %s table stores.", name)
 		raw, err := otsService.client.WithTableStoreClient(name, func(tableStoreClient *tablestore.TableStoreClient) (interface{}, error) {
@@ -93,6 +95,7 @@ func testSweepOtsInstances(region string) error {
 		tables, _ := raw.(*tablestore.ListTableResponse)
 		if tables != nil && len(tables.TableNames) > 0 {
 			for _, t := range tables.TableNames {
+				sweepTunnelsInTable(otsService.client, name, t)
 				req := new(tablestore.DeleteTableRequest)
 				req.TableName = t
 				if _, err := otsService.client.WithTableStoreClient(name, func(tableStoreClient *tablestore.TableStoreClient) (interface{}, error) {
@@ -111,17 +114,40 @@ func testSweepOtsInstances(region string) error {
 		})
 		if err != nil {
 			log.Printf("[ERROR] Failed to delete OTS Instance (%s): %s", name, err)
-		} else {
-			sweeped = true
 		}
 	}
-	if sweeped {
-		time.Sleep(3 * time.Minute)
-	}
+
 	return nil
 }
 
-func TestAccAlicloudOtsInstance_basic(t *testing.T) {
+func sweepTunnelsInTable(client *connectivity.AliyunClient, instanceName string, tableName string) {
+	log.Printf("[INFO] Deleting OTS Tunnels, instance: %s, table: %s", instanceName, tableName)
+	raw, err := client.WithTableStoreTunnelClient(instanceName, func(tunnelClient otsTunnel.TunnelClient) (interface{}, error) {
+		return tunnelClient.ListTunnel(&otsTunnel.ListTunnelRequest{
+			TableName: tableName,
+		})
+	})
+	if err != nil {
+		log.Printf("[ERROR] List OTS Tunnel failed, instance: %s, table: %s, error: %#v", instanceName, tableName, err)
+		return
+	}
+
+	tunnels, _ := raw.(*otsTunnel.ListTunnelResponse)
+	if tunnels != nil && len(tunnels.Tunnels) > 0 {
+		for _, t := range tunnels.Tunnels {
+			if _, err := client.WithTableStoreTunnelClient(instanceName, func(tunnelClient otsTunnel.TunnelClient) (interface{}, error) {
+				return tunnelClient.DeleteTunnel(&otsTunnel.DeleteTunnelRequest{
+					TableName:  tableName,
+					TunnelName: t.TunnelName,
+				})
+			}); err != nil {
+				log.Printf("[ERROR] Delete OTS Tunnel failed, instance: %s, table: %s, tunnel: %s, error: %#v", instanceName, tableName, t.TunnelName, err)
+			}
+		}
+	}
+}
+
+func TestAccAliCloudOtsInstance_basic(t *testing.T) {
 	var v ots.InstanceInfo
 
 	resourceId := "alicloud_ots_instance.default"
@@ -229,7 +255,7 @@ func TestAccAlicloudOtsInstance_basic(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudOtsInstance_highPerformance(t *testing.T) {
+func TestAccAliCloudOtsInstanceHighPerformance(t *testing.T) {
 	var v ots.InstanceInfo
 
 	resourceId := "alicloud_ots_instance.default"
@@ -261,13 +287,13 @@ func TestAccAlicloudOtsInstance_highPerformance(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"name":          name,
 					"description":   name,
-					"instance_type": "Capacity",
+					"instance_type": "HighPerformance",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"name":          name,
 						"description":   name,
-						"instance_type": "Capacity",
+						"instance_type": "HighPerformance",
 					}),
 				),
 			},
@@ -337,7 +363,7 @@ func TestAccAlicloudOtsInstance_highPerformance(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudOtsInstance_multi(t *testing.T) {
+func TestAccAliCloudOtsInstance_multi(t *testing.T) {
 	var v ots.InstanceInfo
 
 	resourceId := "alicloud_ots_instance.default.4"

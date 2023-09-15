@@ -1,5 +1,5 @@
 ---
-subcategory: "Server Load Balancer (SLB)"
+subcategory: "Classic Load Balancer (SLB)"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_slb_backend_server"
 sidebar_current: "docs-alicloud-resource-slb-backend-server"
@@ -15,74 +15,77 @@ Add a group of backend servers (ECS or ENI instance) to the Server Load Balancer
 
 ## Example Usage
 
-```
-variable "name" {
+```terraform
+
+// alicloud_slb_backend_server
+variable "slb_backend_server_name" {
   default = "slbbackendservertest"
 }
 
-data "alicloud_zones" "default" {
+data "alicloud_zones" "backend_server" {
   available_disk_category     = "cloud_efficiency"
   available_resource_creation = "VSwitch"
 }
 
-data "alicloud_instance_types" "default" {
-  availability_zone = data.alicloud_zones.default.zones[0].id
+data "alicloud_instance_types" "backend_server" {
+  availability_zone = data.alicloud_zones.backend_server.zones[0].id
   cpu_core_count    = 1
   memory_size       = 2
 }
 
-data "alicloud_images" "default" {
+data "alicloud_images" "backend_server" {
   name_regex  = "^ubuntu_18.*64"
   most_recent = true
   owners      = "system"
 }
 
-resource "alicloud_vpc" "default" {
-  vpc_name       = var.name
+resource "alicloud_vpc" "backend_server" {
+  vpc_name   = var.slb_backend_server_name
   cidr_block = "172.16.0.0/16"
 }
 
-resource "alicloud_vswitch" "default" {
-  vpc_id            = alicloud_vpc.default.id
-  cidr_block        = "172.16.0.0/16"
-  zone_id           = data.alicloud_zones.default.zones[0].id
-  vswitch_name      = var.name
+resource "alicloud_vswitch" "backend_server" {
+  vpc_id       = alicloud_vpc.backend_server.id
+  cidr_block   = "172.16.0.0/16"
+  zone_id      = data.alicloud_zones.backend_server.zones[0].id
+  vswitch_name = var.slb_backend_server_name
 }
 
-resource "alicloud_security_group" "default" {
-  name   = var.name
-  vpc_id = alicloud_vpc.default.id
+resource "alicloud_security_group" "backend_server" {
+  name   = var.slb_backend_server_name
+  vpc_id = alicloud_vpc.backend_server.id
 }
 
-resource "alicloud_instance" "default" {
-  image_id                   = data.alicloud_images.default.images[0].id
-  instance_type              = data.alicloud_instance_types.default.instance_types[0].id
-  instance_name              = var.name
+resource "alicloud_instance" "backend_server" {
+  image_id                   = data.alicloud_images.backend_server.images[0].id
+  instance_type              = data.alicloud_instance_types.backend_server.instance_types[0].id
+  instance_name              = var.slb_backend_server_name
   count                      = "2"
-  security_groups            = alicloud_security_group.default.*.id
+  security_groups            = alicloud_security_group.backend_server.*.id
   internet_charge_type       = "PayByTraffic"
   internet_max_bandwidth_out = "10"
-  availability_zone          = data.alicloud_zones.default.zones[0].id
+  availability_zone          = data.alicloud_zones.backend_server.zones[0].id
   instance_charge_type       = "PostPaid"
   system_disk_category       = "cloud_efficiency"
-  vswitch_id                 = alicloud_vswitch.default.id
+  vswitch_id                 = alicloud_vswitch.backend_server.id
 }
 
-resource "alicloud_slb" "default" {
-  name       = var.name
-  vswitch_id = alicloud_vswitch.default.id
+resource "alicloud_slb_load_balancer" "backend_server" {
+  load_balancer_name   = var.slb_backend_server_name
+  vswitch_id           = alicloud_vswitch.backend_server.id
+  instance_charge_type = "PayByCLCU"
 }
 
-resource "alicloud_slb_backend_server" "default" {
-  load_balancer_id = alicloud_slb.default.id
+resource "alicloud_slb_backend_server" "backend_server" {
+  load_balancer_id = alicloud_slb_load_balancer.backend_server.id
 
   backend_servers {
-    server_id = alicloud_instance.default[0].id
+    server_id = alicloud_instance.backend_server[0].id
     weight    = 100
   }
 
   backend_servers {
-    server_id = alicloud_instance.default[1].id
+    server_id = alicloud_instance.backend_server[1].id
     weight    = 100
   }
 }
@@ -93,7 +96,7 @@ resource "alicloud_slb_backend_server" "default" {
 The following arguments are supported:
 
 * `load_balancer_id` - (Required) ID of the load balancer.
-* `backend_servers` - (Required) A list of instances to added backend server in the SLB. It contains three sub-fields as `Block server` follows.
+* `backend_servers` - (Optional) A list of instances to added backend server in the SLB. It contains three sub-fields as `Block server` follows.
 * `delete_protection_validation` - (Optional, Available in 1.63.0+) Checking DeleteProtection of SLB instance before deleting. If true, this resource will not be deleted when its SLB instance enabled DeleteProtection. Default to false.
 
 ## Block servers
@@ -102,8 +105,8 @@ The servers mapping supports the following:
 
 * `server_id` - (Required) A list backend server ID (ECS instance ID).
 * `weight` - (Optional) Weight of the backend server. Valid value range: [0-100]. 
-* `type` - (Optional) Type of the backend server. Valid value `ecs`, `eni`. Default to `ecs`.
-* `server_ip` - (Optional, Available in 1.93.0+) ServerIp of the backend server. This parameter can be specified when the type is `eni`. `ecs` type currently does not support adding `server_ip` parameter.
+* `type` - (Optional) Type of the backend server. Valid value `ecs`, `eni`, `eci`. Default to `ecs`. **NOTE:** From 1.170.0+, The `eci` is valid. 
+* `server_ip` - (Optional, Computed, Available in 1.93.0+) ServerIp of the backend server. This parameter can be specified when the type is `eni`. `ecs` type currently does not support adding `server_ip` parameter.
 
 ## Attributes Reference
 
@@ -115,6 +118,6 @@ The following attributes are exported:
 
 Load balancer backend server can be imported using the load balancer id.
 
-```
-$ terraform import alicloud_slb_backend_server.example lb-abc123456
+```shell
+$ terraform import alicloud_slb_backend_server.example <load_balancer_id>
 ```

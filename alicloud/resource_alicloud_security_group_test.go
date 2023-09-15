@@ -22,8 +22,8 @@ func init() {
 		//When implemented, these should be removed firstly
 		Dependencies: []string{
 			"alicloud_instance",
-			"alicloud_network_interface",
-			"alicloud_yundun_bastionhost_instance",
+			"alicloud_ecs_network_interface",
+			"alicloud_bastionhost_instance",
 			"alicloud_cs_kubernetes",
 		},
 	})
@@ -76,21 +76,23 @@ func testSweepSecurityGroups(region string) error {
 		name := v.SecurityGroupName
 		id := v.SecurityGroupId
 		skip := true
-		for _, prefix := range prefixes {
-			if strings.HasPrefix(strings.ToLower(name), strings.ToLower(prefix)) {
-				skip = false
-				break
+		if !sweepAll() {
+			for _, prefix := range prefixes {
+				if strings.HasPrefix(strings.ToLower(name), strings.ToLower(prefix)) {
+					skip = false
+					break
+				}
 			}
-		}
-		// If a Security Group created by other service, it should be fetched by vpc name and deleted.
-		if skip {
-			if need, err := vpcService.needSweepVpc(v.VpcId, ""); err == nil {
-				skip = !need
+			// If a Security Group created by other service, it should be fetched by vpc name and deleted.
+			if skip {
+				if need, err := vpcService.needSweepVpc(v.VpcId, ""); err == nil {
+					skip = !need
+				}
 			}
-		}
-		if skip {
-			log.Printf("[INFO] Skipping Security Group: %s (%s)", name, id)
-			continue
+			if skip {
+				log.Printf("[INFO] Skipping Security Group: %s (%s)", name, id)
+				continue
+			}
 		}
 		log.Printf("[INFO] Deleting Security Group: %s (%s)", name, id)
 		if err := ecsService.sweepSecurityGroup(id); err != nil {
@@ -122,7 +124,7 @@ func testAccCheckSecurityGroupDestroy(s *terraform.State) error {
 	return nil
 }
 
-func TestAccAlicloudSecurityGroupBasic(t *testing.T) {
+func TestAccAlicloudECSSecurityGroupBasic(t *testing.T) {
 	var v ecs.DescribeSecurityGroupAttributeResponse
 	resourceId := "alicloud_security_group.default"
 	ra := resourceAttrInit(resourceId, testAccCheckSecurityBasicMap)
@@ -197,7 +199,7 @@ func TestAccAlicloudSecurityGroupBasic(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudSecurityGroupMulti(t *testing.T) {
+func TestAccAlicloudECSSecurityGroupMulti(t *testing.T) {
 	var v ecs.DescribeSecurityGroupAttributeResponse
 	resourceId := "alicloud_security_group.default.9"
 	ra := resourceAttrInit(resourceId, testAccCheckSecurityBasicMap)

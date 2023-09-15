@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
-func TestAccAlicloudCdnDomainConfig_ip_allow_list(t *testing.T) {
+func TestAccAlicloudCDNDomainConfig_filetype_based_ttl_set_new(t *testing.T) {
 	var v *cdn.DomainConfigInDescribeCdnDomainConfigs
 
 	resourceId := "alicloud_cdn_domain_config.default"
@@ -26,7 +26,93 @@ func TestAccAlicloudCdnDomainConfig_ip_allow_list(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := acctest.RandIntRange(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc%s%d.xiaozhu.com", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCdnDomainConfigDependence)
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		// module name
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
+		CheckDestroy:  rac.checkResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"domain_name":   "${alicloud_cdn_domain_new.default.domain_name}",
+					"function_name": "filetype_based_ttl_set",
+					"function_args": []map[string]interface{}{
+						{
+							"arg_name":  "ttl",
+							"arg_value": "300",
+						},
+						{
+							"arg_name":  "file_type",
+							"arg_value": "jpg",
+						},
+						{
+							"arg_name":  "weight",
+							"arg_value": "1",
+						},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"domain_name":     name,
+						"function_name":   "filetype_based_ttl_set",
+						"function_args.#": "3",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"function_args": []map[string]interface{}{
+						{
+							"arg_name":  "ttl",
+							"arg_value": "200",
+						},
+						{
+							"arg_name":  "file_type",
+							"arg_value": "png",
+						},
+						{
+							"arg_name":  "weight",
+							"arg_value": "2",
+						},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+
+					testAccCheck(map[string]string{
+						"function_args.#": "3",
+					}),
+				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccAlicloudCDNDomainConfig_ip_allow_list(t *testing.T) {
+	var v *cdn.DomainConfigInDescribeCdnDomainConfigs
+
+	resourceId := "alicloud_cdn_domain_config.default"
+	ra := resourceAttrInit(resourceId, cdnDomainConfigBasicMap)
+
+	serviceFunc := func() interface{} {
+		return &CdnService{testAccProvider.Meta().(*connectivity.AliyunClient)}
+	}
+	rc := resourceCheckInit(resourceId, &v, serviceFunc)
+
+	rac := resourceAttrCheckInit(rc, ra)
+
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := acctest.RandIntRange(1000000, 9999999)
+	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCdnDomainConfigDependence)
 	hashcode1 := strconv.Itoa(expirationCdnDomainConfigHash(map[string]interface{}{
 		"arg_name":  "ip_list",
@@ -70,7 +156,7 @@ func TestAccAlicloudCdnDomainConfig_ip_allow_list(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudCdnDomainConfig_referer_white_list(t *testing.T) {
+func TestAccAlicloudCDNDomainConfig_referer_white_list(t *testing.T) {
 	var v *cdn.DomainConfigInDescribeCdnDomainConfigs
 
 	resourceId := "alicloud_cdn_domain_config.default"
@@ -85,7 +171,7 @@ func TestAccAlicloudCdnDomainConfig_referer_white_list(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := acctest.RandIntRange(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc%s%d.xiaozhu.com", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCdnDomainConfigDependence)
 	hashcode1 := strconv.Itoa(expirationCdnDomainConfigHash(map[string]interface{}{
 		"arg_name":  "refer_domain_allow_list",
@@ -129,7 +215,7 @@ func TestAccAlicloudCdnDomainConfig_referer_white_list(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudCdnDomainConfig_referer_black_list(t *testing.T) {
+func TestAccAlicloudCDNDomainConfig_referer_black_list(t *testing.T) {
 	var v *cdn.DomainConfigInDescribeCdnDomainConfigs
 
 	resourceId := "alicloud_cdn_domain_config.default"
@@ -144,7 +230,7 @@ func TestAccAlicloudCdnDomainConfig_referer_black_list(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := acctest.RandIntRange(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc%s%d.xiaozhu.com", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCdnDomainConfigDependence)
 	hashcode1 := strconv.Itoa(expirationCdnDomainConfigHash(map[string]interface{}{
 		"arg_name":  "refer_domain_deny_list",
@@ -188,7 +274,7 @@ func TestAccAlicloudCdnDomainConfig_referer_black_list(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudCdnDomainConfig_filetype_based_ttl_set(t *testing.T) {
+func TestAccAlicloudCDNDomainConfig_filetype_based_ttl_set(t *testing.T) {
 	var v *cdn.DomainConfigInDescribeCdnDomainConfigs
 
 	resourceId := "alicloud_cdn_domain_config.default"
@@ -203,7 +289,7 @@ func TestAccAlicloudCdnDomainConfig_filetype_based_ttl_set(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := acctest.RandIntRange(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc%s%d.xiaozhu.com", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCdnDomainConfigDependence)
 	hashcode1 := strconv.Itoa(expirationCdnDomainConfigHash(map[string]interface{}{
 		"arg_name":  "ttl",
@@ -268,7 +354,7 @@ func TestAccAlicloudCdnDomainConfig_filetype_based_ttl_set(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudCdnDomainConfig_oss_auth(t *testing.T) {
+func TestAccAlicloudCDNDomainConfig_oss_auth(t *testing.T) {
 	var v *cdn.DomainConfigInDescribeCdnDomainConfigs
 
 	resourceId := "alicloud_cdn_domain_config.default"
@@ -309,7 +395,7 @@ func TestAccAlicloudCdnDomainConfig_oss_auth(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 
 					testAccCheck(map[string]string{
-						"domain_name":     fmt.Sprintf("tf-testacc%s-oss.xiaozhu.com", name),
+						"domain_name":     fmt.Sprintf("tf-testacc%s-oss.alicloud-provider.cn", name),
 						"function_name":   "oss_auth",
 						"function_args.#": "1",
 					}),
@@ -324,7 +410,7 @@ func TestAccAlicloudCdnDomainConfig_oss_auth(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudCdnDomainConfig_ip_black_list(t *testing.T) {
+func TestAccAlicloudCDNDomainConfig_ip_black_list(t *testing.T) {
 	var v *cdn.DomainConfigInDescribeCdnDomainConfigs
 
 	resourceId := "alicloud_cdn_domain_config.default"
@@ -339,7 +425,7 @@ func TestAccAlicloudCdnDomainConfig_ip_black_list(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := acctest.RandIntRange(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc%s%d.xiaozhu.com", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCdnDomainConfigDependence)
 	hashcode1 := strconv.Itoa(expirationCdnDomainConfigHash(map[string]interface{}{
 		"arg_name":  "ip_list",
@@ -384,7 +470,7 @@ func TestAccAlicloudCdnDomainConfig_ip_black_list(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudCdnDomainConfig_ip_white_list(t *testing.T) {
+func TestAccAlicloudCDNDomainConfig_ip_white_list(t *testing.T) {
 	var v *cdn.DomainConfigInDescribeCdnDomainConfigs
 
 	resourceId := "alicloud_cdn_domain_config.default"
@@ -399,7 +485,7 @@ func TestAccAlicloudCdnDomainConfig_ip_white_list(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := acctest.RandIntRange(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc%s%d.xiaozhu.com", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCdnDomainConfigDependence)
 	hashcode1 := strconv.Itoa(expirationCdnDomainConfigHash(map[string]interface{}{
 		"arg_name":  "ip_list",
@@ -444,7 +530,7 @@ func TestAccAlicloudCdnDomainConfig_ip_white_list(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudCdnDomainConfig_error_page(t *testing.T) {
+func TestAccAlicloudCDNDomainConfig_error_page(t *testing.T) {
 	var v *cdn.DomainConfigInDescribeCdnDomainConfigs
 
 	resourceId := "alicloud_cdn_domain_config.default"
@@ -459,7 +545,7 @@ func TestAccAlicloudCdnDomainConfig_error_page(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := acctest.RandIntRange(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc%s%d.xiaozhu.com", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCdnDomainConfigDependence)
 	hashcode1 := strconv.Itoa(expirationCdnDomainConfigHash(map[string]interface{}{
 		"arg_name":  "error_code",
@@ -467,7 +553,7 @@ func TestAccAlicloudCdnDomainConfig_error_page(t *testing.T) {
 	}))
 	hashcode2 := strconv.Itoa(expirationCdnDomainConfigHash(map[string]interface{}{
 		"arg_name":  "rewrite_page",
-		"arg_value": "http://www.xiaozhu.com",
+		"arg_value": "http://www.alicloud-provider.cn",
 	}))
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -489,7 +575,7 @@ func TestAccAlicloudCdnDomainConfig_error_page(t *testing.T) {
 						},
 						{
 							"arg_name":  "rewrite_page",
-							"arg_value": "http://www.xiaozhu.com",
+							"arg_value": "http://www.alicloud-provider.cn",
 						},
 					},
 				}),
@@ -500,7 +586,7 @@ func TestAccAlicloudCdnDomainConfig_error_page(t *testing.T) {
 						"function_args." + hashcode1 + ".arg_name":  "error_code",
 						"function_args." + hashcode1 + ".arg_value": "502",
 						"function_args." + hashcode2 + ".arg_name":  "rewrite_page",
-						"function_args." + hashcode2 + ".arg_value": "http://www.xiaozhu.com",
+						"function_args." + hashcode2 + ".arg_value": "http://www.alicloud-provider.cn",
 					}),
 				),
 			},
@@ -513,7 +599,7 @@ func TestAccAlicloudCdnDomainConfig_error_page(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudCdnDomainConfig_set_req_host_header(t *testing.T) {
+func TestAccAlicloudCDNDomainConfig_set_req_host_header(t *testing.T) {
 	var v *cdn.DomainConfigInDescribeCdnDomainConfigs
 
 	resourceId := "alicloud_cdn_domain_config.default"
@@ -528,11 +614,11 @@ func TestAccAlicloudCdnDomainConfig_set_req_host_header(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := acctest.RandIntRange(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc%s%d.xiaozhu.com", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCdnDomainConfigDependence)
 	hashcode1 := strconv.Itoa(expirationCdnDomainConfigHash(map[string]interface{}{
 		"arg_name":  "domain_name",
-		"arg_value": "xiaozhu.com",
+		"arg_value": "alicloud-provider.cn",
 	}))
 
 	resource.Test(t, resource.TestCase{
@@ -551,7 +637,7 @@ func TestAccAlicloudCdnDomainConfig_set_req_host_header(t *testing.T) {
 					"function_args": []map[string]interface{}{
 						{
 							"arg_name":  "domain_name",
-							"arg_value": "xiaozhu.com",
+							"arg_value": "alicloud-provider.cn",
 						},
 					},
 				}),
@@ -560,7 +646,7 @@ func TestAccAlicloudCdnDomainConfig_set_req_host_header(t *testing.T) {
 						"domain_name":   name,
 						"function_name": "set_req_host_header",
 						"function_args." + hashcode1 + ".arg_name":  "domain_name",
-						"function_args." + hashcode1 + ".arg_value": "xiaozhu.com",
+						"function_args." + hashcode1 + ".arg_value": "alicloud-provider.cn",
 					}),
 				),
 			},
@@ -573,7 +659,7 @@ func TestAccAlicloudCdnDomainConfig_set_req_host_header(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudCdnDomainConfig_set_hashkey_args(t *testing.T) {
+func TestAccAlicloudCDNDomainConfig_set_hashkey_args(t *testing.T) {
 	var v *cdn.DomainConfigInDescribeCdnDomainConfigs
 
 	resourceId := "alicloud_cdn_domain_config.default"
@@ -588,7 +674,7 @@ func TestAccAlicloudCdnDomainConfig_set_hashkey_args(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := acctest.RandIntRange(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc%s%d.xiaozhu.com", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCdnDomainConfigDependence)
 	hashcode1 := strconv.Itoa(expirationCdnDomainConfigHash(map[string]interface{}{
 		"arg_name":  "disable",
@@ -633,7 +719,7 @@ func TestAccAlicloudCdnDomainConfig_set_hashkey_args(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudCdnDomainConfig_aliauth(t *testing.T) {
+func TestAccAlicloudCDNDomainConfig_aliauth(t *testing.T) {
 	var v *cdn.DomainConfigInDescribeCdnDomainConfigs
 
 	resourceId := "alicloud_cdn_domain_config.default"
@@ -648,7 +734,7 @@ func TestAccAlicloudCdnDomainConfig_aliauth(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := acctest.RandIntRange(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc%s%d.xiaozhu.com", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCdnDomainConfigDependence)
 	hashcode1 := strconv.Itoa(expirationCdnDomainConfigHash(map[string]interface{}{
 		"arg_name":  "auth_type",
@@ -703,7 +789,7 @@ func TestAccAlicloudCdnDomainConfig_aliauth(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudCdnDomainConfig_set_resp_header(t *testing.T) {
+func TestAccAlicloudCDNDomainConfig_set_resp_header(t *testing.T) {
 	var v *cdn.DomainConfigInDescribeCdnDomainConfigs
 
 	resourceId := "alicloud_cdn_domain_config.default"
@@ -718,7 +804,7 @@ func TestAccAlicloudCdnDomainConfig_set_resp_header(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := acctest.RandIntRange(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc%s%d.xiaozhu.com", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCdnDomainConfigDependence)
 	hashcode1 := strconv.Itoa(expirationCdnDomainConfigHash(map[string]interface{}{
 		"arg_name":  "key",
@@ -773,7 +859,7 @@ func TestAccAlicloudCdnDomainConfig_set_resp_header(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudCdnDomainConfig_https_force(t *testing.T) {
+func TestAccAlicloudCDNDomainConfig_https_force(t *testing.T) {
 	var v *cdn.DomainConfigInDescribeCdnDomainConfigs
 
 	resourceId := "alicloud_cdn_domain_config.default"
@@ -788,7 +874,7 @@ func TestAccAlicloudCdnDomainConfig_https_force(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := acctest.RandIntRange(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc%s%d.xiaozhu.com", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCdnDomainConfigDependence)
 	hashcode1 := strconv.Itoa(expirationCdnDomainConfigHash(map[string]interface{}{
 		"arg_name":  "enable",
@@ -833,7 +919,7 @@ func TestAccAlicloudCdnDomainConfig_https_force(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudCdnDomainConfig_http_force(t *testing.T) {
+func TestAccAlicloudCDNDomainConfig_http_force(t *testing.T) {
 	var v *cdn.DomainConfigInDescribeCdnDomainConfigs
 
 	resourceId := "alicloud_cdn_domain_config.default"
@@ -848,7 +934,7 @@ func TestAccAlicloudCdnDomainConfig_http_force(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := acctest.RandIntRange(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc%s%d.xiaozhu.com", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCdnDomainConfigDependence)
 	hashcode1 := strconv.Itoa(expirationCdnDomainConfigHash(map[string]interface{}{
 		"arg_name":  "enable",
@@ -893,7 +979,7 @@ func TestAccAlicloudCdnDomainConfig_http_force(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudCdnDomainConfig_https_option(t *testing.T) {
+func TestAccAlicloudCDNDomainConfig_https_option(t *testing.T) {
 	var v *cdn.DomainConfigInDescribeCdnDomainConfigs
 
 	resourceId := "alicloud_cdn_domain_config.default"
@@ -908,7 +994,7 @@ func TestAccAlicloudCdnDomainConfig_https_option(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := acctest.RandIntRange(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc%s%d.xiaozhu.com", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCdnDomainConfigDependence)
 	hashcode1 := strconv.Itoa(expirationCdnDomainConfigHash(map[string]interface{}{
 		"arg_name":  "http2",
@@ -953,7 +1039,7 @@ func TestAccAlicloudCdnDomainConfig_https_option(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudCdnDomainConfig_l2_oss_key(t *testing.T) {
+func TestAccAlicloudCDNDomainConfig_l2_oss_key(t *testing.T) {
 	var v *cdn.DomainConfigInDescribeCdnDomainConfigs
 
 	resourceId := "alicloud_cdn_domain_config.default"
@@ -968,7 +1054,7 @@ func TestAccAlicloudCdnDomainConfig_l2_oss_key(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := acctest.RandIntRange(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc%s%d.xiaozhu.com", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCdnDomainConfigDependence)
 	hashcode1 := strconv.Itoa(expirationCdnDomainConfigHash(map[string]interface{}{
 		"arg_name":  "private_oss_auth",
@@ -1013,7 +1099,7 @@ func TestAccAlicloudCdnDomainConfig_l2_oss_key(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudCdnDomainConfig_forward_scheme(t *testing.T) {
+func TestAccAlicloudCDNDomainConfig_forward_scheme(t *testing.T) {
 	var v *cdn.DomainConfigInDescribeCdnDomainConfigs
 
 	resourceId := "alicloud_cdn_domain_config.default"
@@ -1028,7 +1114,7 @@ func TestAccAlicloudCdnDomainConfig_forward_scheme(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := acctest.RandIntRange(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc%s%d.xiaozhu.com", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCdnDomainConfigDependence)
 	hashcode1 := strconv.Itoa(expirationCdnDomainConfigHash(map[string]interface{}{
 		"arg_name":  "enable",
@@ -1083,7 +1169,9 @@ func TestAccAlicloudCdnDomainConfig_forward_scheme(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudCdnDomainConfig_green_manager(t *testing.T) {
+func SkipTestAccAlicloudCDNDomainConfig_green_manager(t *testing.T) {
+	// the function: green_manager has been deleted
+	t.Skip()
 	var v *cdn.DomainConfigInDescribeCdnDomainConfigs
 
 	resourceId := "alicloud_cdn_domain_config.default"
@@ -1098,7 +1186,7 @@ func TestAccAlicloudCdnDomainConfig_green_manager(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := acctest.RandIntRange(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc%s%d.xiaozhu.com", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCdnDomainConfigDependence)
 	hashcode1 := strconv.Itoa(expirationCdnDomainConfigHash(map[string]interface{}{
 		"arg_name":  "enable",
@@ -1143,7 +1231,7 @@ func TestAccAlicloudCdnDomainConfig_green_manager(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudCdnDomainConfig_tmd_signature(t *testing.T) {
+func TestAccAlicloudCDNDomainConfig_tmd_signature(t *testing.T) {
 	var v *cdn.DomainConfigInDescribeCdnDomainConfigs
 
 	resourceId := "alicloud_cdn_domain_config.default"
@@ -1158,7 +1246,7 @@ func TestAccAlicloudCdnDomainConfig_tmd_signature(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := acctest.RandIntRange(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc%s%d.xiaozhu.com", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCdnDomainConfigDependence)
 	hashcode1 := strconv.Itoa(expirationCdnDomainConfigHash(map[string]interface{}{
 		"arg_name":  "ttl",
@@ -1263,7 +1351,7 @@ func TestAccAlicloudCdnDomainConfig_tmd_signature(t *testing.T) {
 }
 
 // Skip test due to product function conflict.
-//func TestAccAlicloudCdnDomainConfig_dynamic(t *testing.T) {
+//func TestAccAlicloudCDNDomainConfig_dynamic(t *testing.T) {
 //	var v *cdn.DomainConfigInDescribeCdnDomainConfigs
 //
 //	resourceId := "alicloud_cdn_domain_config.default"
@@ -1278,7 +1366,7 @@ func TestAccAlicloudCdnDomainConfig_tmd_signature(t *testing.T) {
 //
 //	testAccCheck := rac.resourceAttrMapUpdateSet()
 //	rand := acctest.RandIntRange(1000000, 9999999)
-//	name := fmt.Sprintf("tf-testacc%s%d.xiaozhu.com", defaultRegionToTest, rand)
+//	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
 //	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCdnDomainConfigDependence)
 //	hashcode1 := strconv.Itoa(expirationCdnDomainConfigHash(map[string]interface{}{
 //		"arg_name":  "enable",
@@ -1324,7 +1412,7 @@ func TestAccAlicloudCdnDomainConfig_tmd_signature(t *testing.T) {
 //	})
 //}
 
-func TestAccAlicloudCdnDomainConfig_set_req_header(t *testing.T) {
+func TestAccAlicloudCDNDomainConfig_set_req_header(t *testing.T) {
 	var v *cdn.DomainConfigInDescribeCdnDomainConfigs
 
 	resourceId := "alicloud_cdn_domain_config.default"
@@ -1339,7 +1427,7 @@ func TestAccAlicloudCdnDomainConfig_set_req_header(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := acctest.RandIntRange(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc%s%d.xiaozhu.com", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCdnDomainConfigDependence)
 	hashcode1 := strconv.Itoa(expirationCdnDomainConfigHash(map[string]interface{}{
 		"arg_name":  "key",
@@ -1394,7 +1482,7 @@ func TestAccAlicloudCdnDomainConfig_set_req_header(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudCdnDomainConfig_range(t *testing.T) {
+func TestAccAlicloudCDNDomainConfig_range(t *testing.T) {
 	var v *cdn.DomainConfigInDescribeCdnDomainConfigs
 
 	resourceId := "alicloud_cdn_domain_config.default"
@@ -1409,7 +1497,7 @@ func TestAccAlicloudCdnDomainConfig_range(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := acctest.RandIntRange(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc%s%d.xiaozhu.com", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCdnDomainConfigDependence)
 	hashcode1 := strconv.Itoa(expirationCdnDomainConfigHash(map[string]interface{}{
 		"arg_name":  "enable",
@@ -1454,7 +1542,7 @@ func TestAccAlicloudCdnDomainConfig_range(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudCdnDomainConfig_video_seek(t *testing.T) {
+func TestAccAlicloudCDNDomainConfig_video_seek(t *testing.T) {
 	var v *cdn.DomainConfigInDescribeCdnDomainConfigs
 
 	resourceId := "alicloud_cdn_domain_config.default"
@@ -1469,7 +1557,7 @@ func TestAccAlicloudCdnDomainConfig_video_seek(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := acctest.RandIntRange(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc%s%d.xiaozhu.com", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCdnDomainConfigDependence)
 	hashcode1 := strconv.Itoa(expirationCdnDomainConfigHash(map[string]interface{}{
 		"arg_name":  "enable",
@@ -1514,7 +1602,7 @@ func TestAccAlicloudCdnDomainConfig_video_seek(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudCdnDomainConfig_https_tls_version(t *testing.T) {
+func TestAccAlicloudCDNDomainConfig_https_tls_version(t *testing.T) {
 	var v *cdn.DomainConfigInDescribeCdnDomainConfigs
 
 	resourceId := "alicloud_cdn_domain_config.default"
@@ -1529,7 +1617,7 @@ func TestAccAlicloudCdnDomainConfig_https_tls_version(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := acctest.RandIntRange(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc%s%d.xiaozhu.com", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCdnDomainConfigDependence)
 	hashcode1 := strconv.Itoa(expirationCdnDomainConfigHash(map[string]interface{}{
 		"arg_name":  "tls10",
@@ -1574,7 +1662,7 @@ func TestAccAlicloudCdnDomainConfig_https_tls_version(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudCdnDomainConfig_HSTS(t *testing.T) {
+func TestAccAlicloudCDNDomainConfig_HSTS(t *testing.T) {
 	var v *cdn.DomainConfigInDescribeCdnDomainConfigs
 
 	resourceId := "alicloud_cdn_domain_config.default"
@@ -1589,7 +1677,7 @@ func TestAccAlicloudCdnDomainConfig_HSTS(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := acctest.RandIntRange(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc%s%d.xiaozhu.com", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCdnDomainConfigDependence)
 	hashcode1 := strconv.Itoa(expirationCdnDomainConfigHash(map[string]interface{}{
 		"arg_name":  "enabled",
@@ -1644,7 +1732,7 @@ func TestAccAlicloudCdnDomainConfig_HSTS(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudCdnDomainConfig_filetype_force_ttl_code(t *testing.T) {
+func TestAccAlicloudCDNDomainConfig_filetype_force_ttl_code(t *testing.T) {
 	var v *cdn.DomainConfigInDescribeCdnDomainConfigs
 
 	resourceId := "alicloud_cdn_domain_config.default"
@@ -1659,7 +1747,7 @@ func TestAccAlicloudCdnDomainConfig_filetype_force_ttl_code(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := acctest.RandIntRange(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc%s%d.xiaozhu.com", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCdnDomainConfigDependence)
 	hashcode1 := strconv.Itoa(expirationCdnDomainConfigHash(map[string]interface{}{
 		"arg_name":  "file_type",
@@ -1714,7 +1802,7 @@ func TestAccAlicloudCdnDomainConfig_filetype_force_ttl_code(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudCdnDomainConfig_path_force_ttl_code(t *testing.T) {
+func TestAccAlicloudCDNDomainConfig_path_force_ttl_code(t *testing.T) {
 	var v *cdn.DomainConfigInDescribeCdnDomainConfigs
 
 	resourceId := "alicloud_cdn_domain_config.default"
@@ -1729,7 +1817,7 @@ func TestAccAlicloudCdnDomainConfig_path_force_ttl_code(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := acctest.RandIntRange(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc%s%d.xiaozhu.com", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCdnDomainConfigDependence)
 	hashcode1 := strconv.Itoa(expirationCdnDomainConfigHash(map[string]interface{}{
 		"arg_name":  "code_string",
@@ -1784,7 +1872,7 @@ func TestAccAlicloudCdnDomainConfig_path_force_ttl_code(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudCdnDomainConfig_gzip(t *testing.T) {
+func TestAccAlicloudCDNDomainConfig_gzip(t *testing.T) {
 	var v *cdn.DomainConfigInDescribeCdnDomainConfigs
 
 	resourceId := "alicloud_cdn_domain_config.default"
@@ -1799,7 +1887,7 @@ func TestAccAlicloudCdnDomainConfig_gzip(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := acctest.RandIntRange(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc%s%d.xiaozhu.com", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCdnDomainConfigDependence)
 	hashcode1 := strconv.Itoa(expirationCdnDomainConfigHash(map[string]interface{}{
 		"arg_name":  "enable",
@@ -1844,7 +1932,7 @@ func TestAccAlicloudCdnDomainConfig_gzip(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudCdnDomainConfig_tesla(t *testing.T) {
+func TestAccAlicloudCDNDomainConfig_tesla(t *testing.T) {
 	var v *cdn.DomainConfigInDescribeCdnDomainConfigs
 
 	resourceId := "alicloud_cdn_domain_config.default"
@@ -1859,7 +1947,7 @@ func TestAccAlicloudCdnDomainConfig_tesla(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := acctest.RandIntRange(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc%s%d.xiaozhu.com", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCdnDomainConfigDependence)
 	hashcode1 := strconv.Itoa(expirationCdnDomainConfigHash(map[string]interface{}{
 		"arg_name":  "enable",
@@ -1904,7 +1992,7 @@ func TestAccAlicloudCdnDomainConfig_tesla(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudCdnDomainConfig_https_origin_sni(t *testing.T) {
+func TestAccAlicloudCDNDomainConfig_https_origin_sni(t *testing.T) {
 	var v *cdn.DomainConfigInDescribeCdnDomainConfigs
 
 	resourceId := "alicloud_cdn_domain_config.default"
@@ -1919,7 +2007,7 @@ func TestAccAlicloudCdnDomainConfig_https_origin_sni(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := acctest.RandIntRange(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc%s%d.xiaozhu.com", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCdnDomainConfigDependence)
 	hashcode1 := strconv.Itoa(expirationCdnDomainConfigHash(map[string]interface{}{
 		"arg_name":  "enabled",
@@ -1927,7 +2015,7 @@ func TestAccAlicloudCdnDomainConfig_https_origin_sni(t *testing.T) {
 	}))
 	hashcode2 := strconv.Itoa(expirationCdnDomainConfigHash(map[string]interface{}{
 		"arg_name":  "https_origin_sni",
-		"arg_value": "xiaozhu.com",
+		"arg_value": "alicloud-provider.cn",
 	}))
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -1949,7 +2037,7 @@ func TestAccAlicloudCdnDomainConfig_https_origin_sni(t *testing.T) {
 						},
 						{
 							"arg_name":  "https_origin_sni",
-							"arg_value": "xiaozhu.com",
+							"arg_value": "alicloud-provider.cn",
 						},
 					},
 				}),
@@ -1960,7 +2048,7 @@ func TestAccAlicloudCdnDomainConfig_https_origin_sni(t *testing.T) {
 						"function_args." + hashcode1 + ".arg_name":  "enabled",
 						"function_args." + hashcode1 + ".arg_value": "on",
 						"function_args." + hashcode2 + ".arg_name":  "https_origin_sni",
-						"function_args." + hashcode2 + ".arg_value": "xiaozhu.com",
+						"function_args." + hashcode2 + ".arg_value": "alicloud-provider.cn",
 					}),
 				),
 			},
@@ -1973,7 +2061,7 @@ func TestAccAlicloudCdnDomainConfig_https_origin_sni(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudCdnDomainConfig_brotli(t *testing.T) {
+func TestAccAlicloudCDNDomainConfig_brotli(t *testing.T) {
 	var v *cdn.DomainConfigInDescribeCdnDomainConfigs
 
 	resourceId := "alicloud_cdn_domain_config.default"
@@ -1988,7 +2076,7 @@ func TestAccAlicloudCdnDomainConfig_brotli(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := acctest.RandIntRange(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc%s%d.xiaozhu.com", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCdnDomainConfigDependence)
 	hashcode1 := strconv.Itoa(expirationCdnDomainConfigHash(map[string]interface{}{
 		"arg_name":  "brotli_level",
@@ -2044,7 +2132,7 @@ func TestAccAlicloudCdnDomainConfig_brotli(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudCdnDomainConfig_ali_ua(t *testing.T) {
+func TestAccAlicloudCDNDomainConfig_ali_ua(t *testing.T) {
 	var v *cdn.DomainConfigInDescribeCdnDomainConfigs
 
 	resourceId := "alicloud_cdn_domain_config.default"
@@ -2059,7 +2147,7 @@ func TestAccAlicloudCdnDomainConfig_ali_ua(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := acctest.RandIntRange(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc%s%d.xiaozhu.com", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCdnDomainConfigDependence)
 	hashcode1 := strconv.Itoa(expirationCdnDomainConfigHash(map[string]interface{}{
 		"arg_name":  "ua",
@@ -2114,7 +2202,7 @@ func TestAccAlicloudCdnDomainConfig_ali_ua(t *testing.T) {
 	})
 }
 
-func TestAccAlicloudCdnDomainConfig_host_redirect(t *testing.T) {
+func TestAccAlicloudCDNDomainConfig_host_redirect(t *testing.T) {
 	var v *cdn.DomainConfigInDescribeCdnDomainConfigs
 
 	resourceId := "alicloud_cdn_domain_config.default"
@@ -2129,7 +2217,7 @@ func TestAccAlicloudCdnDomainConfig_host_redirect(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := acctest.RandIntRange(1000000, 9999999)
-	name := fmt.Sprintf("tf-testacc%s%d.xiaozhu.com", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc%s%d.alicloud-provider.cn", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCdnDomainConfigDependence)
 	hashcode1 := strconv.Itoa(expirationCdnDomainConfigHash(map[string]interface{}{
 		"arg_name":  "regex",
@@ -2215,7 +2303,7 @@ func resourceCdnDomainConfigDependence_oss(name string) string {
 	return fmt.Sprintf(`
 	
 	resource "alicloud_cdn_domain_new" "default" {
-	  domain_name = "tf-testacc%s-oss.xiaozhu.com"
+	  domain_name = "tf-testacc%s-oss.alicloud-provider.cn"
 	  cdn_type = "web"
       scope = "overseas"
       sources {

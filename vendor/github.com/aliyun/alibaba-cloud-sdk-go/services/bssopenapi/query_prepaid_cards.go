@@ -79,10 +79,10 @@ type QueryPrepaidCardsRequest struct {
 // QueryPrepaidCardsResponse is the response struct for api QueryPrepaidCards
 type QueryPrepaidCardsResponse struct {
 	*responses.BaseResponse
-	RequestId string                  `json:"RequestId" xml:"RequestId"`
-	Success   bool                    `json:"Success" xml:"Success"`
 	Code      string                  `json:"Code" xml:"Code"`
 	Message   string                  `json:"Message" xml:"Message"`
+	RequestId string                  `json:"RequestId" xml:"RequestId"`
+	Success   bool                    `json:"Success" xml:"Success"`
 	Data      DataInQueryPrepaidCards `json:"Data" xml:"Data"`
 }
 
@@ -91,7 +91,7 @@ func CreateQueryPrepaidCardsRequest() (request *QueryPrepaidCardsRequest) {
 	request = &QueryPrepaidCardsRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "QueryPrepaidCards", "", "")
+	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "QueryPrepaidCards", "bssopenapi", "openAPI")
 	request.Method = requests.POST
 	return
 }

@@ -1,5 +1,5 @@
 ---
-subcategory: "DNS"
+subcategory: "Alidns"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_alidns_record"
 sidebar_current: "docs-alicloud-resource-alidns-record"
@@ -7,24 +7,34 @@ description: |-
   Provides a Alidns Domain Record resource.
 ---
 
-# alicloud\_alidns\_record
+# alicloud_alidns_record
 
 Provides a Alidns Record resource. For information about Alidns Domain Record and how to use it, see [What is Resource Alidns Record](https://www.alibabacloud.com/help/en/doc-detail/29772.htm).
 
--> **NOTE:** Available in v1.85.0+.
+-> **NOTE:** Available since v1.85.0.
 
 -> **NOTE:** When the site is an international site, the `type` neither supports `REDIRECT_URL` nor `REDIRECT_URL`
 
 ## Example Usage
 
 ```terraform
-# Create a new Domain Record
+resource "alicloud_alidns_domain_group" "default" {
+  domain_group_name = "tf-example"
+}
+resource "alicloud_alidns_domain" "default" {
+  domain_name = "starmove.com"
+  group_id    = alicloud_alidns_domain_group.default.id
+  tags = {
+    Created = "TF",
+    For     = "example",
+  }
+}
 resource "alicloud_alidns_record" "record" {
-  domain_name = "domainname"
-  rr          = "@"
-  type        = "A"
-  value       = "192.168.99.99"
-  remark      = "Test new alidns record."
+  domain_name = alicloud_alidns_domain.default.domain_name
+  rr          = "alimail"
+  type        = "CNAME"
+  value       = "mail.mxhichin.com"
+  remark      = "tf-example"
   status      = "ENABLE"
 }
 ```
@@ -51,20 +61,20 @@ The following attributes are exported:
 
 * `id` - The id of Domain Record.
 
-### Timeouts
+## Timeouts
 
 -> **NOTE:** Available in 1.99.0+.
 
 The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
 
-* `Create` - (Defaults to 4 mins) Used when terminating the Alidns record instance.  
-* `delete` - (Defaults to 6 mins) Used when terminating the Alidns record instance.  
-
+* `create` - (Defaults to 4 mins) Used when create the Alidns record instance.
+* `update` - (Defaults to 3 mins) Used when update the Alidns record instance.
+* `delete` - (Defaults to 6 mins) Used when delete the Alidns record instance.
 
 ## Import
 
 Alidns Domain Record can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_alidns_record.example abc123456
 ```

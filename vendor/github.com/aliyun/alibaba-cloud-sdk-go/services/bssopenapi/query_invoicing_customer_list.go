@@ -77,11 +77,11 @@ type QueryInvoicingCustomerListRequest struct {
 // QueryInvoicingCustomerListResponse is the response struct for api QueryInvoicingCustomerList
 type QueryInvoicingCustomerListResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
-	Success   bool   `json:"Success" xml:"Success"`
-	Code      string `json:"Code" xml:"Code"`
-	Message   string `json:"Message" xml:"Message"`
-	Data      Data   `json:"Data" xml:"Data"`
+	Code      string                           `json:"Code" xml:"Code"`
+	Message   string                           `json:"Message" xml:"Message"`
+	RequestId string                           `json:"RequestId" xml:"RequestId"`
+	Success   bool                             `json:"Success" xml:"Success"`
+	Data      DataInQueryInvoicingCustomerList `json:"Data" xml:"Data"`
 }
 
 // CreateQueryInvoicingCustomerListRequest creates a request to invoke QueryInvoicingCustomerList API
@@ -89,7 +89,7 @@ func CreateQueryInvoicingCustomerListRequest() (request *QueryInvoicingCustomerL
 	request = &QueryInvoicingCustomerListRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "QueryInvoicingCustomerList", "", "")
+	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "QueryInvoicingCustomerList", "bssopenapi", "openAPI")
 	request.Method = requests.POST
 	return
 }

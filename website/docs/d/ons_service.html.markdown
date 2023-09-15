@@ -1,5 +1,5 @@
 ---
-subcategory: "RocketMQ"
+subcategory: "RocketMQ (Ons)"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_ons_service"
 sidebar_current: "docs-alicloud-datasource-ons-service"
@@ -19,7 +19,7 @@ For information about ONS and how to use it, see [What is ONS](https://help.aliy
 
 ```terraform
 data "alicloud_ons_service" "open" {
-	enable = "On"
+  enable = "On"
 }
 ```
 

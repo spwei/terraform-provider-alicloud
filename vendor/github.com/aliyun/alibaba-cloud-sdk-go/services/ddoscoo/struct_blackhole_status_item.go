@@ -17,8 +17,8 @@ package ddoscoo
 
 // BlackholeStatusItem is a nested struct in ddoscoo response
 type BlackholeStatusItem struct {
-	StartTime   int64  `json:"StartTime" xml:"StartTime"`
 	EndTime     int64  `json:"EndTime" xml:"EndTime"`
+	StartTime   int64  `json:"StartTime" xml:"StartTime"`
 	Ip          string `json:"Ip" xml:"Ip"`
 	BlackStatus string `json:"BlackStatus" xml:"BlackStatus"`
 }

@@ -7,37 +7,36 @@ description: |-
   Provides a Alicloud CEN child instance attachment resource.
 ---
 
-# alicloud\_cen_instance_attachment
+# alicloud_cen_instance_attachment
 
 Provides a CEN child instance attachment resource that associate the network(VPC, CCN, VBR) with the CEN instance.
 
-->**NOTE:** Available in 1.42.0+
+-> **NOTE:** Available since v1.42.0.
 
 ## Example Usage
 
 Basic Usage
 
 ```terraform
-# Create a new instance-attachment and use it to attach one child instance to a new CEN
-variable "name" {
-  default = "tf-testAccCenInstanceAttachmentBasic"
+data "alicloud_regions" "default" {
+  current = true
 }
 
-resource "alicloud_cen_instance" "cen" {
-  name        = var.name
-  description = "terraform01"
+resource "alicloud_vpc" "example" {
+  vpc_name   = "tf_example"
+  cidr_block = "172.17.3.0/24"
 }
 
-resource "alicloud_vpc" "vpc" {
-  name       = var.name
-  cidr_block = "192.168.0.0/16"
+resource "alicloud_cen_instance" "example" {
+  cen_instance_name = "tf_example"
+  description       = "an example for cen"
 }
 
-resource "alicloud_cen_instance_attachment" "foo" {
-  instance_id              = alicloud_cen_instance.cen.id
-  child_instance_id        = alicloud_vpc.vpc.id
-  child_instance_type      = "VPC" 
-  child_instance_region_id = "cn-beijing"
+resource "alicloud_cen_instance_attachment" "example" {
+  instance_id              = alicloud_cen_instance.example.id
+  child_instance_id        = alicloud_vpc.example.id
+  child_instance_type      = "VPC"
+  child_instance_region_id = data.alicloud_regions.default.regions.0.id
 }
 ```
 ## Argument Reference
@@ -58,12 +57,21 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `id` - ID of the resource, It is formatted to `<instance_id>:<child_instance_id>:<child_instance_type>:<child_instance_region_id>`. Before version 1.97.0, the value is `<instance_id>:<child_instance_id>`.
-* `status` - The associating status of the network. 
+* `status` - The associating status of the network.
+
+## Timeouts
+
+-> **NOTE:** Available in 1.199.0+.
+
+The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
+
+* `create` - (Defaults to 10 mins) Used when create the child instance attachment.
+* `delete` - (Defaults to 10 mins) Used when delete the child instance attachment.
 
 ## Import
 
 CEN instance can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_cen_instance_attachment.example cen-m7i7pjmkon********:vpc-2ze2w07mcy9nz********:VPC:cn-beijing
 ```

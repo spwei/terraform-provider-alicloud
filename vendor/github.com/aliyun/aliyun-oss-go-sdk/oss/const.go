@@ -76,9 +76,12 @@ const (
 
 	// StorageColdArchive cold archive
 	StorageColdArchive StorageClassType = "ColdArchive"
+
+	// StorageDeepColdArchive deep cold archive
+	StorageDeepColdArchive StorageClassType = "DeepColdArchive"
 )
 
-//RedundancyType bucket data Redundancy type
+// RedundancyType bucket data Redundancy type
 type DataRedundancyType string
 
 const (
@@ -89,7 +92,7 @@ const (
 	RedundancyZRS DataRedundancyType = "ZRS"
 )
 
-//ObjecthashFuncType
+// ObjecthashFuncType
 type ObjecthashFuncType string
 
 const (
@@ -108,7 +111,7 @@ const (
 	BucketOwner PayerType = "BucketOwner"
 )
 
-//RestoreMode the restore mode for coldArchive object
+// RestoreMode the restore mode for coldArchive object
 type RestoreMode string
 
 const (
@@ -203,6 +206,12 @@ const (
 	HTTPHeaderOssTaskID                      = "X-Oss-Task-Id"
 	HTTPHeaderOssHashCtx                     = "X-Oss-Hash-Ctx"
 	HTTPHeaderOssMd5Ctx                      = "X-Oss-Md5-Ctx"
+	HTTPHeaderAllowSameActionOverLap         = "X-Oss-Allow-Same-Action-Overlap"
+	HttpHeaderOssDate                        = "X-Oss-Date"
+	HttpHeaderOssContentSha256               = "X-Oss-Content-Sha256"
+	HttpHeaderOssNotification                = "X-Oss-Notification"
+	HTTPHeaderOssEc                          = "X-Oss-Ec"
+	HTTPHeaderOssErr                         = "X-Oss-Err"
 )
 
 // HTTP Param
@@ -234,7 +243,9 @@ const (
 
 	NullVersion = "null"
 
-	Version = "v2.1.7" // Go SDK version
+	DefaultContentSha256 = "UNSIGNED-PAYLOAD" // for v4 signature
+
+	Version = "v2.2.9" // Go SDK version
 )
 
 // FrameType
@@ -254,4 +265,6 @@ const (
 	AuthV1 AuthVersionType = "v1"
 	// AuthV2 v2
 	AuthV2 AuthVersionType = "v2"
+	// AuthV4 v4
+	AuthV4 AuthVersionType = "v4"
 )

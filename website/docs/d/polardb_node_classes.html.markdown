@@ -7,28 +7,27 @@ description: |-
     Provides a list of PolarDB node classes info.
 ---
 
-# alicloud\_polardb\_node\_classes
+# alicloud_polardb_node_classes
 
 This data source provides the PolarDB node classes resource available info of Alibaba Cloud.
 
--> **NOTE:** Available in v1.81.0+
+-> **NOTE:** Available since v1.81.0+
 
 ## Example Usage
 
 ```terraform
-data "alicloud_zones" "resources" {
-  available_resource_creation = "PolarDB"
-}
-
 data "alicloud_polardb_node_classes" "resources" {
-  zone_id              = data.alicloud_zones.resources.zones.0.id
-  pay_type             = "PostPaid"
-  db_type              = "MySQL"
-  db_version           = "5.6"
+  pay_type   = "PostPaid"
+  db_type    = "MySQL"
+  db_version = "5.6"
 }
 
 output "polardb_node_classes" {
   value = data.alicloud_polardb_node_classes.resources.classes
+}
+
+output "polardb_available_zone_id" {
+  value = data.alicloud_polardb_node_classes.resources.classes[0].zone_id
 }
 ```
 
@@ -36,10 +35,11 @@ output "polardb_node_classes" {
 
 The following arguments are supported:
 
-* `pay_type` - (Required) Filter the results by charge type. Valid values: `PrePaid` and `PostPaid`.
-* `db_type` - (Optional) Database type. Options are `MySQL`, `PostgreSQL`, `Oracle`. If db_type is set, db_version also needs to be set.
-* `db_version` - (Optional) Database version required by the user. Value options can refer to the latest docs [detail info](https://www.alibabacloud.com/help/doc-detail/98169.htm) `DBVersion`. If db_version is set, db_type also needs to be set.
+* `pay_type` - (Required, ForceNew) Filter the results by charge type. Valid values: `PrePaid` and `PostPaid`.
+* `db_type` - (Optional, ForceNew) Database type. Options are `MySQL`, `PostgreSQL`, `Oracle`. If db_type is set, db_version also needs to be set.
+* `db_version` - (Optional, ForceNew) Database version required by the user. Value options can refer to the latest docs [detail info](https://www.alibabacloud.com/help/doc-detail/98169.htm) `DBVersion`. If db_version is set, db_type also needs to be set.
 * `db_node_class` - (Optional) The PolarDB node class type by the user.
+* `category` - (Optional) The PolarDB node cluster series.
 * `region_id` - (Optional) The Region to launch the PolarDB cluster.
 * `zone_id` - (Optional) The Zone to launch the PolarDB cluster.
 * `output_file` - (Optional) File name where to save data source results (after running `terraform apply`).

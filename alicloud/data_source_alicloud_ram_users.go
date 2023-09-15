@@ -3,17 +3,19 @@ package alicloud
 import (
 	"log"
 	"regexp"
+	"time"
+
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ram"
 	"github.com/aliyun/terraform-provider-alicloud/alicloud/connectivity"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 )
 
 func dataSourceAlicloudRamUsers() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceAlicloudRamUsersRead,
-
 		Schema: map[string]*schema.Schema{
 			"name_regex": {
 				Type:     schema.TypeString,
@@ -29,13 +31,13 @@ func dataSourceAlicloudRamUsers() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringLenBetween(0, 128),
+				ValidateFunc: StringLenBetween(0, 128),
 			},
 			"policy_type": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"System", "Custom"}, false),
+				ValidateFunc: StringInSlice([]string{"System", "Custom"}, false),
 			},
 			"output_file": {
 				Type:     schema.TypeString,
@@ -114,18 +116,36 @@ func dataSourceAlicloudRamUsersRead(d *schema.ResourceData, meta interface{}) er
 	// all users
 	request := ram.CreateListUsersRequest()
 	request.RegionId = client.RegionId
+	request.MaxItems = requests.NewInteger(1000)
 	for {
-		raw, err := client.WithRamClient(func(ramClient *ram.Client) (interface{}, error) {
-			return ramClient.ListUsers(request)
+		var raw interface{}
+		var err error
+		wait := incrementalWait(3*time.Second, 3*time.Second)
+		err = resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutRead)), func() *resource.RetryError {
+			raw, err = client.WithRamClient(func(ramClient *ram.Client) (interface{}, error) {
+				return ramClient.ListUsers(request)
+			})
+			if err != nil {
+				if NeedRetry(err) {
+					wait()
+					return resource.RetryableError(err)
+				}
+				return resource.NonRetryableError(err)
+			}
+			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+			return nil
 		})
 		if err != nil {
 			return WrapErrorf(err, DataDefaultErrorMsg, "alicloud_ram_users", request.GetActionName(), AlibabaCloudSdkGoERROR)
 		}
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+
 		response, _ := raw.(*ram.ListUsersResponse)
 		for _, v := range response.Users.User {
 			if nameRegexOk {
-				r := regexp.MustCompile(nameRegex.(string))
+				r, err := regexp.Compile(nameRegex.(string))
+				if err != nil {
+					return WrapError(err)
+				}
 				if !r.MatchString(v.UserName) {
 					continue
 				}
@@ -147,18 +167,37 @@ func dataSourceAlicloudRamUsersRead(d *schema.ResourceData, meta interface{}) er
 	if groupNameOk {
 		request := ram.CreateListUsersForGroupRequest()
 		request.GroupName = groupName.(string)
-		raw, err := client.WithRamClient(func(ramClient *ram.Client) (interface{}, error) {
-			return ramClient.ListUsersForGroup(request)
+
+		var raw interface{}
+		var err error
+		wait := incrementalWait(3*time.Second, 3*time.Second)
+		err = resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutRead)), func() *resource.RetryError {
+			raw, err = client.WithRamClient(func(ramClient *ram.Client) (interface{}, error) {
+				return ramClient.ListUsersForGroup(request)
+			})
+			if err != nil {
+				if NeedRetry(err) {
+					wait()
+					return resource.RetryableError(err)
+				}
+				return resource.NonRetryableError(err)
+			}
+			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+			return nil
 		})
 		if err != nil {
 			return WrapErrorf(err, DataDefaultErrorMsg, "alicloud_ram_users", request.GetActionName(), AlibabaCloudSdkGoERROR)
 		}
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+
 		response, _ := raw.(*ram.ListUsersForGroupResponse)
+
 		for _, v := range response.Users.User {
 			groupFilterUsersMap[v.UserName] = v
 		}
-		dataMap = append(dataMap, groupFilterUsersMap)
+
+		if len(groupFilterUsersMap) > 0 {
+			dataMap = append(dataMap, groupFilterUsersMap)
+		}
 	}
 
 	// users which attach with this policy
@@ -170,22 +209,41 @@ func dataSourceAlicloudRamUsersRead(d *schema.ResourceData, meta interface{}) er
 		request := ram.CreateListEntitiesForPolicyRequest()
 		request.PolicyName = policyName.(string)
 		request.PolicyType = pType
-		raw, err := client.WithRamClient(func(ramClient *ram.Client) (interface{}, error) {
-			return ramClient.ListEntitiesForPolicy(request)
+
+		var raw interface{}
+		var err error
+		wait := incrementalWait(3*time.Second, 3*time.Second)
+		err = resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutRead)), func() *resource.RetryError {
+			raw, err = client.WithRamClient(func(ramClient *ram.Client) (interface{}, error) {
+				return ramClient.ListEntitiesForPolicy(request)
+			})
+			if err != nil {
+				if NeedRetry(err) {
+					wait()
+					return resource.RetryableError(err)
+				}
+				return resource.NonRetryableError(err)
+			}
+			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+			return nil
 		})
 		if err != nil {
 			return WrapErrorf(err, DataDefaultErrorMsg, "alicloud_ram_users", request.GetActionName(), AlibabaCloudSdkGoERROR)
 		}
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+
 		response, _ := raw.(*ram.ListEntitiesForPolicyResponse)
+
 		for _, v := range response.Users.User {
 			policyFilterUsersMap[v.UserName] = v
 		}
-		dataMap = append(dataMap, policyFilterUsersMap)
+
+		if len(policyFilterUsersMap) > 0 {
+			dataMap = append(dataMap, policyFilterUsersMap)
+		}
 	}
 
 	// GetIntersection of each map
-	allUsers = ramService.GetIntersection(dataMap, allUsersMap)
+	allUsers = ramService.GetIntersection(dataMap, allUsersMap, groupNameOk, policyNameOk)
 
 	return ramUsersDescriptionAttributes(d, allUsers)
 }
@@ -195,7 +253,7 @@ func ramUsersDescriptionAttributes(d *schema.ResourceData, users []interface{}) 
 	var names []string
 	var s []map[string]interface{}
 	for _, v := range users {
-		user, ok := v.(ram.UserInListUsers)
+		user, ok := v.(ram.User)
 		if !ok {
 			return WrapError(Error("wrong interface convince"))
 		}
@@ -211,12 +269,15 @@ func ramUsersDescriptionAttributes(d *schema.ResourceData, users []interface{}) 
 	}
 
 	d.SetId(dataResourceIdHash(ids))
+
 	if err := d.Set("users", s); err != nil {
 		return WrapError(err)
 	}
+
 	if err := d.Set("ids", ids); err != nil {
 		return WrapError(err)
 	}
+
 	if err := d.Set("names", names); err != nil {
 		return WrapError(err)
 	}
@@ -225,5 +286,6 @@ func ramUsersDescriptionAttributes(d *schema.ResourceData, users []interface{}) 
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
 		writeToFile(output.(string), s)
 	}
+
 	return nil
 }

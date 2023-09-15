@@ -83,8 +83,8 @@ type DescribeDomainAttackEventsRequest struct {
 // DescribeDomainAttackEventsResponse is the response struct for api DescribeDomainAttackEvents
 type DescribeDomainAttackEventsResponse struct {
 	*responses.BaseResponse
-	RequestId          string `json:"RequestId" xml:"RequestId"`
 	TotalCount         int64  `json:"TotalCount" xml:"TotalCount"`
+	RequestId          string `json:"RequestId" xml:"RequestId"`
 	DomainAttackEvents []Data `json:"DomainAttackEvents" xml:"DomainAttackEvents"`
 }
 

@@ -1,5 +1,5 @@
 ---
-subcategory: "Serverless Workflow"
+subcategory: "Serverless Workflow (FnF)"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_fnf_service"
 sidebar_current: "docs-alicloud-datasource-fnf-service"
@@ -19,7 +19,7 @@ For information about Fnf and how to use it, see [What is Fnf](https://www.aliba
 
 ```terraform
 data "alicloud_fnf_service" "open" {
-	enable = "On"
+  enable = "On"
 }
 ```
 

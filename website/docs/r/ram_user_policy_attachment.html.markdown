@@ -7,9 +7,11 @@ description: |-
   Provides a RAM User Policy attachment resource.
 ---
 
-# alicloud\_ram\_user\_policy\_attachment
+# alicloud_ram_user_policy_attachment
 
 Provides a RAM User Policy attachment resource. 
+
+-> **NOTE:** Available since v1.0.0+.
 
 ## Example Usage
 
@@ -25,8 +27,8 @@ resource "alicloud_ram_user" "user" {
 }
 
 resource "alicloud_ram_policy" "policy" {
-  name     = "policyName"
-  document = <<EOF
+  name        = "policyName"
+  document    = <<EOF
   {
     "Statement": [
       {
@@ -45,7 +47,7 @@ resource "alicloud_ram_policy" "policy" {
   }
   EOF
   description = "this is a policy test"
-  force = true
+  force       = true
 }
 
 resource "alicloud_ram_user_policy_attachment" "attach" {
@@ -72,6 +74,6 @@ The following attributes are exported:
 
 RAM User Policy attachment can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_ram_user_policy_attachment.example user:my-policy:Custom:my-user
 ```

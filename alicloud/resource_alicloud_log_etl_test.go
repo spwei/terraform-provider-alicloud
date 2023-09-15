@@ -38,6 +38,7 @@ func TestAccAlicloudLogETL_basic(t *testing.T) {
 					"display_name": "etl_display",
 					"description":  "etl_description",
 					"from_time":    "1616486027",
+					"to_time":      "1617486027",
 					"parameters": map[string]string{
 						"test1": "test2",
 					},
@@ -68,6 +69,8 @@ func TestAccAlicloudLogETL_basic(t *testing.T) {
 					testAccCheck(map[string]string{
 						"etl_name":         name,
 						"project":          name,
+						"from_time":        "1616486027",
+						"to_time":          "1617486027",
 						"etl_sinks.#":      "2",
 						"parameters.%":     "1",
 						"parameters.test1": "test2",
@@ -104,6 +107,17 @@ func TestAccAlicloudLogETL_basic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
+					"script": "e_set('new','new_value')",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"status": "STOPPED",
+						"script": "e_set('new','new_value')",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
 					"status": "RUNNING",
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -114,9 +128,7 @@ func TestAccAlicloudLogETL_basic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"script":    "e_set('aliyun','aliyun')",
-					"from_time": "1616662485",
-					"to_time":   "1616666085",
+					"script": "e_set('aliyun','aliyun')",
 					"parameters": map[string]string{
 						"update": "update",
 					},
@@ -133,11 +145,10 @@ func TestAccAlicloudLogETL_basic(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
+						"status":            "RUNNING",
 						"script":            "e_set('aliyun','aliyun')",
 						"parameters.update": "update",
 						"parameters.test1":  REMOVEKEY,
-						"from_time":         "1616662485",
-						"to_time":           "1616666085",
 						"etl_sinks.#":       "1",
 					}),
 				),

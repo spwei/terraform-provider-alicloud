@@ -84,10 +84,10 @@ type SetRenewalRequest struct {
 // SetRenewalResponse is the response struct for api SetRenewal
 type SetRenewalResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
-	Success   bool   `json:"Success" xml:"Success"`
 	Code      string `json:"Code" xml:"Code"`
 	Message   string `json:"Message" xml:"Message"`
+	RequestId string `json:"RequestId" xml:"RequestId"`
+	Success   bool   `json:"Success" xml:"Success"`
 }
 
 // CreateSetRenewalRequest creates a request to invoke SetRenewal API
@@ -95,7 +95,7 @@ func CreateSetRenewalRequest() (request *SetRenewalRequest) {
 	request = &SetRenewalRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "SetRenewal", "", "")
+	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "SetRenewal", "bssopenapi", "openAPI")
 	request.Method = requests.POST
 	return
 }

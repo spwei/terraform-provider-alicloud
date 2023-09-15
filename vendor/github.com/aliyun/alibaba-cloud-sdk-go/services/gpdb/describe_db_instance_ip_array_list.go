@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeDBInstanceIPArrayList invokes the gpdb.DescribeDBInstanceIPArrayList API synchronously
-// api document: https://help.aliyun.com/api/gpdb/describedbinstanceiparraylist.html
 func (client *Client) DescribeDBInstanceIPArrayList(request *DescribeDBInstanceIPArrayListRequest) (response *DescribeDBInstanceIPArrayListResponse, err error) {
 	response = CreateDescribeDBInstanceIPArrayListResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeDBInstanceIPArrayList(request *DescribeDBInstanceI
 }
 
 // DescribeDBInstanceIPArrayListWithChan invokes the gpdb.DescribeDBInstanceIPArrayList API asynchronously
-// api document: https://help.aliyun.com/api/gpdb/describedbinstanceiparraylist.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeDBInstanceIPArrayListWithChan(request *DescribeDBInstanceIPArrayListRequest) (<-chan *DescribeDBInstanceIPArrayListResponse, <-chan error) {
 	responseChan := make(chan *DescribeDBInstanceIPArrayListResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeDBInstanceIPArrayListWithChan(request *DescribeDBI
 }
 
 // DescribeDBInstanceIPArrayListWithCallback invokes the gpdb.DescribeDBInstanceIPArrayList API asynchronously
-// api document: https://help.aliyun.com/api/gpdb/describedbinstanceiparraylist.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeDBInstanceIPArrayListWithCallback(request *DescribeDBInstanceIPArrayListRequest, callback func(response *DescribeDBInstanceIPArrayListResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,7 +71,8 @@ func (client *Client) DescribeDBInstanceIPArrayListWithCallback(request *Describ
 // DescribeDBInstanceIPArrayListRequest is the request struct for api DescribeDBInstanceIPArrayList
 type DescribeDBInstanceIPArrayListRequest struct {
 	*requests.RpcRequest
-	DBInstanceId string `position:"Query" name:"DBInstanceId"`
+	ResourceGroupId string `position:"Query" name:"ResourceGroupId"`
+	DBInstanceId    string `position:"Query" name:"DBInstanceId"`
 }
 
 // DescribeDBInstanceIPArrayListResponse is the response struct for api DescribeDBInstanceIPArrayList
@@ -91,7 +87,8 @@ func CreateDescribeDBInstanceIPArrayListRequest() (request *DescribeDBInstanceIP
 	request = &DescribeDBInstanceIPArrayListRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("gpdb", "2016-05-03", "DescribeDBInstanceIPArrayList", "gpdb", "openAPI")
+	request.InitWithApiInfo("gpdb", "2016-05-03", "DescribeDBInstanceIPArrayList", "", "")
+	request.Method = requests.POST
 	return
 }
 

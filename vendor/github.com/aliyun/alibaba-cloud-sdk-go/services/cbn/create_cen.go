@@ -75,18 +75,27 @@ type CreateCenRequest struct {
 	ClientToken          string           `position:"Query" name:"ClientToken"`
 	Ipv6Level            string           `position:"Query" name:"Ipv6Level"`
 	Description          string           `position:"Query" name:"Description"`
+	ResourceGroupId      string           `position:"Query" name:"ResourceGroupId"`
+	Tag                  *[]CreateCenTag  `position:"Query" name:"Tag"  type:"Repeated"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	Version              string           `position:"Query" name:"Version"`
 	ProtectionLevel      string           `position:"Query" name:"ProtectionLevel"`
 	Name                 string           `position:"Query" name:"Name"`
+}
+
+// CreateCenTag is a repeated param struct in CreateCenRequest
+type CreateCenTag struct {
+	Value string `name:"Value"`
+	Key   string `name:"Key"`
 }
 
 // CreateCenResponse is the response struct for api CreateCen
 type CreateCenResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
 	CenId     string `json:"CenId" xml:"CenId"`
+	RequestId string `json:"RequestId" xml:"RequestId"`
 }
 
 // CreateCreateCenRequest creates a request to invoke CreateCen API
@@ -94,7 +103,7 @@ func CreateCreateCenRequest() (request *CreateCenRequest) {
 	request = &CreateCenRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("Cbn", "2017-09-12", "CreateCen", "cbn", "openAPI")
+	request.InitWithApiInfo("Cbn", "2017-09-12", "CreateCen", "", "")
 	request.Method = requests.POST
 	return
 }

@@ -71,7 +71,8 @@ func (client *Client) DescribeMonitoringAgentStatusesWithCallback(request *Descr
 // DescribeMonitoringAgentStatusesRequest is the request struct for api DescribeMonitoringAgentStatuses
 type DescribeMonitoringAgentStatusesRequest struct {
 	*requests.RpcRequest
-	InstanceIds string `position:"Query" name:"InstanceIds"`
+	HostAvailabilityTaskId string `position:"Query" name:"HostAvailabilityTaskId"`
+	InstanceIds            string `position:"Query" name:"InstanceIds"`
 }
 
 // DescribeMonitoringAgentStatusesResponse is the response struct for api DescribeMonitoringAgentStatuses
@@ -79,8 +80,8 @@ type DescribeMonitoringAgentStatusesResponse struct {
 	*responses.BaseResponse
 	Code           string         `json:"Code" xml:"Code"`
 	Message        string         `json:"Message" xml:"Message"`
-	Success        bool           `json:"Success" xml:"Success"`
 	RequestId      string         `json:"RequestId" xml:"RequestId"`
+	Success        bool           `json:"Success" xml:"Success"`
 	NodeStatusList NodeStatusList `json:"NodeStatusList" xml:"NodeStatusList"`
 }
 

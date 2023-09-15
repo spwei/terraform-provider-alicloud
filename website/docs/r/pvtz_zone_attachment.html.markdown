@@ -88,7 +88,7 @@ provider "alicloud" {
 
 resource "alicloud_vpc" "third" {
   provider   = alicloud.eu
-  name       = "the-thrid-vpc"
+  name       = "the-third-vpc"
   cidr_block = "172.16.0.0/16"
 }
 
@@ -115,12 +115,12 @@ The following arguments are supported:
 * `vpc_ids` - (Optional, Conflict with `vpcs`) The id List of the VPC with the same region, for example:["vpc-1","vpc-2"]. 
 * `vpcs` - (Optional, Conflict with `vpc_ids`, Available in 1.62.1+) The List of the VPC:
     * `vpc_id` - (Required) The Id of the vpc.
-    * `region_id` - (Option) The region of the vpc. If not set, the current region will instead of.
+    * `region_id` - (Optional) The region of the vpc. If not set, the current region will instead of.
     
     Recommend to use `vpcs`.
 
-* `lang` - (Optional, Available in 1.62.1+) The language of code.
-* `user_client_ip` - (Optional, Available in 1.62.1+) The user custom IP address.
+* `lang` - (Optional, ForceNew, Available in 1.62.1+) The language of code.
+* `user_client_ip` - (Optional, ForceNew, Available in 1.62.1+) The user custom IP address.
 
 ### Timeouts
 
@@ -142,6 +142,6 @@ The following attributes are exported:
 
 Private Zone attachment can be imported using the id(same with `zone_id`), e.g.
 
-```
+```shell
 $ terraform import alicloud_pvtz_zone_attachment.example abc123456
 ```

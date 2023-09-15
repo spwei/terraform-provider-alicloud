@@ -1,5 +1,5 @@
 ---
-subcategory: "Smart Access Gateway"
+subcategory: "Smart Access Gateway (Smartag)"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_sag_acl_rule"
 sidebar_current: "docs-alicloud-resource-sag-acl-rule"
@@ -7,13 +7,13 @@ description: |-
   Provides a Sag Acl Rule resource.
 ---
 
-# alicloud\_sag\_acl\_rule
+# alicloud_sag_acl_rule
 
 Provides a Sag Acl Rule resource. This topic describes how to configure an access control list (ACL) rule for a target Smart Access Gateway instance to permit or deny access to or from specified IP addresses in the ACL rule.
 
-For information about Sag Acl Rule and how to use it, see [What is access control list (ACL) rule](https://www.alibabacloud.com/help/doc-detail/111483.htm).
+For information about Sag Acl Rule and how to use it, see [What is access control list (ACL) rule](https://www.alibabacloud.com/help/en/smart-access-gateway/latest/addaclrule).
 
--> **NOTE:** Available in 1.60.0+
+-> **NOTE:** Available since v1.60.0.
 
 -> **NOTE:** Only the following regions support create Cloud Connect Network. [`cn-shanghai`, `cn-shanghai-finance-1`, `cn-hongkong`, `ap-southeast-1`, `ap-southeast-2`, `ap-southeast-3`, `ap-southeast-5`, `ap-northeast-1`, `eu-central-1`]
 
@@ -21,14 +21,21 @@ For information about Sag Acl Rule and how to use it, see [What is access contro
 
 Basic Usage
 
-```
-resource "alicloud_sag_acl" "default" {
-  name        = "tf-testAccSagAclName"
-  sag_count   = "0"
+```terraform
+variable "name" {
+  default = "tf_example"
 }
+provider "alicloud" {
+  region = "cn-shanghai"
+}
+
+resource "alicloud_sag_acl" "default" {
+  name = var.name
+}
+
 resource "alicloud_sag_acl_rule" "default" {
   acl_id            = alicloud_sag_acl.default.id
-  description       = "tf-testSagAclRule"
+  description       = var.name
   policy            = "accept"
   ip_protocol       = "ALL"
   direction         = "in"
@@ -65,7 +72,7 @@ The following attributes are exported:
 
 The Sag Acl Rule can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_sag_acl_rule.example acr-abc123456
 ```
 

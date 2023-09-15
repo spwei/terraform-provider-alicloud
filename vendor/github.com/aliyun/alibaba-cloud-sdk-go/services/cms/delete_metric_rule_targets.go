@@ -78,10 +78,10 @@ type DeleteMetricRuleTargetsRequest struct {
 // DeleteMetricRuleTargetsResponse is the response struct for api DeleteMetricRuleTargets
 type DeleteMetricRuleTargetsResponse struct {
 	*responses.BaseResponse
-	Success   bool    `json:"Success" xml:"Success"`
 	Code      string  `json:"Code" xml:"Code"`
 	Message   string  `json:"Message" xml:"Message"`
 	RequestId string  `json:"RequestId" xml:"RequestId"`
+	Success   bool    `json:"Success" xml:"Success"`
 	FailIds   FailIds `json:"FailIds" xml:"FailIds"`
 }
 

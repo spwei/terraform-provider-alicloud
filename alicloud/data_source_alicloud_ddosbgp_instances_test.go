@@ -45,18 +45,19 @@ func TestAccAlicloudDdosbgpInstanceDataSource_basic(t *testing.T) {
 
 	var existDdosbgpInstanceMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"ids.#":                      "1",
-			"ids.0":                      CHECKSET,
-			"names.#":                    "1",
-			"names.0":                    fmt.Sprintf("tf_testAcc%d", rand),
-			"instances.#":                "1",
-			"instances.0.name":           fmt.Sprintf("tf_testAcc%d", rand),
-			"instances.0.type":           string(Enterprise),
-			"instances.0.base_bandwidth": "20",
-			"instances.0.bandwidth":      "201",
-			"instances.0.ip_count":       "100",
-			"instances.0.ip_type":        "IPv4",
-			"instances.0.region":         "cn-hangzhou",
+			"ids.#":                        "1",
+			"ids.0":                        CHECKSET,
+			"names.#":                      "1",
+			"names.0":                      fmt.Sprintf("tf_testAcc%d", rand),
+			"instances.#":                  "1",
+			"instances.0.name":             fmt.Sprintf("tf_testAcc%d", rand),
+			"instances.0.type":             string(Enterprise),
+			"instances.0.base_bandwidth":   "20",
+			"instances.0.bandwidth":        "-1",
+			"instances.0.ip_count":         "100",
+			"instances.0.ip_type":          "IPv4",
+			"instances.0.region":           "cn-hangzhou",
+			"instances.0.normal_bandwidth": "100",
 		}
 	}
 
@@ -74,24 +75,21 @@ func TestAccAlicloudDdosbgpInstanceDataSource_basic(t *testing.T) {
 		fakeMapFunc:  fakeDdosbgpInstanceMapFunc,
 	}
 	preCheck := func() {
+		testAccPreCheckWithTime(t, []int{15})
 		testAccPreCheckWithRegions(t, true, connectivity.DdosbgpSupportedRegions)
-
 	}
 	ddosbgpInstanceCheckInfo.dataSourceTestCheckWithPreCheck(t, rand, preCheck, nameRegexConf, idsConf, allConf)
 }
 
 func dataSourceDdosbgpInstanceConfigDependence(name string) string {
 	return fmt.Sprintf(`
-    provider "alicloud" {
-        endpoints {
-            bssopenapi = "business.aliyuncs.com"
-        }
-    }
 
 	resource "alicloud_ddosbgp_instance" "default" {
       name                    = "%s"
-      bandwidth               = "201"
-      ip_count                = "100"
+      bandwidth               = -1
+      base_bandwidth          = 20
+      normal_bandwidth        = 100
+      ip_count                = 100
       ip_type                 = "IPv4"
       type                    = "Enterprise"
 	}`, name)

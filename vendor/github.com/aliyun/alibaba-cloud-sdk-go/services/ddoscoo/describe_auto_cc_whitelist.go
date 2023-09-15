@@ -81,8 +81,8 @@ type DescribeAutoCcWhitelistRequest struct {
 // DescribeAutoCcWhitelistResponse is the response struct for api DescribeAutoCcWhitelist
 type DescribeAutoCcWhitelistResponse struct {
 	*responses.BaseResponse
-	RequestId       string                `json:"RequestId" xml:"RequestId"`
 	TotalCount      int64                 `json:"TotalCount" xml:"TotalCount"`
+	RequestId       string                `json:"RequestId" xml:"RequestId"`
 	AutoCcWhitelist []AutoCcWhitelistItem `json:"AutoCcWhitelist" xml:"AutoCcWhitelist"`
 }
 

@@ -85,11 +85,11 @@ type QueryAccountBillRequest struct {
 // QueryAccountBillResponse is the response struct for api QueryAccountBill
 type QueryAccountBillResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
-	Success   bool   `json:"Success" xml:"Success"`
-	Code      string `json:"Code" xml:"Code"`
-	Message   string `json:"Message" xml:"Message"`
-	Data      Data   `json:"Data" xml:"Data"`
+	Code      string                 `json:"Code" xml:"Code"`
+	Message   string                 `json:"Message" xml:"Message"`
+	RequestId string                 `json:"RequestId" xml:"RequestId"`
+	Success   bool                   `json:"Success" xml:"Success"`
+	Data      DataInQueryAccountBill `json:"Data" xml:"Data"`
 }
 
 // CreateQueryAccountBillRequest creates a request to invoke QueryAccountBill API
@@ -97,7 +97,7 @@ func CreateQueryAccountBillRequest() (request *QueryAccountBillRequest) {
 	request = &QueryAccountBillRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "QueryAccountBill", "", "")
+	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "QueryAccountBill", "bssopenapi", "openAPI")
 	request.Method = requests.POST
 	return
 }

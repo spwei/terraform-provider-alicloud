@@ -7,7 +7,7 @@ description: |-
   Provides a Alicloud CEN cross-regional interconnection bandwidth configuration resource.
 ---
 
-# alicloud\_cen_bandwidth_limit
+# alicloud_cen_bandwidth_limit
 
 Provides a CEN cross-regional interconnection bandwidth resource. To connect networks in different regions, you must set cross-region interconnection bandwidth after buying a bandwidth package. The total bandwidth set for all the interconnected regions of a bandwidth package cannot exceed the bandwidth of the bandwidth package. By default, 1 Kbps bandwidth is provided for connectivity test. To run normal business, you must buy a bandwidth package and set a proper interconnection bandwidth.
 
@@ -15,81 +15,72 @@ For example, a CEN instance is bound to a bandwidth package of 20 Mbps and  the 
 
 For information about CEN and how to use it, see [Cross-region interconnection bandwidth](https://www.alibabacloud.com/help/doc-detail/65983.htm)
 
+-> **NOTE:** Available since v1.18.0.
+
 ## Example Usage
 
 Basic Usage
 
-```
-variable "name" {
-  default = "tf-testAccCenBandwidthLimitConfig"
+```terraform
+variable "region1" {
+  default = "eu-central-1"
+}
+variable "region2" {
+  default = "ap-southeast-1"
 }
 
 provider "alicloud" {
-  alias  = "fra"
-  region = "eu-central-1"
+  alias  = "ec"
+  region = var.region1
 }
-
 provider "alicloud" {
-  alias  = "sh"
-  region = "cn-shanghai"
+  alias  = "as"
+  region = var.region2
 }
 
 resource "alicloud_vpc" "vpc1" {
-  provider   = alicloud.fra
-  vpc_name       = var.name
+  provider   = alicloud.ec
+  vpc_name   = "tf-example"
   cidr_block = "192.168.0.0/16"
 }
-
 resource "alicloud_vpc" "vpc2" {
-  provider   = alicloud.sh
-  name       = var.name
+  provider   = alicloud.as
+  vpc_name   = "tf-example"
   cidr_block = "172.16.0.0/12"
 }
 
-resource "alicloud_cen_instance" "cen" {
-  name        = var.name
-  description = "tf-testAccCenBandwidthLimitConfigDescription"
+resource "alicloud_cen_instance" "example" {
+  cen_instance_name = "tf_example"
+  description       = "an example for cen"
 }
-
-resource "alicloud_cen_bandwidth_package" "bwp" {
-  bandwidth = 5
-  geographic_region_ids = [
-    "Europe",
-    "China",
-  ]
-}
-
-resource "alicloud_cen_bandwidth_package_attachment" "bwp_attach" {
-  instance_id          = alicloud_cen_instance.cen.id
-  bandwidth_package_id = alicloud_cen_bandwidth_package.bwp.id
-}
-
-resource "alicloud_cen_instance_attachment" "vpc_attach_1" {
-  instance_id              = alicloud_cen_instance.cen.id
+resource "alicloud_cen_instance_attachment" "example1" {
+  instance_id              = alicloud_cen_instance.example.id
   child_instance_id        = alicloud_vpc.vpc1.id
   child_instance_type      = "VPC"
-  child_instance_region_id = "eu-central-1"
+  child_instance_region_id = var.region1
 }
-
-resource "alicloud_cen_instance_attachment" "vpc_attach_2" {
-  instance_id              = alicloud_cen_instance.cen.id
+resource "alicloud_cen_instance_attachment" "example2" {
+  instance_id              = alicloud_cen_instance.example.id
   child_instance_id        = alicloud_vpc.vpc2.id
   child_instance_type      = "VPC"
-  child_instance_region_id = "cn-shanghai"
+  child_instance_region_id = var.region2
+}
+resource "alicloud_cen_bandwidth_package" "example" {
+  bandwidth                  = 5
+  cen_bandwidth_package_name = "tf_example"
+  geographic_region_a_id     = "Europe"
+  geographic_region_b_id     = "Asia-Pacific"
 }
 
-resource "alicloud_cen_bandwidth_limit" "foo" {
-  instance_id = alicloud_cen_instance.cen.id
-  region_ids = [
-    "eu-central-1",
-    "cn-shanghai",
-  ]
+resource "alicloud_cen_bandwidth_package_attachment" "example" {
+  instance_id          = alicloud_cen_instance.example.id
+  bandwidth_package_id = alicloud_cen_bandwidth_package.example.id
+}
+
+resource "alicloud_cen_bandwidth_limit" "example" {
+  instance_id     = alicloud_cen_bandwidth_package_attachment.example.instance_id
+  region_ids      = [alicloud_cen_instance_attachment.example1.child_instance_region_id, alicloud_cen_instance_attachment.example2.child_instance_region_id]
   bandwidth_limit = 4
-  depends_on = [
-    alicloud_cen_bandwidth_package_attachment.bwp_attach,
-    alicloud_cen_instance_attachment.vpc_attach_1,
-    alicloud_cen_instance_attachment.vpc_attach_2,
-  ]
 }
 ```
 ## Argument Reference
@@ -102,7 +93,7 @@ The following arguments are supported:
 
 ->**NOTE:** The "alicloud_cen_bandwidthlimit" resource depends on the related "alicloud_cen_bandwidth_package_attachment" resource and "alicloud_cen_instance_attachment" resource.
 
-### Timeouts
+## Timeouts
 -> **NOTE:** Available in 1.48.0+.
 
 The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
@@ -122,8 +113,8 @@ The following attributes are exported:
 
 CEN bandwidth limit can be imported using the id, e.g.
 
-```
-terraform import alicloud_cen_bandwidth_limit.example cen-abc123456:cn-beijing:eu-west-1
+```shell
+$ terraform import alicloud_cen_bandwidth_limit.example cen-abc123456:cn-beijing:eu-west-1
 ```
 
 ->**NOTE:** The sequence of the region_id_1 and region_id_2 makes no difference when import. But the in the id of the resource, they are sorted lexicographically.

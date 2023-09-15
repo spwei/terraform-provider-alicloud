@@ -1,5 +1,5 @@
 ---
-subcategory: "DNS"
+subcategory: "Alidns"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_dns_instances"
 sidebar_current: "docs-alicloud-datasource-dns-instances"
@@ -9,7 +9,7 @@ description: |-
 
 # alicloud\_dns\_instances
 
--> **DEPRECATED:**  This resource has been renamed to `[alicloud_alidns_instances](https://www.terraform.io/docs/providers/alicloud/d/alidns_instances.html)` from version 1.95.0. 
+-> **DEPRECATED:**  This resource has been renamed to [alicloud_alidns_instances](https://www.terraform.io/docs/providers/alicloud/d/alidns_instances) from version 1.95.0. 
 
 This data source provides a list of DNS instances in an Alibaba Cloud account according to the specified filters.
 

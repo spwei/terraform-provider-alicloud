@@ -82,10 +82,10 @@ type RenewInstanceRequest struct {
 // RenewInstanceResponse is the response struct for api RenewInstance
 type RenewInstanceResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
-	Success   bool   `json:"Success" xml:"Success"`
 	Code      string `json:"Code" xml:"Code"`
 	Message   string `json:"Message" xml:"Message"`
+	RequestId string `json:"RequestId" xml:"RequestId"`
+	Success   bool   `json:"Success" xml:"Success"`
 	Data      Data   `json:"Data" xml:"Data"`
 }
 
@@ -94,7 +94,7 @@ func CreateRenewInstanceRequest() (request *RenewInstanceRequest) {
 	request = &RenewInstanceRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "RenewInstance", "", "")
+	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "RenewInstance", "bssopenapi", "openAPI")
 	request.Method = requests.POST
 	return
 }

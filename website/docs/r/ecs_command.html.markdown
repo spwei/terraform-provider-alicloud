@@ -21,11 +21,11 @@ Basic Usage
 
 ```terraform
 resource "alicloud_ecs_command" "example" {
-	name              = "tf-testAcc"
-	command_content   = "bHMK"
-	description       = "For Terraform Test"
-	type              = "RunShellScript"
-	working_dir       = "/root"
+  name            = "tf-testAcc"
+  command_content = "bHMK"
+  description     = "For Terraform Test"
+  type            = "RunShellScript"
+  working_dir     = "/root"
 }
 
 ```
@@ -52,6 +52,6 @@ The following attributes are exported:
 
 ECS Command can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_ecs_command.example <id>
 ```

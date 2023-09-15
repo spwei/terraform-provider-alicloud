@@ -82,11 +82,11 @@ type QueryInstanceGaapCostRequest struct {
 // QueryInstanceGaapCostResponse is the response struct for api QueryInstanceGaapCost
 type QueryInstanceGaapCostResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
-	Success   bool   `json:"Success" xml:"Success"`
-	Code      string `json:"Code" xml:"Code"`
-	Message   string `json:"Message" xml:"Message"`
-	Data      Data   `json:"Data" xml:"Data"`
+	Code      string                      `json:"Code" xml:"Code"`
+	Message   string                      `json:"Message" xml:"Message"`
+	RequestId string                      `json:"RequestId" xml:"RequestId"`
+	Success   bool                        `json:"Success" xml:"Success"`
+	Data      DataInQueryInstanceGaapCost `json:"Data" xml:"Data"`
 }
 
 // CreateQueryInstanceGaapCostRequest creates a request to invoke QueryInstanceGaapCost API
@@ -94,7 +94,7 @@ func CreateQueryInstanceGaapCostRequest() (request *QueryInstanceGaapCostRequest
 	request = &QueryInstanceGaapCostRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "QueryInstanceGaapCost", "", "")
+	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "QueryInstanceGaapCost", "bssopenapi", "openAPI")
 	request.Method = requests.POST
 	return
 }

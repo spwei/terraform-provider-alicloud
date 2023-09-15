@@ -1,5 +1,5 @@
 ---
-subcategory: "DNS"
+subcategory: "Alidns"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_dns_group"
 sidebar_current: "docs-alicloud-resource-dns-group"
@@ -9,13 +9,13 @@ description: |-
 
 # alicloud\_dns\_group
 
--> **DEPRECATED:**  This resource  has been deprecated from version `1.84.0`. Please use new resource [alicloud_alidns_domain_group](https://www.terraform.io/docs/providers/alicloud/r/alidns_domain_group.html).
+-> **DEPRECATED:**  This resource  has been deprecated from version `1.84.0`. Please use new resource [alicloud_alidns_domain_group](https://www.terraform.io/docs/providers/alicloud/r/alidns_domain_group).
 
 Provides a DNS Group resource.
 
 ## Example Usage
 
-```
+```terraform
 # Add a new Domain group.
 resource "alicloud_dns_group" "group" {
   name = "testgroup"

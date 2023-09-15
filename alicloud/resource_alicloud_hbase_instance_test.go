@@ -70,30 +70,40 @@ func testSweepHBaseInstances(region string) error {
 		name := v.InstanceName
 		id := v.InstanceId
 		skip := true
-		for _, prefix := range prefixes {
-			if strings.HasPrefix(strings.ToLower(name), strings.ToLower(prefix)) {
-				skip = false
-				break
+		if !sweepAll() {
+			for _, prefix := range prefixes {
+				if strings.HasPrefix(strings.ToLower(name), strings.ToLower(prefix)) {
+					skip = false
+					break
+				}
+			}
+			// If a slb name is set by other service, it should be fetched by vswitch name and deleted.
+			if skip {
+				if need, err := vpcService.needSweepVpc(v.VpcId, ""); err == nil {
+					skip = !need
+				}
+
+			}
+
+			if skip {
+				log.Printf("[INFO] Skipping Hbase Instance: %s (%s)", name, id)
+				continue
 			}
 		}
-		// If a slb name is set by other service, it should be fetched by vswitch name and deleted.
-		if skip {
-			if need, err := vpcService.needSweepVpc(v.VpcId, ""); err == nil {
-				skip = !need
-			}
-
-		}
-
-		if skip {
-			log.Printf("[INFO] Skipping Hbase Instance: %s (%s)", name, id)
-			continue
-		}
-
 		log.Printf("[INFO] Deleting HBase Instance: %s (%s)", name, id)
-		req := hbase.CreateDeleteInstanceRequest()
-		req.ClusterId = id
+		req1 := hbase.CreateModifyClusterDeletionProtectionRequest()
+		req1.ClusterId = id
+		req1.Protection = requests.NewBoolean(false)
 		_, err := client.WithHbaseClient(func(hbaseClient *hbase.Client) (interface{}, error) {
-			return hbaseClient.DeleteInstance(req)
+			return hbaseClient.ModifyClusterDeletionProtection(req1)
+		})
+		if err != nil {
+			log.Printf("[ERROR] Failed to modify DeletionProtection for Hbase Instance (%s (%s)): %s", name, id, err)
+		}
+		req2 := hbase.CreateDeleteInstanceRequest()
+		req2.ClusterId = id
+		_, err = client.WithHbaseClient(func(hbaseClient *hbase.Client) (interface{}, error) {
+			return hbaseClient.DeleteInstance(req2)
 		})
 		if err != nil {
 			log.Printf("[ERROR] Failed to delete Hbase Instance (%s (%s)): %s", name, id, err)
@@ -115,7 +125,7 @@ variable "name" {
 	default = "%s"
 }
 data "alicloud_vpcs" "default" {
-	is_default = true
+	name_regex = "^default-NODELETING$"
 }
 data "alicloud_vswitches" "default" {
   vpc_id = data.alicloud_vpcs.default.ids.0
@@ -155,7 +165,6 @@ func TestAccAlicloudHBaseInstanceVpc(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckWithNoDefaultVpc(t)
 		},
 
 		IDRefreshName: resourceId,
@@ -166,35 +175,39 @@ func TestAccAlicloudHBaseInstanceVpc(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"name":                  "${var.name}",
+					"engine":                "hbaseue",
 					"engine_version":        "2.0",
-					"master_instance_type":  "hbase.sn1.large",
-					"core_instance_type":    "hbase.sn1.large",
-					"core_disk_type":        "cloud_efficiency",
+					"master_instance_type":  "hbase.sn2.2xlarge",
+					"core_instance_type":    "hbase.sn2.2xlarge",
+					"core_disk_type":        "cloud_ssd",
+					"vpc_id":                "${data.alicloud_vpcs.default.ids.0}",
 					"vswitch_id":            "${local.vswitch_id}",
 					"immediate_delete_flag": "true",
+					"ip_white":              "192.168.0.1",
+					"cold_storage_size":     "800",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"name":                     name,
-						"engine":                   "hbase",
+						"engine":                   "hbaseue",
 						"engine_version":           "2.0",
-						"core_instance_type":       "hbase.sn1.large",
-						"core_disk_type":           "cloud_efficiency",
+						"core_instance_type":       "hbase.sn2.2xlarge",
+						"core_disk_type":           "cloud_ssd",
 						"vswitch_id":               CHECKSET,
 						"immediate_delete_flag":    "true",
 						"core_instance_quantity":   "2",
-						"cold_storage_size":        "0",
+						"cold_storage_size":        "800",
 						"deletion_protection":      "true",
 						"zone_id":                  CHECKSET,
 						"master_instance_quantity": CHECKSET,
 						"maintain_start_time":      CHECKSET,
 						"maintain_end_time":        CHECKSET,
 						"pay_type":                 "PostPaid",
-						"ip_white":                 CHECKSET,
+						"ip_white":                 "192.168.0.1",
 						"security_groups.#":        "0",
-						"ui_proxy_conn_addrs.#":    "1",
-						"zk_conn_addrs.#":          "3",
-						"slb_conn_addrs.#":         "1",
+						"ui_proxy_conn_addrs.#":    CHECKSET,
+						"zk_conn_addrs.#":          CHECKSET,
+						"slb_conn_addrs.#":         CHECKSET,
 					}),
 				),
 			},
@@ -350,6 +363,88 @@ func TestAccAlicloudHBaseInstanceVpc(t *testing.T) {
 						"account":             "adminu",
 						"password":            "YourPassword@123u",
 						"cold_storage_size":   "900",
+					}),
+				),
+			},
+		},
+	})
+}
+
+func TestAccAlicloudHBaseInstance_VpcId(t *testing.T) {
+	var v map[string]interface{}
+	resourceId := "alicloud_hbase_instance.default"
+	ra := resourceAttrInit(resourceId, nil)
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
+		return &HBaseService{testAccProvider.Meta().(*connectivity.AliyunClient)}
+	}, "DescribeHBaseInstance")
+	rac := resourceAttrCheckInit(rc, ra)
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := acctest.RandIntRange(1000000, 9999999)
+	name := fmt.Sprintf("tf-testAcc%sVpc%d", defaultRegionToTest, rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlicloudHbaseBasicDependence)
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+
+		IDRefreshName: resourceId,
+
+		Providers:    testAccProviders,
+		CheckDestroy: rac.checkResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"name":                  "${var.name}",
+					"engine":                "hbaseue",
+					"engine_version":        "2.0",
+					"master_instance_type":  "hbase.sn1.2xlarge",
+					"core_instance_type":    "hbase.sn1.2xlarge",
+					"core_disk_type":        "cloud_ssd",
+					"vswitch_id":            "${local.vswitch_id}",
+					"immediate_delete_flag": "true",
+					"ip_white":              "192.168.0.1",
+					"cold_storage_size":     "800",
+					"vpc_id":                "${data.alicloud_vpcs.default.ids.0}",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"name":                     name,
+						"engine":                   "hbaseue",
+						"engine_version":           "2.0",
+						"core_instance_type":       "hbase.sn1.2xlarge",
+						"core_disk_type":           "cloud_ssd",
+						"vswitch_id":               CHECKSET,
+						"immediate_delete_flag":    "true",
+						"core_instance_quantity":   "2",
+						"cold_storage_size":        "800",
+						"deletion_protection":      "true",
+						"zone_id":                  CHECKSET,
+						"master_instance_quantity": CHECKSET,
+						"maintain_start_time":      CHECKSET,
+						"maintain_end_time":        CHECKSET,
+						"pay_type":                 "PostPaid",
+						"ip_white":                 "192.168.0.1",
+						"security_groups.#":        "0",
+						"ui_proxy_conn_addrs.#":    CHECKSET,
+						"zk_conn_addrs.#":          CHECKSET,
+						"slb_conn_addrs.#":         CHECKSET,
+						"vpc_id":                   CHECKSET,
+					}),
+				),
+			},
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"immediate_delete_flag"},
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"deletion_protection": "false",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"deletion_protection": "false",
 					}),
 				),
 			},

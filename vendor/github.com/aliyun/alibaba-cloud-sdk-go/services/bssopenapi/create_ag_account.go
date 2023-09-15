@@ -85,9 +85,9 @@ type CreateAgAccountRequest struct {
 // CreateAgAccountResponse is the response struct for api CreateAgAccount
 type CreateAgAccountResponse struct {
 	*responses.BaseResponse
-	RequestId     string        `json:"RequestId" xml:"RequestId"`
 	Code          string        `json:"Code" xml:"Code"`
 	Message       string        `json:"Message" xml:"Message"`
+	RequestId     string        `json:"RequestId" xml:"RequestId"`
 	Success       bool          `json:"Success" xml:"Success"`
 	AgRelationDto AgRelationDto `json:"AgRelationDto" xml:"AgRelationDto"`
 }
@@ -97,7 +97,7 @@ func CreateCreateAgAccountRequest() (request *CreateAgAccountRequest) {
 	request = &CreateAgAccountRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "CreateAgAccount", "", "")
+	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "CreateAgAccount", "bssopenapi", "openAPI")
 	request.Method = requests.POST
 	return
 }

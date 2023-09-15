@@ -17,9 +17,9 @@ package edas
 
 // SwimmingLaneGroup is a nested struct in edas response
 type SwimmingLaneGroup struct {
-	Id               int64            `json:"Id" xml:"Id"`
-	Name             string           `json:"Name" xml:"Name"`
 	NamespaceId      string           `json:"NamespaceId" xml:"NamespaceId"`
+	Name             string           `json:"Name" xml:"Name"`
+	Id               int64            `json:"Id" xml:"Id"`
 	EntryApplication EntryApplication `json:"EntryApplication" xml:"EntryApplication"`
 	ApplicationList  []Application    `json:"ApplicationList" xml:"ApplicationList"`
 }

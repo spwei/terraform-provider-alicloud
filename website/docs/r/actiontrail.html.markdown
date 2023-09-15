@@ -9,7 +9,7 @@ description: |-
 
 # alicloud\_actiontrail
 
--> **DEPRECATED:**  This resource has been renamed to [alicloud_actiontrail_trail](https://www.terraform.io/docs/providers/alicloud/r/actiontrail_trail.html) from version 1.95.0. 
+-> **DEPRECATED:**  This resource has been renamed to [alicloud_actiontrail_trail](https://www.terraform.io/docs/providers/alicloud/r/actiontrail_trail) from version 1.95.0.
 
 Provides a new resource to manage [Action Trail](https://www.alibabacloud.com/help/doc-detail/28804.htm).
 
@@ -17,7 +17,7 @@ Provides a new resource to manage [Action Trail](https://www.alibabacloud.com/he
 
 ## Example Usage
 
-```
+```terraform
 # Create a new action trail.
 resource "alicloud_actiontrail" "foo" {
   name            = "action-trail"
@@ -52,6 +52,6 @@ The following attributes are exported:
 
 Action trail can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_actiontrail.foo abc12345678
 ```

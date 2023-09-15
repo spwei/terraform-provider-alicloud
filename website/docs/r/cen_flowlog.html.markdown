@@ -21,23 +21,23 @@ For information about CEN flow log and how to use it, see [Manage CEN flowlog](h
 
 Basic Usage
 
-```
+```terraform
 # Create a cen flowlog resource and use it to publish a route entry pointing to an ECS.
 resource "alicloud_cen_instance" "default" {
-    name = "my-cen"
+  name = "my-cen"
 }
-resource "alicloud_log_project" "default"{
-    name = "sls-for-flowlog"
-    description = "create by terraform"
+resource "alicloud_log_project" "default" {
+  name        = "sls-for-flowlog"
+  description = "create by terraform"
 }
-resource "alicloud_log_store" "default"{
-    project = alicloud_log_project.default.name
-    name = "sls-for-flowlog"
-    retention_period = 3650
-    shard_count = 3
-    auto_split = true
-    max_split_shard_count = 60
-    append_meta = true
+resource "alicloud_log_store" "default" {
+  project               = alicloud_log_project.default.name
+  name                  = "sls-for-flowlog"
+  retention_period      = 3650
+  shard_count           = 3
+  auto_split            = true
+  max_split_shard_count = 60
+  append_meta           = true
 }
 
 resource "alicloud_cen_flowlog" "default" {
@@ -68,7 +68,7 @@ The following attributes are exported:
 
 CEN flowlog can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_cen_flowlog.default flowlog-tig1xxxxxx
 ```
 

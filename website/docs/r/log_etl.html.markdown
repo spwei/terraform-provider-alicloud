@@ -9,7 +9,7 @@ description: |-
 
 # alicloud\_log\_etl
 
-The data processing function of the log service is a hosted, highly available, and scalable data processing service, 
+The data transformation of the log service is a hosted, highly available, and scalable data processing service, 
 which is widely applicable to scenarios such as data regularization, enrichment, distribution, aggregation, and index reconstruction.
 [Refer to details](https://www.alibabacloud.com/help/zh/doc-detail/125384.htm).
 
@@ -19,76 +19,52 @@ which is widely applicable to scenarios such as data regularization, enrichment,
 
 Basic Usage
 
-```
-resource "alicloud_log_project" "example" {
-  name        = "tf-log"
-  description = "created by terraform"
-
+```terraform
+resource "random_integer" "default" {
+  max = 99999
+  min = 10000
 }
+
+resource "alicloud_log_project" "example" {
+  name        = "terraform-example-${random_integer.default.result}"
+  description = "terraform-example"
+}
+
 resource "alicloud_log_store" "example" {
   project               = alicloud_log_project.example.name
-  name                  = "tf-test-logstore"
+  name                  = "example-store"
   retention_period      = 3650
   shard_count           = 3
   auto_split            = true
   max_split_shard_count = 60
   append_meta           = true
 }
+
 resource "alicloud_log_store" "example2" {
   project               = alicloud_log_project.example.name
-  name                  = "tf-test-logstore-2"
+  name                  = "example-store2"
   retention_period      = 3650
   shard_count           = 3
   auto_split            = true
   max_split_shard_count = 60
   append_meta           = true
 }
+
 resource "alicloud_log_store" "example3" {
   project               = alicloud_log_project.example.name
-  name                  = "tf-test-logstore-3"
+  name                  = "example-store3"
   retention_period      = 3650
   shard_count           = 3
   auto_split            = true
   max_split_shard_count = 60
   append_meta           = true
 }
-resource "alicloud_log_etl" "example" {
-  etl_name          = "etl_name"
-  project           = alicloud_log_project.example.name
-  display_name      = "display_name"
-  description       = "etl_description"
-  access_key_id     = "access_key_id"
-  access_key_secret = "access_key_secret"
-  script            = "e_set('new','key')"
-  logstore          = alicloud_log_store.example.name
-  etl_sinks {
-    name              = "target_name"
-    access_key_id     = "example2_access_key_id"
-    access_key_secret = "example2_access_key_secret"
-    endpoint          = "cn-hangzhou.log.aliyuncs.com"
-    project           = alicloud_log_project.example.name
-    logstore          = alicloud_log_store.example2.name
-  }
-  etl_sinks {
-    name              = "target_name2"
-    access_key_id     = "example3_access_key_id"
-    access_key_secret = "example3_access_key_secret"
-    endpoint          = "cn-hangzhou.log.aliyuncs.com"
-    project           = alicloud_log_project.example.name
-    logstore          = alicloud_log_store.example3.name
-  }
 
-}
-
-```
-Stop the task in progress
-```
 resource "alicloud_log_etl" "example" {
-  status            = STOPPED
-  etl_name          = "etl_name"
+  etl_name          = "terraform-example"
   project           = alicloud_log_project.example.name
-  display_name      = "display_name"
-  description       = "etl_description"
+  display_name      = "terraform-example"
+  description       = "terraform-example"
   access_key_id     = "access_key_id"
   access_key_secret = "access_key_secret"
   script            = "e_set('new','key')"
@@ -110,38 +86,6 @@ resource "alicloud_log_etl" "example" {
     logstore          = alicloud_log_store.example3.name
   }
 }
-
-```
-ReStart the stopped task
-```
-resource "alicloud_log_etl" "example" {
-  status            = RUNNING
-  etl_name          = "etl_name"
-  project           = alicloud_log_project.example.name
-  display_name      = "display_name"
-  description       = "etl_description"
-  access_key_id     = "access_key_id"
-  access_key_secret = "access_key_secret"
-  script            = "e_set('new','key')"
-  logstore          = alicloud_log_store.example.name
-  etl_sinks {
-    name              = "target_name"
-    access_key_id     = "example2_access_key_id"
-    access_key_secret = "example2_access_key_secret"
-    endpoint          = "cn-hangzhou.log.aliyuncs.com"
-    project           = alicloud_log_project.example.name
-    logstore          = alicloud_log_store.example2.name
-  }
-  etl_sinks {
-    name              = "target_name2"
-    access_key_id     = "example3_access_key_id"
-    access_key_secret = "example3_access_key_secret"
-    endpoint          = "cn-hangzhou.log.aliyuncs.com"
-    project           = alicloud_log_project.example.name
-    logstore          = alicloud_log_store.example3.name
-  }
-}
-
 ```
 
 ## Argument Reference
@@ -164,15 +108,15 @@ The following arguments are supported:
 * `kms_encrypted_access_key_secret` - (Optional) An KMS encrypts access key secret used to a log etl job. If the `access_key_secret` is filled in, this field will be ignored.
 * `kms_encryption_access_key_secret_context` - (Optional) An KMS encryption context used to decrypt `kms_encrypted_access_key_secret` before creating or updating an instance with `kms_encrypted_access_key_secret`. See [Encryption Context](https://www.alibabacloud.com/help/doc-detail/42975.htm). It is valid when `kms_encrypted_password` is set. When it is changed, the instance will reboot to make the change take effect.
 
-* `from_time` - (Optional) The start time of the processing job, the default starts from the current time.
-* `to_time` - (Optional) Deadline of processing job, the default value is None.
+* `from_time` - (Optional) The start time of the processing job, if not set the value is 0, indicates to start processing from the oldest data.
+* `to_time` - (Optional) Deadline of processing job, if not set the value is 0, indicates that new data will be processed continuously.
 * `script` - (Required) Processing operation grammar.
-* `version` - (Optional) Log etl job version. the default value is 2.
+* `version` - (Optional) Log etl job version. the default value is `2`.
 * `logstore` - (Required) The source logstore of the processing job.
 * `parameters` - (Optional) Advanced parameter configuration of processing operations.
-* `role_arn` - (Optional) Sts role info.
+* `role_arn` - (Optional) Sts role info under source logstore. `role_arn` and `(access_key_id, access_key_secret)` fill in at most one. If you do not fill in both, then you must fill in `(kms_encrypted_access_key_id, kms_encrypted_access_key_secret, kms_encryption_access_key_id_context, kms_encryption_access_key_secret_context)` to use KMS to get the key pair.
 * `etl_sinks` - (Required) Target logstore configuration for delivery after data processing.
-    * `access_key_id` - (Optional,Sensitive) Dekms_encryption_access_key_id_contextlivery target logstore access key id.
+    * `access_key_id` - (Optional,Sensitive) Delivery target logstore access key id.
     * `kms_encrypted_access_key_id` - (Optional) An KMS encrypts access key id used to a log etl job. If the `access_key_id` is filled in, this field will be ignored.
     * `access_key_secret`- (Optional,Sensitive) Delivery target logstore access key secret.
     * `kms_encrypted_access_key_secret` - (Optional) An KMS encrypts access key secret used to a log etl job. If the `access_key_secret` is filled in, this field will be ignored.
@@ -180,8 +124,10 @@ The following arguments are supported:
     * `name` - (Required) Delivery target name.
     * `project` - (Required) The project where the target logstore is delivered.
     * `logstore` - (Required) Delivery target logstore.
-    * `role_arn` - (Required) Sts role info.
+    * `role_arn` - (Optional) Sts role info under delivery target logstore. `role_arn` and `(access_key_id, access_key_secret)` fill in at most one. If you do not fill in both, then you must fill in `(kms_encrypted_access_key_id, kms_encrypted_access_key_secret, kms_encryption_access_key_id_context, kms_encryption_access_key_secret_context)` to use KMS to get the key pair.
     * `type` - (Optional)  ETL sinks type, the default value is AliyunLOG.
+    
+-> **Note:** `from_time` and `to_time` no modification allowed after successful creation.
 
 ## Attributes Reference
 
@@ -202,6 +148,6 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/d
 
 Log etl can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_log_etl.example tf-log-project:tf-log-etl-name
 ```

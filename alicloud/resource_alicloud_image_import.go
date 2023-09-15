@@ -57,21 +57,7 @@ func resourceAliCloudImageImport() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-				Default:  "Ubuntu",
-				ValidateFunc: validation.StringInSlice([]string{
-					"CentOS",
-					"Ubuntu",
-					"SUSE",
-					"OpenSUSE",
-					"Debian",
-					"CoreOS",
-					"Windows Server 2003",
-					"Windows Server 2008",
-					"Windows Server 2012",
-					"Windows 7",
-					"Customized Linux",
-					"Others Linux",
-				}, false),
+				Computed: true,
 			},
 			"os_type": {
 				Type:     schema.TypeString,
@@ -169,7 +155,7 @@ func resourceAliCloudImageImportCreate(d *schema.ResourceData, meta interface{})
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	resp, _ := raw.(*ecs.ImportImageResponse)
 	d.SetId(resp.ImageId)
-	stateConf := BuildStateConf([]string{"Waiting"}, []string{"Available"}, d.Timeout(schema.TimeoutCreate), 1*time.Minute, ecsService.ImageStateRefreshFunc(d.Id(), []string{"CreateFailed", "UnAvailable"}))
+	stateConf := BuildStateConf([]string{}, []string{"Available"}, d.Timeout(schema.TimeoutCreate), 1*time.Minute, ecsService.ImageStateRefreshFunc(d.Id(), []string{"CreateFailed", "UnAvailable"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return WrapErrorf(err, IdMsg, d.Id())
 	}

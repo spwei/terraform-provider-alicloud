@@ -80,24 +80,26 @@ func resourceAlicloudCenInstanceAttachmentCreate(d *schema.ResourceData, meta in
 	request.ChildInstanceType = d.Get("child_instance_type").(string)
 	request.CenId = d.Get("instance_id").(string)
 	wait := incrementalWait(3*time.Second, 5*time.Second)
-	err := resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
+	err := resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutCreate)), func() *resource.RetryError {
 		raw, err := client.WithCbnClient(func(cbnClient *cbn.Client) (interface{}, error) {
 			return cbnClient.AttachCenChildInstance(request)
 		})
 		if err != nil {
-			if IsExpectedErrors(err, []string{"InvalidOperation.CenInstanceStatus", "InvalidOperation.ChildInstanceStatus", "Operation.Blocking", "OperationFailed.InvalidVpcStatus", "Throttling.User"}) {
+			if IsExpectedErrors(err, []string{"Operation.Blocking", "OperationFailed.InvalidVpcStatus", "InvalidOperation.CenInstanceStatus", "InvalidOperation.ChildInstanceStatus", "IncorrectStatus.VpcSwitch", "IncorrectStatus.VpcRouteTable"}) || NeedRetry(err) {
 				wait()
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
 		}
 		addDebug(request.GetActionName(), raw)
-		d.SetId(fmt.Sprintf("%v:%v:%v:%v", request.CenId, request.ChildInstanceId, request.ChildInstanceType, request.ChildInstanceRegionId))
 		return nil
 	})
 	if err != nil {
 		return WrapErrorf(err, DefaultErrorMsg, "alicloud_cen_instance_attachment", request.GetActionName(), AlibabaCloudSdkGoERROR)
 	}
+
+	d.SetId(fmt.Sprintf("%v:%v:%v:%v", request.CenId, request.ChildInstanceId, request.ChildInstanceType, request.ChildInstanceRegionId))
+
 	stateConf := BuildStateConf([]string{}, []string{"Attached"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, cbnService.CenInstanceAttachmentStateRefreshFunc(d.Id(), []string{}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return WrapErrorf(err, IdMsg, d.Id())
@@ -105,6 +107,7 @@ func resourceAlicloudCenInstanceAttachmentCreate(d *schema.ResourceData, meta in
 
 	return resourceAlicloudCenInstanceAttachmentRead(d, meta)
 }
+
 func resourceAlicloudCenInstanceAttachmentRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AliyunClient)
 	cbnService := CbnService{client}
@@ -112,6 +115,7 @@ func resourceAlicloudCenInstanceAttachmentRead(d *schema.ResourceData, meta inte
 		childType, _ := GetCenChildInstanceType(d.Get("child_instance_id").(string))
 		d.SetId(fmt.Sprintf("%v:%v:%v", d.Id(), childType, d.Get("child_instance_region_id").(string)))
 	}
+
 	object, err := cbnService.DescribeCenInstanceAttachment(d.Id())
 	if err != nil {
 		if NotFoundError(err) {
@@ -121,51 +125,61 @@ func resourceAlicloudCenInstanceAttachmentRead(d *schema.ResourceData, meta inte
 		}
 		return WrapError(err)
 	}
+
 	parts, err := ParseResourceId(d.Id(), 4)
 	if err != nil {
 		return WrapError(err)
 	}
+
 	d.Set("child_instance_id", parts[1])
 	d.Set("child_instance_region_id", parts[3])
 	d.Set("child_instance_type", parts[2])
 	d.Set("instance_id", parts[0])
 	d.Set("child_instance_owner_id", object.ChildInstanceOwnerId)
 	d.Set("status", object.Status)
+
 	return nil
 }
+
 func resourceAlicloudCenInstanceAttachmentUpdate(d *schema.ResourceData, meta interface{}) error {
 	log.Println(fmt.Sprintf("[WARNING] The resouce has not update operation."))
 	return resourceAlicloudCenInstanceAttachmentRead(d, meta)
 }
+
 func resourceAlicloudCenInstanceAttachmentDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AliyunClient)
 	if len(strings.Split(d.Id(), ":")) == 2 {
 		childType, _ := GetCenChildInstanceType(d.Get("child_instance_id").(string))
 		d.SetId(fmt.Sprintf("%v:%v:%v", d.Id(), childType, d.Get("child_instance_region_id").(string)))
 	}
+
 	parts, err := ParseResourceId(d.Id(), 4)
 	if err != nil {
 		return WrapError(err)
 	}
+
 	cbnService := CbnService{client}
 	request := cbn.CreateDetachCenChildInstanceRequest()
 	request.ChildInstanceId = parts[1]
 	request.ChildInstanceRegionId = parts[3]
 	request.ChildInstanceType = parts[2]
 	request.CenId = parts[0]
+
 	if v, ok := d.GetOk("cen_owner_id"); ok {
 		request.CenOwnerId = requests.NewInteger(v.(int))
 	}
+
 	if v, ok := d.GetOk("child_instance_owner_id"); ok {
 		request.ChildInstanceOwnerId = requests.NewInteger(v.(int))
 	}
+
 	wait := incrementalWait(3*time.Second, 5*time.Second)
-	err = resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
+	err = resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutDelete)), func() *resource.RetryError {
 		raw, err := client.WithCbnClient(func(cbnClient *cbn.Client) (interface{}, error) {
 			return cbnClient.DetachCenChildInstance(request)
 		})
 		if err != nil {
-			if IsExpectedErrors(err, []string{"InvalidOperation.CenInstanceStatus", "Operation.Blocking"}) {
+			if IsExpectedErrors(err, []string{"Operation.Blocking", "InvalidOperation.CenInstanceStatus", "InstanceStatus.NotSupport", "IncorrectStatus.VpcRouteTable"}) || NeedRetry(err) {
 				wait()
 				return resource.RetryableError(err)
 			}
@@ -174,15 +188,18 @@ func resourceAlicloudCenInstanceAttachmentDelete(d *schema.ResourceData, meta in
 		addDebug(request.GetActionName(), raw)
 		return nil
 	})
+
 	if err != nil {
 		if IsExpectedErrors(err, []string{"Bid.NotFound", "ParameterInstanceId"}) {
 			return nil
 		}
 		return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabaCloudSdkGoERROR)
 	}
+
 	stateConf := BuildStateConf([]string{}, []string{}, d.Timeout(schema.TimeoutDelete), 5*time.Second, cbnService.CenInstanceAttachmentStateRefreshFunc(d.Id(), []string{}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return WrapErrorf(err, IdMsg, d.Id())
 	}
+
 	return nil
 }

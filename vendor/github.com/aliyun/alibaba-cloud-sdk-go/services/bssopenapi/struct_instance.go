@@ -17,8 +17,8 @@ package bssopenapi
 
 // Instance is a nested struct in bssopenapi response
 type Instance struct {
-	Region              string   `json:"Region" xml:"Region"`
 	ExpectedReleaseTime string   `json:"ExpectedReleaseTime" xml:"ExpectedReleaseTime"`
+	Region              string   `json:"Region" xml:"Region"`
 	PackageType         string   `json:"PackageType" xml:"PackageType"`
 	DeductType          string   `json:"DeductType" xml:"DeductType"`
 	CreateTime          string   `json:"CreateTime" xml:"CreateTime"`
@@ -30,15 +30,16 @@ type Instance struct {
 	TotalAmountUnit     string   `json:"TotalAmountUnit" xml:"TotalAmountUnit"`
 	SubscriptionType    string   `json:"SubscriptionType" xml:"SubscriptionType"`
 	RemainingAmountUnit string   `json:"RemainingAmountUnit" xml:"RemainingAmountUnit"`
+	CommodityCode       string   `json:"CommodityCode" xml:"CommodityCode"`
 	StopTime            string   `json:"StopTime" xml:"StopTime"`
 	Seller              string   `json:"Seller" xml:"Seller"`
 	Remark              string   `json:"Remark" xml:"Remark"`
 	ProductType         string   `json:"ProductType" xml:"ProductType"`
-	ProductCode         string   `json:"ProductCode" xml:"ProductCode"`
-	RenewalDuration     int      `json:"RenewalDuration" xml:"RenewalDuration"`
 	RenewalDurationUnit string   `json:"RenewalDurationUnit" xml:"RenewalDurationUnit"`
-	RemainingAmount     string   `json:"RemainingAmount" xml:"RemainingAmount"`
+	RenewalDuration     int      `json:"RenewalDuration" xml:"RenewalDuration"`
+	ProductCode         string   `json:"ProductCode" xml:"ProductCode"`
 	EffectiveTime       string   `json:"EffectiveTime" xml:"EffectiveTime"`
+	RemainingAmount     string   `json:"RemainingAmount" xml:"RemainingAmount"`
 	ExpiryTime          string   `json:"ExpiryTime" xml:"ExpiryTime"`
 	EndTime             string   `json:"EndTime" xml:"EndTime"`
 	SellerId            int64    `json:"SellerId" xml:"SellerId"`

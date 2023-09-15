@@ -1,5 +1,5 @@
 ---
-subcategory: "Server Load Balancer (SLB)"
+subcategory: "Classic Load Balancer (SLB)"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_slb_attachment"
 sidebar_current: "docs-alicloud-resource-slb-attachment"
@@ -9,13 +9,13 @@ description: |-
 
 # alicloud\_slb\_attachment
 
-~> **Warnings:** This resource has been deprecated and please use [alicloud_backend_serverhttps](//www.terraform.io/docs/providers/alicloud/r/slb_backend_server.html).
+-> **DEPRECATED:** This resource has been deprecated from v1.153.0 and using [alicloud_backend_server](https://www.terraform.io/docs/providers/alicloud/r/slb_backend_server.html) instead.
 
 Add a group of backend servers (ECS instance) to the Server Load Balancer or remove them from it.
 
 ## Example Usage
 
-```
+```terraform
 variable "name" {
   default = "slbattachmenttest"
 }
@@ -43,10 +43,10 @@ resource "alicloud_vpc" "default" {
 }
 
 resource "alicloud_vswitch" "default" {
-  vpc_id            = alicloud_vpc.default.id
-  cidr_block        = "172.16.0.0/16"
-  zone_id           = data.alicloud_zones.default.zones[0].id
-  vswitch_name      = var.name
+  vpc_id       = alicloud_vpc.default.id
+  cidr_block   = "172.16.0.0/16"
+  zone_id      = data.alicloud_zones.default.zones[0].id
+  vswitch_name = var.name
 }
 
 resource "alicloud_security_group" "default" {
@@ -65,13 +65,13 @@ resource "alicloud_instance" "default" {
   vswitch_id                 = alicloud_vswitch.default.id
 }
 
-resource "alicloud_slb" "default" {
-  name       = var.name
-  vswitch_id = alicloud_vswitch.default.id
+resource "alicloud_slb_load_balancer" "default" {
+  load_balancer_name = var.name
+  vswitch_id         = alicloud_vswitch.default.id
 }
 
 resource "alicloud_slb_attachment" "default" {
-  load_balancer_id = alicloud_slb.default.id
+  load_balancer_id = alicloud_slb_load_balancer.default.id
   instance_ids     = [alicloud_instance.default.id]
   weight           = 90
 }
@@ -102,6 +102,6 @@ The following attributes are exported:
 
 Load balancer attachment can be imported using the id or load balancer id, e.g.
 
-```
+```shell
 $ terraform import alicloud_slb_attachment.example lb-abc123456
 ```

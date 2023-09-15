@@ -78,11 +78,11 @@ type QueryResellerAvailableQuotaRequest struct {
 // QueryResellerAvailableQuotaResponse is the response struct for api QueryResellerAvailableQuota
 type QueryResellerAvailableQuotaResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
 	Code      string `json:"Code" xml:"Code"`
 	Message   string `json:"Message" xml:"Message"`
-	Success   bool   `json:"Success" xml:"Success"`
 	Data      string `json:"Data" xml:"Data"`
+	RequestId string `json:"RequestId" xml:"RequestId"`
+	Success   bool   `json:"Success" xml:"Success"`
 }
 
 // CreateQueryResellerAvailableQuotaRequest creates a request to invoke QueryResellerAvailableQuota API
@@ -90,7 +90,7 @@ func CreateQueryResellerAvailableQuotaRequest() (request *QueryResellerAvailable
 	request = &QueryResellerAvailableQuotaRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "QueryResellerAvailableQuota", "", "")
+	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "QueryResellerAvailableQuota", "bssopenapi", "openAPI")
 	request.Method = requests.POST
 	return
 }

@@ -82,10 +82,10 @@ type DescribeDBInstanceSSLRequest struct {
 // DescribeDBInstanceSSLResponse is the response struct for api DescribeDBInstanceSSL
 type DescribeDBInstanceSSLResponse struct {
 	*responses.BaseResponse
-	RequestId      string `json:"RequestId" xml:"RequestId"`
 	SSLExpiredTime string `json:"SSLExpiredTime" xml:"SSLExpiredTime"`
-	CertCommonName string `json:"CertCommonName" xml:"CertCommonName"`
 	SSLStatus      string `json:"SSLStatus" xml:"SSLStatus"`
+	RequestId      string `json:"RequestId" xml:"RequestId"`
+	CertCommonName string `json:"CertCommonName" xml:"CertCommonName"`
 }
 
 // CreateDescribeDBInstanceSSLRequest creates a request to invoke DescribeDBInstanceSSL API
@@ -93,7 +93,7 @@ func CreateDescribeDBInstanceSSLRequest() (request *DescribeDBInstanceSSLRequest
 	request = &DescribeDBInstanceSSLRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("Dds", "2015-12-01", "DescribeDBInstanceSSL", "Dds", "openAPI")
+	request.InitWithApiInfo("Dds", "2015-12-01", "DescribeDBInstanceSSL", "dds", "openAPI")
 	request.Method = requests.POST
 	return
 }

@@ -5,7 +5,6 @@ import (
 	"log"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/PaesslerAG/jsonpath"
 	util "github.com/alibabacloud-go/tea-utils/service"
@@ -63,24 +62,23 @@ func testSweepPvtzZones(region string) error {
 		}
 		request["PageNumber"] = request["PageNumber"].(int) + 1
 	}
-	sweeped := false
-
 	for _, v := range zones {
 		v := v.(map[string]interface{})
 		name := v["ZoneName"].(string)
 		id := v["ZoneId"].(string)
 		skip := true
-		for _, prefix := range prefixes {
-			if strings.HasPrefix(strings.ToLower(name), strings.ToLower(prefix)) {
-				skip = false
-				break
+		if !sweepAll() {
+			for _, prefix := range prefixes {
+				if strings.HasPrefix(strings.ToLower(name), strings.ToLower(prefix)) {
+					skip = false
+					break
+				}
+			}
+			if skip {
+				log.Printf("[INFO] Skipping Private Zone: %s (%s)", name, id)
+				continue
 			}
 		}
-		if skip {
-			log.Printf("[INFO] Skipping Private Zone: %s (%s)", name, id)
-			continue
-		}
-		sweeped = true
 		log.Printf("[INFO] Unbinding VPC from Private Zone: %s (%s)", name, id)
 		action := "BindZoneVpc"
 		request := make(map[string]interface{})
@@ -101,9 +99,6 @@ func testSweepPvtzZones(region string) error {
 		if err != nil {
 			log.Printf("[ERROR] Failed to delete Private Zone (%s (%s)): %s", name, id, err)
 		}
-	}
-	if sweeped {
-		time.Sleep(5 * time.Second)
 	}
 	return nil
 }
@@ -278,6 +273,155 @@ func TestAccAlicloudPvtzZone_multi(t *testing.T) {
 		},
 	})
 }
+
+func TestAccAlicloudPvtzZone_syncTask(t *testing.T) {
+	var v map[string]interface{}
+	resourceId := "alicloud_pvtz_zone.default"
+	ra := resourceAttrInit(resourceId, pvtzZoneBasicMap)
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
+		return &PvtzService{testAccProvider.Meta().(*connectivity.AliyunClient)}
+	}, "DescribePvtzZone")
+	rac := resourceAttrCheckInit(rc, ra)
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := acctest.RandIntRange(1000000, 9999999)
+	name := fmt.Sprintf("tf-testacc%d.test.com", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourcePvtzZoneConfigDependence)
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
+		CheckDestroy:  rac.checkResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"zone_name":         name,
+					"resource_group_id": "${data.alicloud_resource_manager_resource_groups.default.ids.0}",
+					"sync_status":       "OFF",
+					"user_info": []map[string]interface{}{
+						{
+							"user_id":    "${data.alicloud_resource_manager_resource_groups.default.groups.0.account_id}",
+							"region_ids": []string{"cn-beijing", "cn-hangzhou"},
+						},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"zone_name":         name,
+						"proxy_pattern":     "ZONE",
+						"resource_group_id": CHECKSET,
+						"user_info.#":       "1",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"sync_status": "OFF",
+					"user_info": []map[string]interface{}{
+						{
+							"user_id":    "${data.alicloud_resource_manager_resource_groups.default.groups.0.account_id}",
+							"region_ids": []string{"cn-beijing", "cn-hangzhou", "cn-chengdu"},
+						},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"user_info.#": "1",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"sync_status": "OFF",
+					"user_info": []map[string]interface{}{
+						{
+							"user_id":    "${data.alicloud_resource_manager_resource_groups.default.groups.0.account_id}",
+							"region_ids": []string{"cn-beijing", "cn-hangzhou"},
+						},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"user_info.#": "1",
+					}),
+				),
+			},
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"resource_group_id"},
+			},
+		},
+	})
+}
+
+func TestAccAlicloudPvtzZone_syncTask1(t *testing.T) {
+	var v map[string]interface{}
+	resourceId := "alicloud_pvtz_zone.default"
+	ra := resourceAttrInit(resourceId, pvtzZoneBasicMap)
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
+		return &PvtzService{testAccProvider.Meta().(*connectivity.AliyunClient)}
+	}, "DescribePvtzZone")
+	rac := resourceAttrCheckInit(rc, ra)
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := acctest.RandIntRange(1000000, 9999999)
+	name := fmt.Sprintf("tf-testacc%d.test.com", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourcePvtzZoneConfigDependence)
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
+		CheckDestroy:  rac.checkResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"zone_name":         name,
+					"resource_group_id": "${data.alicloud_resource_manager_resource_groups.default.ids.0}",
+					"sync_status":       "OFF",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"zone_name":         name,
+						"proxy_pattern":     "ZONE",
+						"resource_group_id": CHECKSET,
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"sync_status": "ON",
+					"user_info": []map[string]interface{}{
+						{
+							"user_id":    "${data.alicloud_resource_manager_resource_groups.default.groups.0.account_id}",
+							"region_ids": []string{"cn-beijing", "cn-hangzhou", "cn-chengdu"},
+						},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"user_info.#": "1",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"sync_status": "OFF",
+					"user_info":   REMOVEKEY,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"sync_status": "OFF",
+					}),
+				),
+			},
+		},
+	})
+}
+
 func resourcePvtzZoneConfigDependence(name string) string {
 	return fmt.Sprintf(`
 	data "alicloud_resource_manager_resource_groups" "default" {

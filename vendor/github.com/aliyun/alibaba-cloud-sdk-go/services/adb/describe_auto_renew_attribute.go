@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeAutoRenewAttribute invokes the adb.DescribeAutoRenewAttribute API synchronously
-// api document: https://help.aliyun.com/api/adb/describeautorenewattribute.html
 func (client *Client) DescribeAutoRenewAttribute(request *DescribeAutoRenewAttributeRequest) (response *DescribeAutoRenewAttributeResponse, err error) {
 	response = CreateDescribeAutoRenewAttributeResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeAutoRenewAttribute(request *DescribeAutoRenewAttri
 }
 
 // DescribeAutoRenewAttributeWithChan invokes the adb.DescribeAutoRenewAttribute API asynchronously
-// api document: https://help.aliyun.com/api/adb/describeautorenewattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeAutoRenewAttributeWithChan(request *DescribeAutoRenewAttributeRequest) (<-chan *DescribeAutoRenewAttributeResponse, <-chan error) {
 	responseChan := make(chan *DescribeAutoRenewAttributeResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeAutoRenewAttributeWithChan(request *DescribeAutoRe
 }
 
 // DescribeAutoRenewAttributeWithCallback invokes the adb.DescribeAutoRenewAttribute API asynchronously
-// api document: https://help.aliyun.com/api/adb/describeautorenewattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeAutoRenewAttributeWithCallback(request *DescribeAutoRenewAttributeRequest, callback func(response *DescribeAutoRenewAttributeResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -89,10 +84,10 @@ type DescribeAutoRenewAttributeRequest struct {
 // DescribeAutoRenewAttributeResponse is the response struct for api DescribeAutoRenewAttribute
 type DescribeAutoRenewAttributeResponse struct {
 	*responses.BaseResponse
-	RequestId        string                            `json:"RequestId" xml:"RequestId"`
-	PageNumber       int                               `json:"PageNumber" xml:"PageNumber"`
 	TotalRecordCount int                               `json:"TotalRecordCount" xml:"TotalRecordCount"`
 	PageRecordCount  int                               `json:"PageRecordCount" xml:"PageRecordCount"`
+	RequestId        string                            `json:"RequestId" xml:"RequestId"`
+	PageNumber       int                               `json:"PageNumber" xml:"PageNumber"`
 	Items            ItemsInDescribeAutoRenewAttribute `json:"Items" xml:"Items"`
 }
 

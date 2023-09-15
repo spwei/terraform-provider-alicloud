@@ -80,8 +80,8 @@ type AttachSceneDefenseObjectRequest struct {
 // AttachSceneDefenseObjectResponse is the response struct for api AttachSceneDefenseObject
 type AttachSceneDefenseObjectResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
 	Success   bool   `json:"Success" xml:"Success"`
+	RequestId string `json:"RequestId" xml:"RequestId"`
 }
 
 // CreateAttachSceneDefenseObjectRequest creates a request to invoke AttachSceneDefenseObject API

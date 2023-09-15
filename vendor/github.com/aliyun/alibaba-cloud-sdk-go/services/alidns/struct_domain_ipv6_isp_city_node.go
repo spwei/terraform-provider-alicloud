@@ -17,11 +17,12 @@ package alidns
 
 // DomainIpv6IspCityNode is a nested struct in alidns response
 type DomainIpv6IspCityNode struct {
-	IspName         string `json:"IspName" xml:"IspName"`
-	IspCode         string `json:"IspCode" xml:"IspCode"`
-	CityName        string `json:"CityName" xml:"CityName"`
-	CityCode        string `json:"CityCode" xml:"CityCode"`
-	DefaultSelected bool   `json:"DefaultSelected" xml:"DefaultSelected"`
-	GroupType       string `json:"GroupType" xml:"GroupType"`
-	GroupName       string `json:"GroupName" xml:"GroupName"`
+	CityCode        string                                    `json:"CityCode" xml:"CityCode"`
+	GroupName       string                                    `json:"GroupName" xml:"GroupName"`
+	IspCode         string                                    `json:"IspCode" xml:"IspCode"`
+	CityName        string                                    `json:"CityName" xml:"CityName"`
+	IspName         string                                    `json:"IspName" xml:"IspName"`
+	GroupType       string                                    `json:"GroupType" xml:"GroupType"`
+	DefaultSelected bool                                      `json:"DefaultSelected" xml:"DefaultSelected"`
+	Ips             IpsInDescribeDnsGtmMonitorAvailableConfig `json:"Ips" xml:"Ips"`
 }

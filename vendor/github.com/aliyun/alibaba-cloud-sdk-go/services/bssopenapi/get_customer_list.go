@@ -76,11 +76,11 @@ type GetCustomerListRequest struct {
 // GetCustomerListResponse is the response struct for api GetCustomerList
 type GetCustomerListResponse struct {
 	*responses.BaseResponse
-	RequestId string                `json:"RequestId" xml:"RequestId"`
-	Success   bool                  `json:"Success" xml:"Success"`
-	Code      string                `json:"Code" xml:"Code"`
-	Message   string                `json:"Message" xml:"Message"`
-	Data      DataInGetCustomerList `json:"Data" xml:"Data"`
+	Code      string `json:"Code" xml:"Code"`
+	Message   string `json:"Message" xml:"Message"`
+	RequestId string `json:"RequestId" xml:"RequestId"`
+	Success   bool   `json:"Success" xml:"Success"`
+	Data      Data   `json:"Data" xml:"Data"`
 }
 
 // CreateGetCustomerListRequest creates a request to invoke GetCustomerList API
@@ -88,7 +88,7 @@ func CreateGetCustomerListRequest() (request *GetCustomerListRequest) {
 	request = &GetCustomerListRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "GetCustomerList", "", "")
+	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "GetCustomerList", "bssopenapi", "openAPI")
 	request.Method = requests.POST
 	return
 }

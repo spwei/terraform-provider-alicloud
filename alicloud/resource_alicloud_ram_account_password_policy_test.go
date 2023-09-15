@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
-func TestAccAlicloudRamAccountPasswordPolicy_basic(t *testing.T) {
+func TestAccAlicloudRAMAccountPasswordPolicy_basic(t *testing.T) {
 	var v *ram.GetPasswordPolicyResponse
 
 	resourceId := "alicloud_ram_account_password_policy.default"
@@ -252,7 +252,7 @@ func testAccCheckRamAccountPasswordPolicyDestroy(s *terraform.State) error {
 			return WrapError(err)
 		}
 
-		var expectedPasswordPolicyDefault = ram.PasswordPolicyInGetPasswordPolicy{
+		var expectedPasswordPolicyDefault = ram.PasswordPolicy{
 			MinimumPasswordLength:      12,
 			RequireLowercaseCharacters: true,
 			RequireUppercaseCharacters: true,

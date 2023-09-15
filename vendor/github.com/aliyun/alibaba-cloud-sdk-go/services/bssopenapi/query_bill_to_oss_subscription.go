@@ -76,11 +76,11 @@ type QueryBillToOSSSubscriptionRequest struct {
 // QueryBillToOSSSubscriptionResponse is the response struct for api QueryBillToOSSSubscription
 type QueryBillToOSSSubscriptionResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
-	Success   bool   `json:"Success" xml:"Success"`
-	Code      string `json:"Code" xml:"Code"`
-	Message   string `json:"Message" xml:"Message"`
-	Data      Data   `json:"Data" xml:"Data"`
+	Code      string                           `json:"Code" xml:"Code"`
+	Message   string                           `json:"Message" xml:"Message"`
+	RequestId string                           `json:"RequestId" xml:"RequestId"`
+	Success   bool                             `json:"Success" xml:"Success"`
+	Data      DataInQueryBillToOSSSubscription `json:"Data" xml:"Data"`
 }
 
 // CreateQueryBillToOSSSubscriptionRequest creates a request to invoke QueryBillToOSSSubscription API
@@ -88,7 +88,7 @@ func CreateQueryBillToOSSSubscriptionRequest() (request *QueryBillToOSSSubscript
 	request = &QueryBillToOSSSubscriptionRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "QueryBillToOSSSubscription", "", "")
+	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "QueryBillToOSSSubscription", "bssopenapi", "openAPI")
 	request.Method = requests.POST
 	return
 }

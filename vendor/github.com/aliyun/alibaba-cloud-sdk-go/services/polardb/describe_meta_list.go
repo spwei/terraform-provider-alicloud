@@ -87,11 +87,12 @@ type DescribeMetaListRequest struct {
 // DescribeMetaListResponse is the response struct for api DescribeMetaList
 type DescribeMetaListResponse struct {
 	*responses.BaseResponse
-	RequestId        string     `json:"RequestId" xml:"RequestId"`
-	TotalRecordCount string     `json:"TotalRecordCount" xml:"TotalRecordCount"`
 	TotalPageCount   string     `json:"TotalPageCount" xml:"TotalPageCount"`
+	TotalRecordCount string     `json:"TotalRecordCount" xml:"TotalRecordCount"`
 	PageSize         string     `json:"PageSize" xml:"PageSize"`
+	RequestId        string     `json:"RequestId" xml:"RequestId"`
 	PageNumber       string     `json:"PageNumber" xml:"PageNumber"`
+	DBClusterId      string     `json:"DBClusterId" xml:"DBClusterId"`
 	Items            []MetaItem `json:"Items" xml:"Items"`
 }
 

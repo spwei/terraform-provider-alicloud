@@ -1,5 +1,5 @@
 ---
-subcategory: "Message Notification Service (MNS)"
+subcategory: "Message Service"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_mns_service"
 sidebar_current: "docs-alicloud-datasource-mns-service"
@@ -15,11 +15,13 @@ For information about MNS and how to use it, see [What is MNS](https://www.aliba
 
 -> **NOTE:** Available in v1.118.0+
 
+-> **NOTE:** The MNS service is not support in the international site.
+
 ## Example Usage
 
 ```terraform
 data "alicloud_mns_service" "open" {
-	enable = "On"
+  enable = "On"
 }
 ```
 

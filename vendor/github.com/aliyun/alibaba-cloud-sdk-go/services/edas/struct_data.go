@@ -17,59 +17,51 @@ package edas
 
 // Data is a nested struct in edas response
 type Data struct {
-	EdasAppName                     string                                   `json:"EdasAppName" xml:"EdasAppName"`
-	Source                          string                                   `json:"Source" xml:"Source"`
-	ConsumerAppName                 string                                   `json:"ConsumerAppName" xml:"ConsumerAppName"`
-	VpcId                           string                                   `json:"VpcId" xml:"VpcId"`
-	ServiceType                     string                                   `json:"ServiceType" xml:"ServiceType"`
-	ServiceName                     string                                   `json:"ServiceName" xml:"ServiceName"`
-	Path                            string                                   `json:"Path" xml:"Path"`
-	ExtSlbIp                        string                                   `json:"ExtSlbIp" xml:"ExtSlbIp"`
-	UpdateTime                      int64                                    `json:"UpdateTime" xml:"UpdateTime"`
-	Id                              int64                                    `json:"Id" xml:"Id"`
-	ExtSlbName                      string                                   `json:"ExtSlbName" xml:"ExtSlbName"`
-	VServerGroupId                  string                                   `json:"VServerGroupId" xml:"VServerGroupId"`
-	AppId                           string                                   `json:"AppId" xml:"AppId"`
-	ExtVServerGroupId               string                                   `json:"ExtVServerGroupId" xml:"ExtVServerGroupId"`
-	AccountId                       string                                   `json:"AccountId" xml:"AccountId"`
-	PodName                         string                                   `json:"PodName" xml:"PodName"`
-	AppInfos                        string                                   `json:"AppInfos" xml:"AppInfos"`
-	SlbId                           string                                   `json:"SlbId" xml:"SlbId"`
-	Status                          string                                   `json:"Status" xml:"Status"`
-	ClusterType                     int                                      `json:"ClusterType" xml:"ClusterType"`
-	TotalSize                       int                                      `json:"TotalSize" xml:"TotalSize"`
-	Region                          string                                   `json:"Region" xml:"Region"`
 	Name                            string                                   `json:"Name" xml:"Name"`
-	Timeout                         string                                   `json:"Timeout" xml:"Timeout"`
 	ChangeOrderId                   string                                   `json:"ChangeOrderId" xml:"ChangeOrderId"`
 	Group                           string                                   `json:"Group" xml:"Group"`
 	TotalPages                      int                                      `json:"TotalPages" xml:"TotalPages"`
 	OversoldFactor                  int                                      `json:"OversoldFactor" xml:"OversoldFactor"`
+	EdasAppName                     string                                   `json:"EdasAppName" xml:"EdasAppName"`
 	PageSize                        int                                      `json:"PageSize" xml:"PageSize"`
-	ConsumerAppId                   string                                   `json:"ConsumerAppId" xml:"ConsumerAppId"`
+	Reason                          string                                   `json:"Reason" xml:"Reason"`
 	Size                            int                                      `json:"Size" xml:"Size"`
 	SlbPort                         int                                      `json:"SlbPort" xml:"SlbPort"`
 	Tag                             string                                   `json:"Tag" xml:"Tag"`
 	Metadata                        string                                   `json:"Metadata" xml:"Metadata"`
 	PageNumber                      int                                      `json:"PageNumber" xml:"PageNumber"`
-	TenantId                        string                                   `json:"TenantId" xml:"TenantId"`
-	Ip                              string                                   `json:"Ip" xml:"Ip"`
+	VpcId                           string                                   `json:"VpcId" xml:"VpcId"`
+	ServiceType                     string                                   `json:"ServiceType" xml:"ServiceType"`
+	ServiceName                     string                                   `json:"ServiceName" xml:"ServiceName"`
+	ExtSlbIp                        string                                   `json:"ExtSlbIp" xml:"ExtSlbIp"`
+	UpdateTime                      int64                                    `json:"UpdateTime" xml:"UpdateTime"`
 	Version                         string                                   `json:"Version" xml:"Version"`
 	ExtSlbId                        string                                   `json:"ExtSlbId" xml:"ExtSlbId"`
 	TotalElements                   int                                      `json:"TotalElements" xml:"TotalElements"`
+	Id                              int64                                    `json:"Id" xml:"Id"`
 	EntryRule                       string                                   `json:"EntryRule" xml:"EntryRule"`
+	ExtSlbName                      string                                   `json:"ExtSlbName" xml:"ExtSlbName"`
 	SlbName                         string                                   `json:"SlbName" xml:"SlbName"`
+	VServerGroupId                  string                                   `json:"VServerGroupId" xml:"VServerGroupId"`
+	ExtVServerGroupId               string                                   `json:"ExtVServerGroupId" xml:"ExtVServerGroupId"`
 	RegistryType                    string                                   `json:"RegistryType" xml:"RegistryType"`
+	AppInfos                        string                                   `json:"AppInfos" xml:"AppInfos"`
 	NamespaceId                     string                                   `json:"NamespaceId" xml:"NamespaceId"`
 	GroupId                         int64                                    `json:"GroupId" xml:"GroupId"`
 	SpringApplicationName           string                                   `json:"SpringApplicationName" xml:"SpringApplicationName"`
+	SlbId                           string                                   `json:"SlbId" xml:"SlbId"`
+	Status                          string                                   `json:"Status" xml:"Status"`
+	ClusterType                     int                                      `json:"ClusterType" xml:"ClusterType"`
+	TotalSize                       int                                      `json:"TotalSize" xml:"TotalSize"`
 	DubboApplicationName            string                                   `json:"DubboApplicationName" xml:"DubboApplicationName"`
 	SlbIp                           string                                   `json:"SlbIp" xml:"SlbIp"`
+	Jobs                            []string                                 `json:"Jobs" xml:"Jobs"`
 	EntryApplication                EntryApplication                         `json:"EntryApplication" xml:"EntryApplication"`
-	Methods                         []Method                                 `json:"Methods" xml:"Methods"`
 	Result                          []Method                                 `json:"Result" xml:"Result"`
-	ApplicationList                 ApplicationListInInsertSwimmingLaneGroup `json:"ApplicationList" xml:"ApplicationList"`
-	RuleList                        RuleListInGetScalingRules                `json:"RuleList" xml:"RuleList"`
-	Content                         []Provider                               `json:"Content" xml:"Content"`
 	SwimmingLaneAppRelationShipList []SwimmingLaneAppRelationShip            `json:"SwimmingLaneAppRelationShipList" xml:"SwimmingLaneAppRelationShipList"`
+	Content                         []Provider                               `json:"Content" xml:"Content"`
+	ApplicationList                 ApplicationListInInsertSwimmingLaneGroup `json:"ApplicationList" xml:"ApplicationList"`
+	JobResults                      []JobResultsItem                         `json:"JobResults" xml:"JobResults"`
+	RuleList                        RuleList                                 `json:"RuleList" xml:"RuleList"`
+	Methods                         []Method                                 `json:"Methods" xml:"Methods"`
 }

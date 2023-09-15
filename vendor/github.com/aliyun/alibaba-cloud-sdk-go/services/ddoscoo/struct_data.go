@@ -20,11 +20,11 @@ type Data struct {
 	StartTime int64  `json:"StartTime" xml:"StartTime"`
 	Region    string `json:"Region" xml:"Region"`
 	Domain    string `json:"Domain" xml:"Domain"`
-	Bps       int64  `json:"Bps" xml:"Bps"`
 	EventType string `json:"EventType" xml:"EventType"`
+	Bps       int64  `json:"Bps" xml:"Bps"`
 	Port      string `json:"Port" xml:"Port"`
-	Pps       int64  `json:"Pps" xml:"Pps"`
 	Ip        string `json:"Ip" xml:"Ip"`
+	Pps       int64  `json:"Pps" xml:"Pps"`
 	MaxQps    int64  `json:"MaxQps" xml:"MaxQps"`
 	Count     int64  `json:"Count" xml:"Count"`
 	EndTime   int64  `json:"EndTime" xml:"EndTime"`

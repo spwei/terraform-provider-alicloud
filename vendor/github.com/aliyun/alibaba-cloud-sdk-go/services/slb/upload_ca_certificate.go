@@ -71,30 +71,37 @@ func (client *Client) UploadCACertificateWithCallback(request *UploadCACertifica
 // UploadCACertificateRequest is the request struct for api UploadCACertificate
 type UploadCACertificateRequest struct {
 	*requests.RpcRequest
-	AccessKeyId          string           `position:"Query" name:"access_key_id"`
-	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ResourceGroupId      string           `position:"Query" name:"ResourceGroupId"`
-	CACertificateName    string           `position:"Query" name:"CACertificateName"`
-	CACertificate        string           `position:"Query" name:"CACertificate"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	StandardType         string           `position:"Query" name:"StandardType"`
-	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	AccessKeyId          string                    `position:"Query" name:"access_key_id"`
+	ResourceOwnerId      requests.Integer          `position:"Query" name:"ResourceOwnerId"`
+	ResourceGroupId      string                    `position:"Query" name:"ResourceGroupId"`
+	CACertificateName    string                    `position:"Query" name:"CACertificateName"`
+	Tag                  *[]UploadCACertificateTag `position:"Query" name:"Tag"  type:"Repeated"`
+	CACertificate        string                    `position:"Query" name:"CACertificate"`
+	ResourceOwnerAccount string                    `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount         string                    `position:"Query" name:"OwnerAccount"`
+	StandardType         string                    `position:"Query" name:"StandardType"`
+	OwnerId              requests.Integer          `position:"Query" name:"OwnerId"`
+}
+
+// UploadCACertificateTag is a repeated param struct in UploadCACertificateRequest
+type UploadCACertificateTag struct {
+	Value string `name:"Value"`
+	Key   string `name:"Key"`
 }
 
 // UploadCACertificateResponse is the response struct for api UploadCACertificate
 type UploadCACertificateResponse struct {
 	*responses.BaseResponse
-	RequestId         string `json:"RequestId" xml:"RequestId"`
-	CACertificateId   string `json:"CACertificateId" xml:"CACertificateId"`
-	CACertificateName string `json:"CACertificateName" xml:"CACertificateName"`
-	Fingerprint       string `json:"Fingerprint" xml:"Fingerprint"`
-	ResourceGroupId   string `json:"ResourceGroupId" xml:"ResourceGroupId"`
-	CreateTime        string `json:"CreateTime" xml:"CreateTime"`
 	CreateTimeStamp   int64  `json:"CreateTimeStamp" xml:"CreateTimeStamp"`
+	RequestId         string `json:"RequestId" xml:"RequestId"`
 	ExpireTime        string `json:"ExpireTime" xml:"ExpireTime"`
-	ExpireTimeStamp   int64  `json:"ExpireTimeStamp" xml:"ExpireTimeStamp"`
+	Fingerprint       string `json:"Fingerprint" xml:"Fingerprint"`
+	CreateTime        string `json:"CreateTime" xml:"CreateTime"`
 	CommonName        string `json:"CommonName" xml:"CommonName"`
+	ResourceGroupId   string `json:"ResourceGroupId" xml:"ResourceGroupId"`
+	CACertificateName string `json:"CACertificateName" xml:"CACertificateName"`
+	ExpireTimeStamp   int64  `json:"ExpireTimeStamp" xml:"ExpireTimeStamp"`
+	CACertificateId   string `json:"CACertificateId" xml:"CACertificateId"`
 }
 
 // CreateUploadCACertificateRequest creates a request to invoke UploadCACertificate API

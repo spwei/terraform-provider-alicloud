@@ -7,9 +7,11 @@ description: |-
   Provides a RAM Group Policy attachment resource.
 ---
 
-# alicloud\_ram\_group\_policy\_attachment
+# alicloud_ram_group_policy_attachment
 
 Provides a RAM Group Policy attachment resource. 
+
+-> **NOTE:** Available since v1.0.0+.
 
 ## Example Usage
 
@@ -22,8 +24,8 @@ resource "alicloud_ram_group" "group" {
 }
 
 resource "alicloud_ram_policy" "policy" {
-  name     = "policyName"
-  document = <<EOF
+  name        = "policyName"
+  document    = <<EOF
     {
       "Statement": [
         {
@@ -42,7 +44,7 @@ resource "alicloud_ram_policy" "policy" {
     }
   EOF
   description = "this is a policy test"
-  force = true
+  force       = true
 }
 
 resource "alicloud_ram_group_policy_attachment" "attach" {
@@ -69,6 +71,6 @@ The following attributes are exported:
 
 RAM Group Policy attachment can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_ram_group_policy_attachment.example group:my-policy:Custom:my-group
 ```

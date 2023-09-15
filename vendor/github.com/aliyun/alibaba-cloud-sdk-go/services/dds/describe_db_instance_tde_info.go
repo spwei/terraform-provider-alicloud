@@ -82,8 +82,8 @@ type DescribeDBInstanceTDEInfoRequest struct {
 // DescribeDBInstanceTDEInfoResponse is the response struct for api DescribeDBInstanceTDEInfo
 type DescribeDBInstanceTDEInfoResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
 	TDEStatus string `json:"TDEStatus" xml:"TDEStatus"`
+	RequestId string `json:"RequestId" xml:"RequestId"`
 }
 
 // CreateDescribeDBInstanceTDEInfoRequest creates a request to invoke DescribeDBInstanceTDEInfo API
@@ -91,7 +91,7 @@ func CreateDescribeDBInstanceTDEInfoRequest() (request *DescribeDBInstanceTDEInf
 	request = &DescribeDBInstanceTDEInfoRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("Dds", "2015-12-01", "DescribeDBInstanceTDEInfo", "Dds", "openAPI")
+	request.InitWithApiInfo("Dds", "2015-12-01", "DescribeDBInstanceTDEInfo", "dds", "openAPI")
 	request.Method = requests.POST
 	return
 }

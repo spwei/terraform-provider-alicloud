@@ -9,7 +9,7 @@ description: |-
 
 # alicloud\_disk\_attachment
 
--> **DEPRECATED:** This resource has been renamed to [alicloud_ecs_disk_attachment](https://www.terraform.io/docs/providers/alicloud/r/ecs_disk_attachment.html) from version 1.122.0.
+-> **DEPRECATED:** This resource has been renamed to [alicloud_ecs_disk_attachment](https://www.terraform.io/docs/providers/alicloud/r/ecs_disk_attachment) from version 1.122.0.
 
 Provides an Alicloud ECS Disk Attachment as a resource, to attach and detach disks from ECS Instances.
 
@@ -17,7 +17,7 @@ Provides an Alicloud ECS Disk Attachment as a resource, to attach and detach dis
 
 Basic usage
 
-```
+```terraform
 # Create a new ECS disk-attachment and use it attach one disk to a new instance.
 resource "alicloud_security_group" "ecs_sg" {
   name        = "terraform-test-group"
@@ -69,6 +69,6 @@ The following attributes are exported:
 
 The disk attachment can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_disk_attachment.example d-abc12345678:i-abc12355
 ```

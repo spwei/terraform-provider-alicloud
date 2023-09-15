@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeInclinedTables invokes the adb.DescribeInclinedTables API synchronously
-// api document: https://help.aliyun.com/api/adb/describeinclinedtables.html
 func (client *Client) DescribeInclinedTables(request *DescribeInclinedTablesRequest) (response *DescribeInclinedTablesResponse, err error) {
 	response = CreateDescribeInclinedTablesResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeInclinedTables(request *DescribeInclinedTablesRequ
 }
 
 // DescribeInclinedTablesWithChan invokes the adb.DescribeInclinedTables API asynchronously
-// api document: https://help.aliyun.com/api/adb/describeinclinedtables.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeInclinedTablesWithChan(request *DescribeInclinedTablesRequest) (<-chan *DescribeInclinedTablesResponse, <-chan error) {
 	responseChan := make(chan *DescribeInclinedTablesResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeInclinedTablesWithChan(request *DescribeInclinedTa
 }
 
 // DescribeInclinedTablesWithCallback invokes the adb.DescribeInclinedTables API asynchronously
-// api document: https://help.aliyun.com/api/adb/describeinclinedtables.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeInclinedTablesWithCallback(request *DescribeInclinedTablesRequest, callback func(response *DescribeInclinedTablesResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -90,10 +85,10 @@ type DescribeInclinedTablesRequest struct {
 // DescribeInclinedTablesResponse is the response struct for api DescribeInclinedTables
 type DescribeInclinedTablesResponse struct {
 	*responses.BaseResponse
-	RequestId  string                        `json:"RequestId" xml:"RequestId"`
 	TotalCount string                        `json:"TotalCount" xml:"TotalCount"`
-	PageNumber string                        `json:"PageNumber" xml:"PageNumber"`
 	PageSize   string                        `json:"PageSize" xml:"PageSize"`
+	RequestId  string                        `json:"RequestId" xml:"RequestId"`
+	PageNumber string                        `json:"PageNumber" xml:"PageNumber"`
 	Items      ItemsInDescribeInclinedTables `json:"Items" xml:"Items"`
 }
 

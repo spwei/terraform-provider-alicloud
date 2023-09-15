@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	util "github.com/alibabacloud-go/tea-utils/service"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
@@ -25,8 +27,12 @@ func resourceAliyunSecurityGroupRule() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
-
 		Schema: map[string]*schema.Schema{
+			"security_group_id": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
 			"type": {
 				Type:         schema.TypeString,
 				Required:     true,
@@ -34,22 +40,12 @@ func resourceAliyunSecurityGroupRule() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"ingress", "egress"}, false),
 				Description:  "Type of rule, ingress (inbound) or egress (outbound).",
 			},
-
 			"ip_protocol": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"tcp", "udp", "icmp", "gre", "all"}, false),
 			},
-
-			"nic_type": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				Computed:     true,
-				ValidateFunc: validation.StringInSlice([]string{"internet", "intranet"}, false),
-			},
-
 			"policy": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -57,15 +53,6 @@ func resourceAliyunSecurityGroupRule() *schema.Resource {
 				Default:      GroupRulePolicyAccept,
 				ValidateFunc: validation.StringInSlice([]string{"accept", "drop"}, false),
 			},
-
-			"port_range": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				ForceNew:         true,
-				Default:          AllPortRange,
-				DiffSuppressFunc: ecsSecurityGroupRulePortRangeDiffSuppressFunc,
-			},
-
 			"priority": {
 				Type:         schema.TypeInt,
 				Optional:     true,
@@ -73,32 +60,50 @@ func resourceAliyunSecurityGroupRule() *schema.Resource {
 				Default:      1,
 				ValidateFunc: validation.IntBetween(1, 100),
 			},
-
-			"security_group_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-			},
-
 			"cidr_ip": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				AtLeastOneOf: []string{"cidr_ip", "ipv6_cidr_ip", "source_security_group_id", "prefix_list_id"},
 			},
-
+			"ipv6_cidr_ip": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"cidr_ip"},
+			},
 			"source_security_group_id": {
 				Type:          schema.TypeString,
 				Optional:      true,
 				ForceNew:      true,
 				ConflictsWith: []string{"cidr_ip"},
 			},
-
 			"source_group_owner_account": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
-
+			"prefix_list_id": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				ForceNew:         true,
+				DiffSuppressFunc: ecsSecurityGroupRulePreFixListIdDiffSuppressFunc,
+			},
+			"port_range": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				ForceNew:         true,
+				Default:          AllPortRange,
+				DiffSuppressFunc: ecsSecurityGroupRulePortRangeDiffSuppressFunc,
+			},
+			"nic_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice([]string{"internet", "intranet"}, false),
+			},
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -109,51 +114,160 @@ func resourceAliyunSecurityGroupRule() *schema.Resource {
 
 func resourceAliyunSecurityGroupRuleCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AliyunClient)
-
-	direction := d.Get("type").(string)
-	sgId := d.Get("security_group_id").(string)
-	ptl := d.Get("ip_protocol").(string)
-	port := d.Get("port_range").(string)
-	if port == "" {
-		return WrapError(fmt.Errorf("'port_range': required field is not set or invalid."))
-	}
-	nicType := d.Get("nic_type").(string)
-	policy := d.Get("policy").(string)
-	priority := d.Get("priority").(int)
-
-	if _, ok := d.GetOk("cidr_ip"); !ok {
-		if _, ok := d.GetOk("source_security_group_id"); !ok {
-			return WrapError(fmt.Errorf("Either 'cidr_ip' or 'source_security_group_id' must be specified."))
-		}
-	}
-
-	request, err := buildAliyunSGRuleRequest(d, meta)
+	ecsService := EcsService{client}
+	var response map[string]interface{}
+	var cidrIp string
+	var sourceSecurityGroupId string
+	request := make(map[string]interface{})
+	conn, err := client.NewEcsClient()
 	if err != nil {
 		return WrapError(err)
 	}
 
-	if direction == string(DirectionIngress) {
-		request.ApiName = "AuthorizeSecurityGroup"
-		_, err = client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
-		})
-	} else {
-		request.ApiName = "AuthorizeSecurityGroupEgress"
-		_, err = client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
-		})
-	}
-	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alicloud_security_group_rule", request.GetActionName(), AlibabaCloudSdkGoERROR)
+	request["RegionId"] = client.RegionId
+
+	securityGroupId := d.Get("security_group_id").(string)
+	request["SecurityGroupId"] = securityGroupId
+
+	direction := d.Get("type").(string)
+
+	permissionsMaps := make([]map[string]interface{}, 0)
+	permissionsMap := map[string]interface{}{}
+	permissionsMap["IpProtocol"] = d.Get("ip_protocol")
+
+	if v, ok := d.GetOk("policy"); ok {
+		permissionsMap["Policy"] = v
 	}
 
-	var cidr_ip string
-	if ip, ok := d.GetOk("cidr_ip"); ok {
-		cidr_ip = ip.(string)
-	} else {
-		cidr_ip = d.Get("source_security_group_id").(string)
+	if v, ok := d.GetOk("priority"); ok {
+		permissionsMap["Priority"] = strconv.Itoa(v.(int))
 	}
-	d.SetId(sgId + ":" + direction + ":" + ptl + ":" + port + ":" + nicType + ":" + cidr_ip + ":" + policy + ":" + strconv.Itoa(priority))
+
+	if v, ok := d.GetOk("cidr_ip"); ok {
+		cidrIp = v.(string)
+		if direction == string(DirectionIngress) {
+			permissionsMap["SourceCidrIp"] = v
+		} else {
+			permissionsMap["DestCidrIp"] = v
+		}
+	}
+
+	if v, ok := d.GetOk("ipv6_cidr_ip"); ok {
+		cidrIp = strings.Replace(v.(string), ":", "_", -1)
+		if direction == string(DirectionIngress) {
+			permissionsMap["Ipv6SourceCidrIp"] = v
+		} else {
+			permissionsMap["Ipv6DestCidrIp"] = v
+		}
+	}
+
+	if v, ok := d.GetOk("source_security_group_id"); ok {
+		cidrIp = v.(string)
+		sourceSecurityGroupId = v.(string)
+		if direction == string(DirectionIngress) {
+			permissionsMap["SourceGroupId"] = v
+		} else {
+			permissionsMap["DestGroupId"] = v
+		}
+	}
+
+	if v, ok := d.GetOk("source_group_owner_account"); ok {
+		if direction == string(DirectionIngress) {
+			permissionsMap["SourceGroupOwnerAccount"] = v
+		} else {
+			permissionsMap["DestGroupOwnerAccount"] = v
+		}
+	}
+
+	if v, ok := d.GetOk("prefix_list_id"); ok {
+		if direction == string(DirectionIngress) {
+			permissionsMap["SourcePrefixListId"] = v
+		} else {
+			permissionsMap["DestPrefixListId"] = v
+		}
+	}
+
+	if v, ok := d.GetOk("port_range"); ok {
+		permissionsMap["PortRange"] = v
+
+		if permissionsMap["IpProtocol"].(string) == string(Tcp) || permissionsMap["IpProtocol"].(string) == string(Udp) {
+			if v.(string) == AllPortRange {
+				return fmt.Errorf(" 'tcp' and 'udp' can support port range: [1, 65535]. Please correct it and try again.")
+			}
+		} else if v.(string) != AllPortRange {
+			return fmt.Errorf(" 'icmp', 'gre' and 'all' only support port range '-1/-1'. Please correct it and try again.")
+		}
+	}
+
+	securityGroup, err := ecsService.DescribeSecurityGroup(securityGroupId)
+	if err != nil {
+		return WrapError(err)
+	}
+
+	if v, ok := d.GetOk("nic_type"); ok {
+		if securityGroup.VpcId != "" || sourceSecurityGroupId != "" {
+			if GroupRuleNicType(v.(string)) != GroupRuleIntranet {
+				return fmt.Errorf(" When security group in the vpc or authorizing permission for source/destination security group, the nic_type must be 'intranet'.")
+			}
+		}
+
+		permissionsMap["NicType"] = v
+	}
+
+	if v, ok := d.GetOk("description"); ok {
+		permissionsMap["Description"] = v
+	}
+
+	permissionsMaps = append(permissionsMaps, permissionsMap)
+	request["Permissions"] = permissionsMaps
+
+	if direction == string(DirectionIngress) {
+		action := "AuthorizeSecurityGroup"
+
+		runtime := util.RuntimeOptions{}
+		runtime.SetAutoretry(true)
+		wait := incrementalWait(3*time.Second, 5*time.Second)
+		err = resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutCreate)), func() *resource.RetryError {
+			response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2014-05-26"), StringPointer("AK"), nil, request, &runtime)
+			if err != nil {
+				if NeedRetry(err) {
+					wait()
+					return resource.RetryableError(err)
+				}
+				return resource.NonRetryableError(err)
+			}
+			return nil
+		})
+		addDebug(action, response, request)
+
+		if err != nil {
+			return WrapErrorf(err, DefaultErrorMsg, "alicloud_security_group_rule", action, AlibabaCloudSdkGoERROR)
+		}
+	} else {
+		action := "AuthorizeSecurityGroupEgress"
+
+		runtime := util.RuntimeOptions{}
+		runtime.SetAutoretry(true)
+		wait := incrementalWait(3*time.Second, 5*time.Second)
+		err = resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutCreate)), func() *resource.RetryError {
+			response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2014-05-26"), StringPointer("AK"), nil, request, &runtime)
+			if err != nil {
+				if NeedRetry(err) {
+					wait()
+					return resource.RetryableError(err)
+				}
+				return resource.NonRetryableError(err)
+			}
+			return nil
+		})
+		addDebug(action, response, request)
+
+		if err != nil {
+			return WrapErrorf(err, DefaultErrorMsg, "alicloud_security_group_rule", action, AlibabaCloudSdkGoERROR)
+		}
+	}
+
+	d.SetId(fmt.Sprintf("%v:%v:%v:%v:%v:%v:%v:%v", request["SecurityGroupId"], direction, permissionsMap["IpProtocol"], permissionsMap["PortRange"], permissionsMap["NicType"], cidrIp, permissionsMap["Policy"], permissionsMap["Priority"]))
 
 	return resourceAliyunSecurityGroupRuleRead(d, meta)
 }
@@ -216,13 +330,18 @@ func resourceAliyunSecurityGroupRuleRead(d *schema.ResourceData, meta interface{
 	//support source and desc by type
 	if direction == string(DirectionIngress) {
 		d.Set("cidr_ip", object.SourceCidrIp)
+		d.Set("ipv6_cidr_ip", object.Ipv6SourceCidrIp)
 		d.Set("source_security_group_id", object.SourceGroupId)
 		d.Set("source_group_owner_account", object.SourceGroupOwnerAccount)
+		d.Set("prefix_list_id", object.SourcePrefixListId)
 	} else {
 		d.Set("cidr_ip", object.DestCidrIp)
+		d.Set("ipv6_cidr_ip", object.Ipv6DestCidrIp)
 		d.Set("source_security_group_id", object.DestGroupId)
 		d.Set("source_group_owner_account", object.DestGroupOwnerAccount)
+		d.Set("prefix_list_id", object.DestPrefixListId)
 	}
+
 	return nil
 }
 
@@ -272,6 +391,7 @@ func resourceAliyunSecurityGroupRuleUpdate(d *schema.ResourceData, meta interfac
 	}
 
 	addDebug(request.GetActionName(), raw, request.Headers, request)
+
 	return resourceAliyunSecurityGroupRuleRead(d, meta)
 }
 
@@ -374,6 +494,20 @@ func buildAliyunSGRuleRequest(d *schema.ResourceData, meta interface{}) (*reques
 			request.QueryParams["DestCidrIp"] = v.(string)
 		}
 	}
+	if v, ok := d.GetOk("ipv6_cidr_ip"); ok {
+		if direction == string(DirectionIngress) {
+			request.QueryParams["Ipv6SourceCidrIp"] = v.(string)
+		} else {
+			request.QueryParams["Ipv6DestCidrIp"] = v.(string)
+		}
+	}
+	if v, ok := d.GetOk("prefix_list_id"); ok {
+		if direction == string(DirectionIngress) {
+			request.QueryParams["SourcePrefixListId"] = v.(string)
+		} else {
+			request.QueryParams["DestPrefixListId"] = v.(string)
+		}
+	}
 
 	var targetGroupId string
 	if v, ok := d.GetOk("source_security_group_id"); ok {
@@ -422,7 +556,7 @@ func parseSecurityRuleId(d *schema.ResourceData, meta interface{}, index int) (r
 	parts := strings.Split(d.Id(), ":")
 	defer func() {
 		if e := recover(); e != nil {
-			fmt.Printf("Panicing %s\r\n", e)
+			log.Printf("Panicing %s\r\n", e)
 			result = ""
 		}
 	}()

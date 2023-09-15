@@ -3,6 +3,7 @@ package sls
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"io/ioutil"
 	"net/http"
@@ -26,15 +27,19 @@ type LogStore struct {
 	WebTracking   bool   `json:"enable_tracking"`
 	AutoSplit     bool   `json:"autoSplit"`
 	MaxSplitShard int    `json:"maxSplitShard"`
+
 	AppendMeta    bool   `json:"appendMeta"`
-	ArchiveSecons int    `json:"archiveSeconds"`
 	TelemetryType string `json:"telemetryType"`
+	HotTTL        int32  `json:"hot_ttl,omitempty"`
+	Mode          string `json:"mode,omitempty"` // "query" or "standard"(default), can't be modified after creation
 
 	CreateTime     uint32 `json:"createTime,omitempty"`
 	LastModifyTime uint32 `json:"lastModifyTime,omitempty"`
 
 	project            *LogProject
 	putLogCompressType int
+	EncryptConf        *EncryptConf `json:"encrypt_conf,omitempty"`
+	ProductType        string       `json:"productType,omitempty"`
 }
 
 // Shard defines shard struct
@@ -44,6 +49,20 @@ type Shard struct {
 	InclusiveBeginKey string `json:"inclusiveBeginKey"`
 	ExclusiveBeginKey string `json:"exclusiveEndKey"`
 	CreateTime        int    `json:"createTime"`
+}
+
+// encrypt struct
+type EncryptConf struct {
+	Enable      bool                `json:"enable"`
+	EncryptType string              `json:"encrypt_type"`
+	UserCmkInfo *EncryptUserCmkConf `json:"user_cmk_info,omitempty"`
+}
+
+// EncryptUserCmkConf struct
+type EncryptUserCmkConf struct {
+	CmkKeyId string `json:"cmk_key_id"`
+	Arn      string `json:"arn"`
+	RegionId string `json:"region_id"`
 }
 
 // NewLogStore ...
@@ -505,7 +524,7 @@ func (s *LogStore) GetHistograms(topic string, from int64, to int64, queryExp st
 		return nil, NewBadResponseError(string(body), r.Header, r.StatusCode)
 	}
 
-	count, err := strconv.ParseInt(r.Header[GetLogsCountHeader][0], 10, 64)
+	count, err := strconv.ParseInt(r.Header.Get(GetLogsCountHeader), 10, 64)
 	if err != nil {
 		return nil, err
 	}
@@ -519,23 +538,14 @@ func (s *LogStore) GetHistograms(topic string, from int64, to int64, queryExp st
 }
 
 // getLogs query logs with [from, to) time range
-func (s *LogStore) getLogs(topic string, from int64, to int64, queryExp string,
-	maxLineNum int64, offset int64, reverse bool) (*http.Response, []byte, *GetLogsResponse, error) {
+func (s *LogStore) getLogs(req *GetLogRequest) (*http.Response, []byte, *GetLogsResponse, error) {
 
 	h := map[string]string{
 		"x-log-bodyrawsize": "0",
 		"Accept":            "application/json",
 	}
 
-	urlVal := url.Values{}
-	urlVal.Add("type", "log")
-	urlVal.Add("from", strconv.Itoa(int(from)))
-	urlVal.Add("to", strconv.Itoa(int(to)))
-	urlVal.Add("topic", topic)
-	urlVal.Add("line", strconv.Itoa(int(maxLineNum)))
-	urlVal.Add("offset", strconv.Itoa(int(offset)))
-	urlVal.Add("reverse", strconv.FormatBool(reverse))
-	urlVal.Add("query", queryExp)
+	urlVal := req.ToURLParams()
 
 	uri := fmt.Sprintf("/logstores/%s?%s", s.Name, urlVal.Encode())
 	r, err := request(s.project, "GET", uri, h, nil)
@@ -553,7 +563,7 @@ func (s *LogStore) getLogs(topic string, from int64, to int64, queryExp string,
 		return nil, nil, nil, err
 	}
 
-	count, err := strconv.ParseInt(r.Header[GetLogsCountHeader][0], 10, 32)
+	count, err := strconv.ParseInt(r.Header.Get(GetLogsCountHeader), 10, 32)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -564,7 +574,7 @@ func (s *LogStore) getLogs(topic string, from int64, to int64, queryExp string,
 		}
 	}
 	hasSQL := false
-	if sqlHeaderArray, ok := r.Header[HasSQLHeader]; ok && len(sqlHeaderArray) > 0 && sqlHeaderArray[0] == "true" {
+	if r.Header.Get(HasSQLHeader) == "true" {
 		hasSQL = true
 	}
 
@@ -573,14 +583,28 @@ func (s *LogStore) getLogs(topic string, from int64, to int64, queryExp string,
 		Count:    count,
 		Contents: contents,
 		HasSQL:   hasSQL,
+		Header:   r.Header,
 	}, nil
 }
 
-// GetJsonLogs query logs with [from, to) time range
+// GetLogLines query logs with [from, to) time range
 func (s *LogStore) GetLogLines(topic string, from int64, to int64, queryExp string,
 	maxLineNum int64, offset int64, reverse bool) (*GetLogLinesResponse, error) {
 
-	rsp, b, logRsp, err := s.getLogs(topic, from, to, queryExp, maxLineNum, offset, reverse)
+	var req GetLogRequest
+	req.Topic = topic
+	req.From = from
+	req.To = to
+	req.Query = queryExp
+	req.Lines = maxLineNum
+	req.Offset = offset
+	req.Reverse = reverse
+	return s.GetLogLinesV2(&req)
+}
+
+// GetLogLinesV2 query logs with [from, to) time range
+func (s *LogStore) GetLogLinesV2(req *GetLogRequest) (*GetLogLinesResponse, error) {
+	rsp, b, logRsp, err := s.getLogs(req)
 	if err != nil {
 		return nil, err
 	}
@@ -601,8 +625,89 @@ func (s *LogStore) GetLogLines(topic string, from int64, to int64, queryExp stri
 // GetLogs query logs with [from, to) time range
 func (s *LogStore) GetLogs(topic string, from int64, to int64, queryExp string,
 	maxLineNum int64, offset int64, reverse bool) (*GetLogsResponse, error) {
+	var req GetLogRequest
+	req.Topic = topic
+	req.From = from
+	req.To = to
+	req.Query = queryExp
+	req.Lines = maxLineNum
+	req.Offset = offset
+	req.Reverse = reverse
+	return s.GetLogsV2(&req)
+}
 
-	rsp, b, logRsp, err := s.getLogs(topic, from, to, queryExp, maxLineNum, offset, reverse)
+func (s *LogStore) getToCompleted(f func() (bool, error)) {
+	interval := 100 * time.Millisecond
+	retryCount := MaxCompletedRetryCount
+	isCompleted := false
+	timeoutTime := time.Now().Add(MaxCompletedRetryLatency)
+	for retryCount > 0 && timeoutTime.After(time.Now()) {
+		var err error
+		isCompleted, err = f()
+		if err != nil || isCompleted {
+			return
+		}
+		time.Sleep(interval)
+		retryCount--
+		if interval < 10*time.Second {
+			interval = interval * 2
+		}
+		if interval > 10*time.Second {
+			interval = 10 * time.Second
+		}
+	}
+	return
+}
+
+// GetLogsToCompleted query logs with [from, to) time range to completed
+func (s *LogStore) GetLogsToCompleted(topic string, from int64, to int64, queryExp string,
+	maxLineNum int64, offset int64, reverse bool) (*GetLogsResponse, error) {
+	var res *GetLogsResponse
+	var err error
+	f := func() (bool, error) {
+		res, err = s.GetLogs(topic, from, to, queryExp, maxLineNum, offset, reverse)
+		if err == nil {
+			return res.IsComplete(), nil
+		}
+		return false, err
+	}
+	s.getToCompleted(f)
+	return res, err
+}
+
+// GetLogsToCompletedV2 query logs with [from, to) time range to completed
+func (s *LogStore) GetLogsToCompletedV2(req *GetLogRequest) (*GetLogsResponse, error) {
+	var res *GetLogsResponse
+	var err error
+	f := func() (bool, error) {
+		res, err = s.GetLogsV2(req)
+		if err == nil {
+			return res.IsComplete(), nil
+		}
+		return false, err
+	}
+	s.getToCompleted(f)
+	return res, err
+}
+
+// GetHistogramsToCompleted query logs with [from, to) time range to completed
+func (s *LogStore) GetHistogramsToCompleted(topic string, from int64, to int64, queryExp string) (*GetHistogramsResponse, error) {
+	var res *GetHistogramsResponse
+	var err error
+	f := func() (bool, error) {
+		res, err = s.GetHistograms(topic, from, to, queryExp)
+		if err == nil {
+			return res.IsComplete(), nil
+		}
+		return false, err
+	}
+	s.getToCompleted(f)
+	return res, err
+}
+
+// GetLogsV2 query logs with [from, to) time range
+func (s *LogStore) GetLogsV2(req *GetLogRequest) (*GetLogsResponse, error) {
+	rsp, b, logRsp, err := s.getLogs(req)
 	if err == nil && len(b) != 0 {
 		logs := []map[string]string{}
 		err = json.Unmarshal(b, &logs)
@@ -611,7 +716,6 @@ func (s *LogStore) GetLogs(topic string, from int64, to int64, queryExp string,
 		}
 		logRsp.Logs = logs
 	}
-
 	return logRsp, err
 }
 
@@ -739,27 +843,15 @@ func (s *LogStore) UpdateIndexString(indexStr string) error {
 
 // DeleteIndex ...
 func (s *LogStore) DeleteIndex() error {
-	type Body struct {
-		project string `json:"projectName"`
-		store   string `json:"logstoreName"`
-	}
-
-	body, err := json.Marshal(Body{
-		project: s.project.Name,
-		store:   s.Name,
-	})
-	if err != nil {
-		return err
-	}
 
 	h := map[string]string{
-		"x-log-bodyrawsize": fmt.Sprintf("%v", len(body)),
+		"x-log-bodyrawsize": "0",
 		"Content-Type":      "application/json",
 		"Accept-Encoding":   "deflate", // TODO: support lz4
 	}
 
 	uri := fmt.Sprintf("/logstores/%s/index", s.Name)
-	r, err := request(s.project, "DELETE", uri, h, body)
+	r, err := request(s.project, "DELETE", uri, h, nil)
 	if r != nil {
 		r.Body.Close()
 	}
@@ -768,27 +860,14 @@ func (s *LogStore) DeleteIndex() error {
 
 // GetIndex ...
 func (s *LogStore) GetIndex() (*Index, error) {
-	type Body struct {
-		project string `json:"projectName"`
-		store   string `json:"logstoreName"`
-	}
-
-	body, err := json.Marshal(Body{
-		project: s.project.Name,
-		store:   s.Name,
-	})
-	if err != nil {
-		return nil, err
-	}
-
 	h := map[string]string{
-		"x-log-bodyrawsize": fmt.Sprintf("%v", len(body)),
 		"Content-Type":      "application/json",
-		"Accept-Encoding":   "deflate", // TODO: support lz4
+		"x-log-bodyrawsize": "0",
+		"Accept-Encoding":   "deflate",
 	}
 
 	uri := fmt.Sprintf("/logstores/%s/index", s.Name)
-	r, err := request(s.project, "GET", uri, h, body)
+	r, err := request(s.project, "GET", uri, h, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -805,27 +884,14 @@ func (s *LogStore) GetIndex() (*Index, error) {
 
 // GetIndexString ...
 func (s *LogStore) GetIndexString() (string, error) {
-	type Body struct {
-		project string `json:"projectName"`
-		store   string `json:"logstoreName"`
-	}
-
-	body, err := json.Marshal(Body{
-		project: s.project.Name,
-		store:   s.Name,
-	})
-	if err != nil {
-		return "", err
-	}
-
 	h := map[string]string{
-		"x-log-bodyrawsize": fmt.Sprintf("%v", len(body)),
 		"Content-Type":      "application/json",
-		"Accept-Encoding":   "deflate", // TODO: support lz4
+		"x-log-bodyrawsize": "0",
+		"Accept-Encoding":   "deflate",
 	}
 
 	uri := fmt.Sprintf("/logstores/%s/index", s.Name)
-	r, err := request(s.project, "GET", uri, h, body)
+	r, err := request(s.project, "GET", uri, h, nil)
 	if err != nil {
 		return "", err
 	}

@@ -47,11 +47,12 @@ func resourceAliyunSlbBackendServer() *schema.Resource {
 							Type:         schema.TypeString,
 							Optional:     true,
 							Default:      string(ECS),
-							ValidateFunc: validation.StringInSlice([]string{"eni", "ecs"}, false),
+							ValidateFunc: validation.StringInSlice([]string{"eni", "ecs", "eci"}, false),
 						},
 						"server_ip": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 					},
 				},
@@ -73,14 +74,25 @@ func resourceAliyunSlbBackendServersCreate(d *schema.ResourceData, meta interfac
 	if v, ok := d.GetOk("backend_servers"); ok {
 		request.BackendServers = expandBackendServersInfoToString(v.(*schema.Set).List())
 	}
-	raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
-		return slbClient.AddBackendServers(request)
+	var response *slb.AddBackendServersResponse
+	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
+		raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
+			return slbClient.AddBackendServers(request)
+		})
+		if err != nil {
+			if IsExpectedErrors(err, []string{"ServiceIsConfiguring"}) {
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
+		}
+		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+		response, _ = raw.(*slb.AddBackendServersResponse)
+		return nil
 	})
 	if err != nil {
 		return WrapErrorf(err, DefaultErrorMsg, "alicloud_slb_backend_servers", request.GetActionName(), AlibabaCloudSdkGoERROR)
 	}
-	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ := raw.(*slb.AddBackendServersResponse)
+
 	d.SetId(response.LoadBalancerId)
 
 	return resourceAliyunSlbBackendServersRead(d, meta)
@@ -188,6 +200,9 @@ func resourceAliyunSlbBackendServersUpdate(d *schema.ResourceData, meta interfac
 						"weight":    adds["weight"],
 						"type":      adds["type"],
 					}
+					if v, ok := adds["server_ip"]; ok && fmt.Sprint(v) != "" {
+						addsm["server_ip"] = v
+					}
 					addservers = append(addservers, addsm)
 				}
 			}
@@ -222,6 +237,10 @@ func resourceAliyunSlbBackendServersUpdate(d *schema.ResourceData, meta interfac
 					"server_id": s["server_id"],
 					"weight":    s["weight"],
 					"type":      s["type"],
+				}
+
+				if v, ok := s["server_ip"]; ok && fmt.Sprint(v) != "" {
+					sm["server_ip"] = v
 				}
 				servers = append(servers, sm)
 			}
@@ -305,7 +324,7 @@ func resourceAliyunSlbBackendServersDelete(d *schema.ResourceData, meta interfac
 					return slbClient.RemoveBackendServers(request)
 				})
 				if err != nil {
-					if IsExpectedErrors(err, []string{"RspoolVipExist", "ObtainIpFail"}) {
+					if IsExpectedErrors(err, []string{"RspoolVipExist", "ObtainIpFail", "ServiceIsStopping"}) {
 						return resource.RetryableError(err)
 					}
 					return resource.NonRetryableError(err)

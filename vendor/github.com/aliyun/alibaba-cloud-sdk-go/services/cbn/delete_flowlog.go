@@ -77,14 +77,15 @@ type DeleteFlowlogRequest struct {
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	Version              string           `position:"Query" name:"Version"`
 	FlowLogId            string           `position:"Query" name:"FlowLogId"`
 }
 
 // DeleteFlowlogResponse is the response struct for api DeleteFlowlog
 type DeleteFlowlogResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
 	Success   string `json:"Success" xml:"Success"`
+	RequestId string `json:"RequestId" xml:"RequestId"`
 }
 
 // CreateDeleteFlowlogRequest creates a request to invoke DeleteFlowlog API
@@ -92,7 +93,7 @@ func CreateDeleteFlowlogRequest() (request *DeleteFlowlogRequest) {
 	request = &DeleteFlowlogRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("Cbn", "2017-09-12", "DeleteFlowlog", "cbn", "openAPI")
+	request.InitWithApiInfo("Cbn", "2017-09-12", "DeleteFlowlog", "", "")
 	request.Method = requests.POST
 	return
 }

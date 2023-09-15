@@ -77,10 +77,10 @@ type DeleteMetricRulesRequest struct {
 // DeleteMetricRulesResponse is the response struct for api DeleteMetricRules
 type DeleteMetricRulesResponse struct {
 	*responses.BaseResponse
-	Success   bool   `json:"Success" xml:"Success"`
 	Code      string `json:"Code" xml:"Code"`
 	Message   string `json:"Message" xml:"Message"`
 	RequestId string `json:"RequestId" xml:"RequestId"`
+	Success   bool   `json:"Success" xml:"Success"`
 }
 
 // CreateDeleteMetricRulesRequest creates a request to invoke DeleteMetricRules API

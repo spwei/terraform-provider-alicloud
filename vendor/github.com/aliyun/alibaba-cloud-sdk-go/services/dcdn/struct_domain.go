@@ -17,5 +17,6 @@ package dcdn
 
 // Domain is a nested struct in dcdn response
 type Domain struct {
-	DomainName string `json:"DomainName" xml:"DomainName"`
+	DomainName    string             `json:"DomainName" xml:"DomainName"`
+	DefenseScenes []DefenseSceneItem `json:"DefenseScenes" xml:"DefenseScenes"`
 }

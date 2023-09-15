@@ -70,7 +70,7 @@ func TestAccAlicloudMSEClustersDataSource(t *testing.T) {
 			"clusters.0.app_version":      CHECKSET,
 			"clusters.0.cluster_name":     name,
 			"clusters.0.cluster_id":       CHECKSET,
-			"clusters.0.cluster_type":     "Eureka",
+			"clusters.0.cluster_type":     "Nacos-Ans",
 			"clusters.0.id":               CHECKSET,
 			"clusters.0.instance_id":      CHECKSET,
 			"clusters.0.internet_address": CHECKSET,
@@ -104,31 +104,29 @@ func TestAccAlicloudMSEClustersDataSource(t *testing.T) {
 		existMapFunc: existMseClusterMapFunc,
 		fakeMapFunc:  fakeMseClusterMapFunc,
 	}
-	preCheck := func() {
-		testAccPreCheckWithNoDefaultVpc(t)
-	}
-	mseClustersInfo.dataSourceTestCheckWithPreCheck(t, 0, preCheck, nameRegexConf, idsConf, statusConf, allConf)
+	mseClustersInfo.dataSourceTestCheck(t, 0, nameRegexConf, idsConf, statusConf, allConf)
 }
 
 func dataSourceMseClustersDependence(name string) string {
 	return fmt.Sprintf(`
 	data "alicloud_vpcs" "default" {
-	  is_default = true
+	  name_regex = "^default-NODELETING$"
 	}
 	data "alicloud_vswitches" "default" {
 	  vpc_id = data.alicloud_vpcs.default.ids.0
 	}
 	
 	resource "alicloud_mse_cluster" "default" {
-	  cluster_specification = "MSE_SC_1_2_200_c"
-	  cluster_type = "Eureka"
-	  cluster_version = "EUREKA_1_9_3"
+	  cluster_specification = "MSE_SC_1_2_60_c"
+	  cluster_type = "Nacos-Ans"
+	  cluster_version = "NACOS_2_0_0"
 	  instance_count = 1
 	  net_type = "privatenet"
 	  vswitch_id = data.alicloud_vswitches.default.ids.0
 	  pub_network_flow = "1"
 	  acl_entry_list= ["127.0.0.1/32"]
 	  cluster_alias_name= "%s"
+      mse_version = "mse_dev"
 	}
 	`, name)
 }

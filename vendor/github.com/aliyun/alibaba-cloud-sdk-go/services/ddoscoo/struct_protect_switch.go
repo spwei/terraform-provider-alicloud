@@ -17,14 +17,14 @@ package ddoscoo
 
 // ProtectSwitch is a nested struct in ddoscoo response
 type ProtectSwitch struct {
-	Domain               string `json:"Domain" xml:"Domain"`
 	BlackWhiteListEnable int    `json:"BlackWhiteListEnable" xml:"BlackWhiteListEnable"`
-	RegionBlockEnable    int    `json:"RegionBlockEnable" xml:"RegionBlockEnable"`
-	CcEnable             int    `json:"CcEnable" xml:"CcEnable"`
-	CcCustomRuleEnable   int    `json:"CcCustomRuleEnable" xml:"CcCustomRuleEnable"`
-	PreciseRuleEnable    int    `json:"PreciseRuleEnable" xml:"PreciseRuleEnable"`
-	AiRuleEnable         int    `json:"AiRuleEnable" xml:"AiRuleEnable"`
-	CcTemplate           string `json:"CcTemplate" xml:"CcTemplate"`
 	AiTemplate           string `json:"AiTemplate" xml:"AiTemplate"`
+	PreciseRuleEnable    int    `json:"PreciseRuleEnable" xml:"PreciseRuleEnable"`
+	Domain               string `json:"Domain" xml:"Domain"`
 	AiMode               string `json:"AiMode" xml:"AiMode"`
+	AiRuleEnable         int    `json:"AiRuleEnable" xml:"AiRuleEnable"`
+	RegionBlockEnable    int    `json:"RegionBlockEnable" xml:"RegionBlockEnable"`
+	CcTemplate           string `json:"CcTemplate" xml:"CcTemplate"`
+	CcCustomRuleEnable   int    `json:"CcCustomRuleEnable" xml:"CcCustomRuleEnable"`
+	CcEnable             int    `json:"CcEnable" xml:"CcEnable"`
 }

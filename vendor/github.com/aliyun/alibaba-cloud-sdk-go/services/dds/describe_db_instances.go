@@ -81,6 +81,7 @@ type DescribeDBInstancesRequest struct {
 	SecurityToken         string                    `position:"Query" name:"SecurityToken"`
 	Engine                string                    `position:"Query" name:"Engine"`
 	PageSize              requests.Integer          `position:"Query" name:"PageSize"`
+	DBNodeType            string                    `position:"Query" name:"DBNodeType"`
 	DBInstanceId          string                    `position:"Query" name:"DBInstanceId"`
 	DBInstanceDescription string                    `position:"Query" name:"DBInstanceDescription"`
 	DBInstanceStatus      string                    `position:"Query" name:"DBInstanceStatus"`
@@ -107,10 +108,10 @@ type DescribeDBInstancesTag struct {
 // DescribeDBInstancesResponse is the response struct for api DescribeDBInstances
 type DescribeDBInstancesResponse struct {
 	*responses.BaseResponse
-	RequestId   string                           `json:"RequestId" xml:"RequestId"`
-	PageNumber  int                              `json:"PageNumber" xml:"PageNumber"`
-	PageSize    int                              `json:"PageSize" xml:"PageSize"`
 	TotalCount  int                              `json:"TotalCount" xml:"TotalCount"`
+	RequestId   string                           `json:"RequestId" xml:"RequestId"`
+	PageSize    int                              `json:"PageSize" xml:"PageSize"`
+	PageNumber  int                              `json:"PageNumber" xml:"PageNumber"`
 	DBInstances DBInstancesInDescribeDBInstances `json:"DBInstances" xml:"DBInstances"`
 }
 
@@ -119,7 +120,7 @@ func CreateDescribeDBInstancesRequest() (request *DescribeDBInstancesRequest) {
 	request = &DescribeDBInstancesRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("Dds", "2015-12-01", "DescribeDBInstances", "Dds", "openAPI")
+	request.InitWithApiInfo("Dds", "2015-12-01", "DescribeDBInstances", "dds", "openAPI")
 	request.Method = requests.POST
 	return
 }

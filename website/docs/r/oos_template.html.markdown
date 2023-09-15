@@ -59,8 +59,9 @@ The following arguments are supported:
 * `auto_delete_executions` - (Optional) When deleting a template, whether to delete its related executions. Default to `false`.
 * `template_name` - (Required, ForceNew) The name of the template. The template name can be up to 200 characters in length. The name can contain letters, digits, hyphens (-), and underscores (_). It cannot start with `ALIYUN`, `ACS`, `ALIBABA`, or `ALICLOUD`.
 * `version_name` - (Optional) The name of template version.
+* `resource_group_id` (Optional, Computed, Available in 1.177.0+) The ID of resource group which the template belongs.  
 * `tags` - (Optional) A mapping of tags to assign to the resource.
-                    
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -82,6 +83,6 @@ The following attributes are exported:
 
 OOS Template can be imported using the id or template_name, e.g.
 
-```
+```shell
 $ terraform import alicloud_oos_template.example template_name
 ```

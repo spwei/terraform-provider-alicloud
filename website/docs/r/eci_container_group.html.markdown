@@ -7,28 +7,49 @@ description: |-
   Provides a Alicloud ECI Container Group resource.
 ---
 
-# alicloud\_eci\_container\_group
+# alicloud_eci_container_group
 
 Provides ECI Container Group resource.
 
-For information about ECI Container Group and how to use it, see [What is Container Group](https://www.alibabacloud.com/help/en/doc-detail/90341.htm).
+For information about ECI Container Group and how to use it, see [What is Container Group](https://www.alibabacloud.com/help/en/elastic-container-instance/latest/api-eci-2018-08-08-createcontainergroup).
 
--> **NOTE:** Available in v1.111.0+.
+-> **NOTE:** Available since v1.111.0.
 
 ## Example Usage
 
 Basic Usage
 
 ```terraform
-resource "alicloud_eci_container_group" "example" {
-  container_group_name = "tf-testacc-eci-gruop"
+variable "name" {
+  default = "tf-example"
+}
+
+data "alicloud_eci_zones" "default" {}
+resource "alicloud_vpc" "default" {
+  vpc_name   = var.name
+  cidr_block = "10.0.0.0/8"
+}
+resource "alicloud_vswitch" "default" {
+  vswitch_name = var.name
+  cidr_block   = "10.1.0.0/16"
+  vpc_id       = alicloud_vpc.default.id
+  zone_id      = data.alicloud_eci_zones.default.zones.0.zone_ids.0
+}
+resource "alicloud_security_group" "default" {
+  name   = var.name
+  vpc_id = alicloud_vpc.default.id
+}
+
+resource "alicloud_eci_container_group" "default" {
+  container_group_name = var.name
   cpu                  = 8.0
   memory               = 16.0
   restart_policy       = "OnFailure"
-  security_group_id    = alicloud_security_group.group.id
-  vswitch_id           = data.alicloud_vpcs.default.vpcs.0.vswitch_ids.0
+  security_group_id    = alicloud_security_group.default.id
+  vswitch_id           = alicloud_vswitch.default.id
   tags = {
-    TF = "create"
+    Created = "TF",
+    For     = "example",
   }
 
   containers {
@@ -38,7 +59,7 @@ resource "alicloud_eci_container_group" "example" {
     image_pull_policy = "IfNotPresent"
     commands          = ["/bin/sh", "-c", "sleep 9999"]
     volume_mounts {
-      mount_path = "/tmp/test"
+      mount_path = "/tmp/example"
       read_only  = false
       name       = "empty1"
     }
@@ -47,8 +68,28 @@ resource "alicloud_eci_container_group" "example" {
       protocol = "TCP"
     }
     environment_vars {
-      key   = "test"
+      key   = "name"
       value = "nginx"
+    }
+    liveness_probe {
+      period_seconds        = "5"
+      initial_delay_seconds = "5"
+      success_threshold     = "1"
+      failure_threshold     = "3"
+      timeout_seconds       = "1"
+      exec {
+        commands = ["cat /tmp/healthy"]
+      }
+    }
+    readiness_probe {
+      period_seconds        = "5"
+      initial_delay_seconds = "5"
+      success_threshold     = "1"
+      failure_threshold     = "3"
+      timeout_seconds       = "1"
+      exec {
+        commands = ["cat /tmp/healthy"]
+      }
     }
   }
   containers {
@@ -79,166 +120,281 @@ resource "alicloud_eci_container_group" "example" {
 The following arguments are supported:
 
 * `container_group_name` - (Required, ForceNew) The name of the container group.
-* `containers` - (Required) The list of containers.
-* `cpu` - (Optional) The amount of CPU resources allocated to the container group.
-* `dns_config` - (Optional) The structure of dnsConfig.
-* `host_aliases` - (Optional, ForceNew) HostAliases.
-* `init_containers` - (Optional) The list of initContainers.
-* `instance_type` - (Optional, ForceNew) The type of the ECS instance.
-* `memory` - (Optional) The amount of memory resources allocated to the container group.
-* `ram_role_name` - (Optional, ForceNew) The RAM role that the container group assumes. ECI and ECS share the same RAM role.
-* `resource_group_id` - (Optional, Computed, ForceNew) The ID of the resource group.
-* `restart_policy` - (Optional) The restart policy of the container group. Default to `Always`.
-* `security_group_id` - (Required, ForceNew) The ID of the security group to which the container group belongs. Container groups within the same security group can access each other.
-* `volumes` - (Optional) The list of volumes.
 * `vswitch_id` - (Required, ForceNew) The ID of the VSwitch. Currently, container groups can only be deployed in VPC networks. The number of IP addresses in the VSwitch CIDR block determines the maximum number of container groups that can be created in the VSwitch. Before you can create an ECI instance, plan the CIDR block of the VSwitch.
-* `zone_id` - (Optional, Computed, ForceNew) The ID of the zone where you want to deploy the container group. If no value is specified, the system assigns a zone to the container group. By default, no value is specified.
+**NOTE:** From version 1.208.0, You can specify up to 10 `vswitch_id`. Separate multiple vSwitch IDs with commas (,), such as vsw-***,vsw-***.  attribute `vswitch_id` updating diff will be ignored when you set multiple vSwitchIds, there is only one valid `vswitch_id` exists in the set vSwitchIds.
+* `security_group_id` - (Required, ForceNew) The ID of the security group to which the container group belongs. Container groups within the same security group can access each other.
+* `instance_type` - (Optional, ForceNew) The type of the ECS instance.
+* `zone_id` - (Optional, ForceNew) The ID of the zone where you want to deploy the container group. If no value is specified, the system assigns a zone to the container group. By default, no value is specified.
+* `cpu` - (Optional, Float) The amount of CPU resources allocated to the container group.
+* `memory` - (Optional, Float) The amount of memory resources allocated to the container group.
+* `ram_role_name` - (Optional, ForceNew) The RAM role that the container group assumes. ECI and ECS share the same RAM role.
+* `resource_group_id` - (Optional) The ID of the resource group. **NOTE:** From version 1.208.0, `resource_group_id` can be modified.
+* `restart_policy` - (Optional) The restart policy of the container group. Valid values: `Always`, `Never`, `OnFailure`.
+* `auto_match_image_cache` - (Optional, Bool, Available since v1.166.0) Specifies whether to automatically match the image cache. Default value: `false`. Valid values: `true` and `false`.
+* `plain_http_registry` - (Optional, Available since v1.170.0) The address of the self-built mirror warehouse. When creating an image cache from an image in a self-built image repository using the HTTP protocol, you need to configure this parameter so that the ECI uses the HTTP protocol to pull the image to avoid image pull failure due to different protocols.
+* `insecure_registry` - (Optional, Available since v1.170.0) The address of the self-built mirror warehouse. When creating an image cache using an image in a self-built image repository with a self-signed certificate, you need to configure this parameter to skip certificate authentication to avoid image pull failure due to certificate authentication failure.
+* `auto_create_eip` - (Optional, Bool, Available since v1.170.0) Specifies whether to automatically create an EIP and bind the EIP to the elastic container instance.
+* `eip_bandwidth` - (Optional, Int, Available since v1.170.0) The bandwidth of the EIP. Default value: `5`.
+* `eip_instance_id` - (Optional, Available since v1.170.0) The ID of the elastic IP address (EIP).
+* `containers` - (Required, Set) The list of containers. See [`containers`](#containers) below.
+* `init_containers` - (Optional, Set) The list of initContainers. See [`init_containers`](#init_containers) below.
+* `dns_config` - (Optional, Set) The structure of dnsConfig. See [`dns_config`](#dns_config) below.
+* `eci_security_context` - (Optional, ForceNew, Set) The security context of the container group. See [`eci_security_context`](#eci_security_context) below.
+* `host_aliases` - (Optional, ForceNew, Set) HostAliases. See [`host_aliases`](#host_aliases) below.
+* `volumes` - (Optional, Set) The list of volumes. See [`volumes`](#volumes) below.
+* `image_registry_credential` - (Optional, Set, Available since v1.141.0) The image registry credential. See [`image_registry_credential`](#image_registry_credential) below.
+* `acr_registry_info` - (Optional, ForceNew, Set, Available since v1.189.0) The ACR enterprise edition example properties. See [`acr_registry_info`](#acr_registry_info) below.
+* `tags` - (Optional) A mapping of tags to assign to the resource.
+  - Key: It can be up to 64 characters in length. It cannot begin with "aliyun", "acs:", "http://", or "https://". It cannot be a null string.
+  - Value: It can be up to 128 characters in length. It cannot begin with "aliyun", "acs:", "http://", or "https://". It can be a null string.
 
-#### Block volumes
+### `acr_registry_info`
 
-The volumes supports the following: 
+The acr_registry_info supports the following:
+
+* `instance_id` - (Optional) The ACR enterprise edition example ID.
+* `region_id` - (Optional) The ACR enterprise edition instance belongs to the region.
+* `instance_name` - (Optional) The name of the ACR enterprise edition instance.
+* `domains` - (Optional, List) The domain name of the ACR Enterprise Edition instance. Defaults to all domain names of the corresponding instance. Support specifying individual domain names, multiple separated by half comma.
+
+### `image_registry_credential`
+
+The image_registry_credential supports the following:
+
+* `user_name` - (Required) The username used to log on to the image repository. It is required when `image_registry_credential` is configured.
+* `password` - (Required) The password used to log on to the image repository. It is required when `image_registry_credential` is configured.
+* `server` - (Required) The address of the image repository. It is required when `image_registry_credential` is configured.
+
+### `volumes`
+
+The volumes supports the following:
+
 * `name` - (Optional) The name of the volume.
 * `type` - (Optional) The type of the volume.
-* `config_file_volume_config_file_to_paths` - (Optional) ConfigFileVolumeConfigFileToPaths.
-
 * `disk_volume_disk_id` - (Optional, ForceNew) The ID of DiskVolume.
 * `disk_volume_fs_type` - (Optional, ForceNew) The system type of DiskVolume.
-
 * `flex_volume_driver` - (Optional, ForceNew) The name of the FlexVolume driver.
 * `flex_volume_fs_type` - (Optional, ForceNew) The type of the mounted file system. The default value is determined by the script of FlexVolume.
 * `flex_volume_options` - (Optional, ForceNew) The list of FlexVolume objects. Each object is a key-value pair contained in a JSON string.
-
 * `nfs_volume_path` - (Optional) The path to the NFS volume.
-* `nfs_volume_read_only` - (Optional) The nfs volume read only. Default to `false`.
 * `nfs_volume_server` - (Optional) The address of the NFS server.
+* `nfs_volume_read_only` - (Optional, Bool) The nfs volume read only. Default value: `false`.
+* `config_file_volume_config_file_to_paths` - (Optional, Set) The paths of the ConfigFile volume. See [`config_file_volume_config_file_to_paths`](#volumes-config_file_volume_config_file_to_paths) below.
+-> **NOTE:** Every volumes mounted must have `name` and `type` attributes.
 
--> **NOTE:** Every volumes mounted must have name and type attributes.
+### `volumes-config_file_volume_config_file_to_paths`
 
-#### Block config_file_volume_config_file_to_paths
-
-The config_file_volume_config_file_to_paths supports the following: 
+The config_file_volume_config_file_to_paths supports the following:
 
 * `content` - (Optional) The content of the configuration file. Maximum size: 32 KB.
 * `path` - (Optional) The relative file path.
 
-#### Block init_containers
+### `host_aliases`
 
-The init_containers supports the following: 
+The host_aliases supports the following:
 
-* `args` - (Optional) The arguments passed to the commands.
-* `commands` - (Optional) The commands run by the init container.
-* `cpu` - (Optional) The amount of CPU resources allocated to the container.
-* `environment_vars` - (Optional) The structure of environmentVars.
-* `gpu` - (Optional) The number GPUs.
-* `image` - (Optional) The image of the container.
-* `image_pull_policy` - (Optional) The restart policy of the image.
-* `memory` - (Optional) The amount of memory resources allocated to the container.
-* `name` - (Optional) The name of the init container.
-* `ports` - (Optional, ForceNew) The structure of port.
-* `volume_mounts` - (Optional) The structure of volumeMounts.
-* `working_dir` - (Optional) The working directory of the container.
+* `ip` - (Optional, ForceNew) The IP address of the host.
+* `hostnames` - (Optional, ForceNew, List) The information about the host.
 
-#### Block volume_mounts in init_containers
+### `eci_security_context`
 
-The volume_mounts supports the following: 
+The eci_security_context supports the following:
 
-* `mount_path` - (Optional) The directory of the mounted volume. Data under this directory will be overwritten by the data in the volume.
-* `name` - (Optional) The name of the mounted volume.
-* `read_only` - (Optional) Default to `false`.
+* `sysctls` - (Optional, ForceNew, Set) Sysctls hold a list of namespaced sysctls used for the pod. Pods with unsupported sysctls (by the container runtime) might fail to launch. See [`sysctls`](#eci_security_context-sysctls) below.
 
-#### Block ports in init_containers
+### `eci_security_context-sysctls`
 
-The ports supports the following: 
+The sysctls supports the following:
 
-* `port` - (Optional, ForceNew) The port number. Valid values: 1 to 65535.
-* `protocol` - (Optional, ForceNew) Valid values: TCP and UDP.
+* `name` - (Optional, ForceNew) The name of the security context that the container group runs.
+* `value` - (Optional, ForceNew) The variable value of the security context that the container group runs.
 
-#### Block environment_vars in init_containers
+### `dns_config`
 
-The environment_vars supports the following: 
+The dns_config supports the following:
 
-* `key` - (Optional) The name of the variable. The name can be 1 to 128 characters in length and can contain letters, digits, and underscores (_). It cannot start with a digit.
-* `value` - (Optional) The value of the variable. The value can be 0 to 256 characters in length.
+* `name_servers` - (Optional, List) The list of DNS server IP addresses.
+* `searches` - (Optional, List) The list of DNS lookup domains.
+* `options` - (Optional, Set) The structure of options. See [`options`](#dns_config-options) below.
 
-#### Block host_aliases
+### `dns_config-options`
 
-The host_aliases supports the following: 
-
-* `hostnames` - (Optional, ForceNew) Adds a host name.
-* `ip` - (Optional, ForceNew) Adds an IP address.
-
-#### Block dns_config
-
-The dns_config supports the following: 
-
-* `name_servers` - (Optional) The list of DNS server IP addresses.
-* `options` - (Optional) The structure of options.
-* `searches` - (Optional) The list of DNS lookup domains.
-
-#### Block options
-
-The options supports the following: 
+The options supports the following:
 
 * `name` - (Optional) The name of the object.
 * `value` - (Optional) The value of the object.
 
-#### Block containers
+### `init_containers`
 
-The containers supports the following: 
+The init_containers supports the following:
 
-* `args` - (Optional) The arguments passed to the commands.
-* `commands` - (Optional) The commands run by the init container.
-* `cpu` - (Optional) The amount of CPU resources allocated to the container.
-* `environment_vars` - (Optional) The structure of environmentVars.
-* `gpu` - (Optional) The number GPUs.
-* `image` - (Required) The image of the container.
-* `image_pull_policy` - (Optional) The restart policy of the image.
-* `memory` - (Optional) The amount of memory resources allocated to the container.
-* `name` - (Required) The name of the init container.
-* `ports` - (Optional, ForceNew) The structure of port.
-* `volume_mounts` - (Optional) The structure of volumeMounts.
+* `name` - (Optional) The name of the init container.
+* `cpu` - (Optional, Float) The amount of CPU resources allocated to the container. Default value: `0`.
+* `gpu` - (Optional, Int) The number GPUs. Default value: `0`.
+* `memory` - (Optional, Float) The amount of memory resources allocated to the container. Default value: `0`.
+* `image` - (Optional) The image of the container.
+* `image_pull_policy` - (Optional) The restart policy of the image. Default value: `IfNotPresent`. Valid values: `Always`, `IfNotPresent`, `Never`.
 * `working_dir` - (Optional) The working directory of the container.
+* `commands` - (Optional, List) The commands run by the init container.
+* `args` - (Optional, List) The arguments passed to the commands.
+* `ports` - (Optional, ForceNew, Set) The structure of port. See [`ports`](#init_containers-ports) below.
+* `environment_vars` - (Optional, Set) The structure of environmentVars. See [`environment_vars`](#init_containers-environment_vars) below.
+* `volume_mounts` - (Optional, Set) The structure of volumeMounts. See [`volume_mounts`](#init_containers-volume_mounts) below.
+* `ready` - (Optional, Available since v1.208.0) Indicates whether the container passed the readiness probe.
+* `restart_count` - (Optional, Available since v1.208.0) The number of times that the container restarted.
 
-#### Block volume_mounts
+### `init_containers-ports`
 
-The volume_mounts supports the following: 
+The ports supports the following:
 
-* `mount_path` - (Optional) The directory of the mounted volume. Data under this directory will be overwritten by the data in the volume.
-* `name` - (Optional) The name of the mounted volume.
-* `read_only` - (Optional) Default to `false`.
+* `port` - (Optional, ForceNew, Int) The port number. Valid values: `1` to `65535`.
+* `protocol` - (Optional, ForceNew) The type of the protocol. Valid values: `TCP` and `UDP`.
 
-#### Block ports
+### `init_containers-environment_vars`
 
-The ports supports the following: 
-
-* `port` - (Optional, ForceNew) The port number. Valid values: 1 to 65535.
-* `protocol` - (Optional, ForceNew) Valid values: TCP and UDP.
-
-#### Block environment_vars
-
-The environment_vars supports the following: 
+The environment_vars supports the following:
 
 * `key` - (Optional) The name of the variable. The name can be 1 to 128 characters in length and can contain letters, digits, and underscores (_). It cannot start with a digit.
 * `value` - (Optional) The value of the variable. The value can be 0 to 256 characters in length.
+
+### `init_containers-volume_mounts`
+
+The volume_mounts supports the following:
+
+* `mount_path` - (Optional) The directory of the mounted volume. Data under this directory will be overwritten by the data in the volume.
+* `name` - (Optional) The name of the mounted volume.
+* `read_only` - (Optional, Bool) Specifies whether the mount path is read-only. Default value: `false`.
+
+### `containers`
+
+The containers supports the following:
+
+* `name` - (Required) The name of the init container.
+* `image` - (Required) The image of the container.
+* `cpu` - (Optional, Float) The amount of CPU resources allocated to the container. Default value: `0`.
+* `gpu` - (Optional, Int) The number GPUs. Default value: `0`.
+* `memory` - (Optional, Float) The amount of memory resources allocated to the container. Default value: `0`.
+* `image_pull_policy` - (Optional) The restart policy of the image. Default value: `IfNotPresent`. Valid values: `Always`, `IfNotPresent`, `Never`.
+* `working_dir` - (Optional) The working directory of the container.
+* `commands` - (Optional, List) The commands run by the init container.
+* `args` - (Optional, List) The arguments passed to the commands.
+* `ports` - (Optional, ForceNew, Set) The structure of port. See [`ports`](#containers-ports) below.
+* `environment_vars` - (Optional, Set) The structure of environmentVars. See [`environment_vars`](#containers-environment_vars) below.
+* `volume_mounts` - (Optional, Set) The structure of volumeMounts. See [`volume_mounts`](#containers-volume_mounts) below.
+* `liveness_probe` - (Optional, Set, Available since v1.189.0) The health check of the container. See [`liveness_probe`](#containers-liveness_probe) below.
+* `readiness_probe` - (Optional, Set, Available since v1.189.0) The health check of the container. See [`readiness_probe`](#containers-readiness_probe) below.
+* `ready` - (Optional, Available since v1.208.0) Indicates whether the container passed the readiness probe.
+* `restart_count` - (Optional, Available since v1.208.0) The number of times that the container restarted.
+
+### `containers-ports`
+
+The ports supports the following:
+
+* `port` - (Optional, ForceNew, Int) The port number. Valid values: `1` to `65535`.
+* `protocol` - (Optional, ForceNew) The type of the protocol. Valid values: `TCP` and `UDP`.
+
+### `containers-environment_vars`
+
+The environment_vars supports the following:
+
+* `key` - (Optional) The name of the variable. The name can be 1 to 128 characters in length and can contain letters, digits, and underscores (_). It cannot start with a digit.
+* `value` - (Optional) The value of the variable. The value can be 0 to 256 characters in length.
+
+### `containers-volume_mounts`
+
+The volume_mounts supports the following:
+
+* `mount_path` - (Optional) The directory of the mounted volume. Data under this directory will be overwritten by the data in the volume.
+* `name` - (Optional) The name of the mounted volume.
+* `read_only` - (Optional, Bool) Specifies whether the volume is read-only. Default value: `false`.
+
+### `containers-liveness_probe`
+
+The liveness_probe supports the following:
+
+* `initial_delay_seconds` - (Optional, Int) Check the time to start execution, calculated from the completion of container startup.
+* `period_seconds` - (Optional, Int) Buffer time for the program to handle operations before closing.
+* `timeout_seconds` - (Optional, Int) Check the timeout, the default is 1 second, the minimum is 1 second.
+* `success_threshold` - (Optional, Int) The check count threshold for re-identifying successful checks since the last failed check (must be consecutive successes), default is 1. Current must be 1.
+* `failure_threshold` - (Optional, Int) Threshold for the number of checks that are determined to have failed since the last successful check (must be consecutive failures), default is 3.
+* `exec` - (Optional, Set) Health check using command line method. See [`exec`](#containers-liveness_probe-exec) below.
+* `tcp_socket` - (Optional, Set) Health check using TCP socket method. See [`tcp_socket`](#containers-liveness_probe-tcp_socket) below.
+* `http_get` - (Optional, Set) Health check using HTTP request method. See [`http_get`](#containers-liveness_probe-http_get) below.
+
+### `containers-liveness_probe-exec`
+
+The exec supports the following:
+
+* `commands` - (Optional, List) Commands to be executed inside the container when performing health checks using the command line method.
+
+### `containers-liveness_probe-tcp_socket`
+
+The tcp_socket supports the following:
+
+* `port` - (Optional, Int) The port for TCP socket detection when using the TCP socket method for health check.
+
+### `containers-liveness_probe-http_get`
+
+The http_get supports the following:
+
+* `scheme` - (Optional) The protocol type corresponding to the HTTP Get request when using the HTTP request method for health checks. Valid values: `HTTP`, `HTTPS`.
+* `port` - (Optional, Int) When using the HTTP request method for health check, the port number for HTTP Get request detection.
+* `path` - (Optional) The path of HTTP Get request detection when setting the postStart callback function using the HTTP request method.
+
+### `containers-readiness_probe`
+
+The readiness_probe supports the following:
+
+* `initial_delay_seconds` - (Optional, Int) Check the time to start execution, calculated from the completion of container startup.
+* `period_seconds` - (Optional, Int) Buffer time for the program to handle operations before closing.
+* `timeout_seconds` - (Optional, Int) Check the timeout, the default is 1 second, the minimum is 1 second.
+* `success_threshold` - (Optional, Int) The check count threshold for re-identifying successful checks since the last failed check (must be consecutive successes), default is 1. Current must be 1.
+* `failure_threshold` - (Optional, Int) Threshold for the number of checks that are determined to have failed since the last successful check (must be consecutive failures), default is 3.
+* `exec` - (Optional) Health check using command line method. See [`exec`](#containers-readiness_probe-exec) below.
+* `tcp_socket` - (Optional) Health check using TCP socket method. See [`tcp_socket`](#containers-readiness_probe-tcp_socket) below.
+* `http_get` - (Optional) Health check using HTTP request method. See [`http_get`](#containers-readiness_probe-http_get) below.
+
+### `containers-readiness_probe-exec`
+
+The exec supports the following:
+
+* `commands` - (Optional, List) Commands to be executed inside the container when performing health checks using the command line method.
+
+### `containers-readiness_probe-tcp_socket`
+
+The tcp_socket supports the following:
+
+* `port` - (Optional, Int) The port for TCP socket detection when using the TCP socket method for health check.
+
+### `containers-readiness_probe-http_get`
+
+The http_get supports the following:
+
+* `scheme` - (Optional) The protocol type corresponding to the HTTP Get request when using the HTTP request method for health checks. Valid values: `HTTP`, `HTTPS`.
+* `port` - (Optional, Int) When using the HTTP request method for health check, the port number for HTTP Get request detection.
+* `path` - (Optional) The path of HTTP Get request detection when setting the postStart callback function using the HTTP request method.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
 * `id` - The resource ID in terraform of Container Group. Value as `container_group_id`.
+* `internet_ip` - (Available since v1.170.0) The Public IP of the container group.
+* `intranet_ip` - (Available since v1.170.0) The Private IP of the container group.
 * `status` - The status of container group.
 
-### Timeouts
+## Timeouts
 
 The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
 
 * `create` - (Defaults to 20 mins) Used when create the Container Group.
 * `update` - (Defaults to 20 mins) Used when update the Container Group.
+* `delete` - (Defaults to 5 mins) Used when delete the Container Group.
 
 ## Import
 
 ECI Container Group can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_eci_container_group.example <container_group_id>
 ```

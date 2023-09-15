@@ -80,13 +80,13 @@ type DescribeGroupMonitoringAgentProcessRequest struct {
 // DescribeGroupMonitoringAgentProcessResponse is the response struct for api DescribeGroupMonitoringAgentProcess
 type DescribeGroupMonitoringAgentProcessResponse struct {
 	*responses.BaseResponse
+	RequestId  string    `json:"RequestId" xml:"RequestId"`
+	Success    bool      `json:"Success" xml:"Success"`
 	Code       string    `json:"Code" xml:"Code"`
 	Message    string    `json:"Message" xml:"Message"`
-	Success    bool      `json:"Success" xml:"Success"`
-	RequestId  string    `json:"RequestId" xml:"RequestId"`
-	Total      string    `json:"Total" xml:"Total"`
-	PageSize   string    `json:"PageSize" xml:"PageSize"`
 	PageNumber string    `json:"PageNumber" xml:"PageNumber"`
+	PageSize   string    `json:"PageSize" xml:"PageSize"`
+	Total      string    `json:"Total" xml:"Total"`
 	Processes  Processes `json:"Processes" xml:"Processes"`
 }
 

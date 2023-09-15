@@ -78,10 +78,10 @@ type DeleteEventRuleTargetsRequest struct {
 // DeleteEventRuleTargetsResponse is the response struct for api DeleteEventRuleTargets
 type DeleteEventRuleTargetsResponse struct {
 	*responses.BaseResponse
-	Success   bool   `json:"Success" xml:"Success"`
 	Code      string `json:"Code" xml:"Code"`
 	Message   string `json:"Message" xml:"Message"`
 	RequestId string `json:"RequestId" xml:"RequestId"`
+	Success   bool   `json:"Success" xml:"Success"`
 }
 
 // CreateDeleteEventRuleTargetsRequest creates a request to invoke DeleteEventRuleTargets API

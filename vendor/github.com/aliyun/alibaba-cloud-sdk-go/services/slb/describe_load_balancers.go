@@ -91,10 +91,12 @@ type DescribeLoadBalancersRequest struct {
 	PageNumber            requests.Integer            `position:"Query" name:"PageNumber"`
 	PageSize              requests.Integer            `position:"Query" name:"PageSize"`
 	AddressType           string                      `position:"Query" name:"AddressType"`
+	InstanceChargeType    string                      `position:"Query" name:"InstanceChargeType"`
 	Fuzzy                 string                      `position:"Query" name:"Fuzzy"`
 	BusinessStatus        string                      `position:"Query" name:"BusinessStatus"`
 	Address               string                      `position:"Query" name:"Address"`
 	ResourceOwnerAccount  string                      `position:"Query" name:"ResourceOwnerAccount"`
+	FilterByTagOrName     requests.Boolean            `position:"Query" name:"FilterByTagOrName"`
 	OwnerAccount          string                      `position:"Query" name:"OwnerAccount"`
 	LoadBalancerStatus    string                      `position:"Query" name:"LoadBalancerStatus"`
 	VpcId                 string                      `position:"Query" name:"VpcId"`

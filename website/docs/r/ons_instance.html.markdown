@@ -1,5 +1,5 @@
 ---
-subcategory: "RocketMQ"
+subcategory: "RocketMQ (Ons)"
 layout: "alicloud"
 page_title: "Alicloud: alicloud_ons_instance"
 sidebar_current: "docs-alicloud-resource-ons-instance"
@@ -21,7 +21,7 @@ For more information about how to use it, see [RocketMQ Instance Management API]
 
 Basic Usage
 
-```terraform 
+```terraform
 resource "alicloud_ons_instance" "example" {
   instance_name = "tf-example-ons-instance"
   remark        = "tf-example-ons-instance-remark"
@@ -33,8 +33,8 @@ resource "alicloud_ons_instance" "example" {
 The following arguments are supported:
 
 
-* `name` - (Required, Deprecated in v1.97.0+) Replaced by `instance_name` after version 1.97.0.
-* `instance_name` - (Required, Available in v1.97.0+) Two instances on a single account in the same region cannot have the same name. The length must be 3 to 64 characters. Chinese characters, English letters digits and hyphen are allowed.
+* `name` - (Optional, Deprecated from v1.97.0+) Replaced by `instance_name` after version 1.97.0.
+* `instance_name` - (Optional, Available in v1.97.0+) Two instances on a single account in the same region cannot have the same name. The length must be 3 to 64 characters. Chinese characters, English letters digits and hyphen are allowed.
 * `remark` - (Optional) This attribute is a concise description of instance. The length cannot exceed 128.
 * `tags` - (Optional, Available in v1.97.0+) A mapping of tags to assign to the resource.
     - Key: It can be up to 64 characters in length. It cannot begin with "aliyun", "acs:", "http://", or "https://". It cannot be a null string.
@@ -54,6 +54,6 @@ The following attributes are exported:
 
 ONS INSTANCE can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_ons_instance.instance MQ_INST_1234567890_Baso1234567
 ```

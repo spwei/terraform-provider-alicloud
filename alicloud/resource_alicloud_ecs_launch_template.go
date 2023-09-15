@@ -328,10 +328,12 @@ func resourceAlicloudEcsLaunchTemplate() *schema.Resource {
 			"vpc_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"zone_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"system_disk_category": {
 				Type:          schema.TypeString,
@@ -387,14 +389,31 @@ func resourceAlicloudEcsLaunchTemplateCreate(d *schema.ResourceData, meta interf
 		for _, dataDisks := range v.(*schema.Set).List() {
 			dataDisksMap := make(map[string]interface{})
 			dataDisksArg := dataDisks.(map[string]interface{})
-			dataDisksMap["Category"] = dataDisksArg["category"]
+
+			if category, ok := dataDisksArg["category"].(string); ok && category != "" {
+				dataDisksMap["Category"] = category
+			}
+
+			if description, ok := dataDisksArg["description"].(string); ok && description != "" {
+				dataDisksMap["Description"] = description
+			}
+
+			if name, ok := dataDisksArg["name"].(string); ok && name != "" {
+				dataDisksMap["DiskName"] = name
+			}
+
+			if performanceLevel, ok := dataDisksArg["performance_level"].(string); ok && performanceLevel != "" {
+				dataDisksMap["PerformanceLevel"] = performanceLevel
+			}
+
+			if snapshotId, ok := dataDisksArg["snapshot_id"].(string); ok && snapshotId != "" {
+				dataDisksMap["SnapshotId"] = snapshotId
+			}
+
 			dataDisksMap["DeleteWithInstance"] = requests.NewBoolean(dataDisksArg["delete_with_instance"].(bool))
-			dataDisksMap["Description"] = dataDisksArg["description"]
 			dataDisksMap["Encrypted"] = fmt.Sprintf("%v", dataDisksArg["encrypted"].(bool))
-			dataDisksMap["DiskName"] = dataDisksArg["name"]
-			dataDisksMap["PerformanceLevel"] = dataDisksArg["performance_level"]
 			dataDisksMap["Size"] = requests.NewInteger(dataDisksArg["size"].(int))
-			dataDisksMap["SnapshotId"] = dataDisksArg["snapshot_id"]
+
 			dataDisksMaps = append(dataDisksMaps, dataDisksMap)
 		}
 		request["DataDisk"] = dataDisksMaps
@@ -637,6 +656,7 @@ func resourceAlicloudEcsLaunchTemplateCreate(d *schema.ResourceData, meta interf
 
 	return resourceAlicloudEcsLaunchTemplateRead(d, meta)
 }
+
 func resourceAlicloudEcsLaunchTemplateRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AliyunClient)
 	ecsService := EcsService{client}
@@ -765,6 +785,7 @@ func resourceAlicloudEcsLaunchTemplateRead(d *schema.ResourceData, meta interfac
 	d.Set("tags", tagsToMap(describeLaunchTemplateVersionsObject["LaunchTemplateData"].(map[string]interface{})["Tags"].(map[string]interface{})["InstanceTag"]))
 	return nil
 }
+
 func resourceAlicloudEcsLaunchTemplateUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AliyunClient)
 	ecsService := EcsService{client}
@@ -783,14 +804,14 @@ func resourceAlicloudEcsLaunchTemplateUpdate(d *schema.ResourceData, meta interf
 	}
 	// Remove one of the oldest and non-default version when the total number reach 30
 	if len(versions) > 29 {
-		var oldestVersion int64
+		var oldestVersion int
 		for _, version := range versions {
-			if !version.(map[string]interface{})["DefaultVersion"].(bool) && (oldestVersion == 0 || version.(map[string]interface{})["VersionNumber"].(int64) < oldestVersion) {
-				oldestVersion = version.(map[string]interface{})["VersionNumber"].(int64)
+			if !version.(map[string]interface{})["DefaultVersion"].(bool) && (oldestVersion == 0 || formatInt(version.(map[string]interface{})["VersionNumber"]) < oldestVersion) {
+				oldestVersion = formatInt(version.(map[string]interface{})["VersionNumber"])
 			}
 		}
 
-		err = deleteLaunchTemplateVersion(d.Id(), int(oldestVersion), meta)
+		err = deleteLaunchTemplateVersion(d.Id(), oldestVersion, meta)
 		if err != nil {
 			return WrapError(err)
 		}
@@ -815,14 +836,31 @@ func resourceAlicloudEcsLaunchTemplateUpdate(d *schema.ResourceData, meta interf
 		for i, DataDisksValue := range v.(*schema.Set).List() {
 			DataDisksMap := DataDisksValue.(map[string]interface{})
 			DataDisks[i] = make(map[string]interface{})
-			DataDisks[i]["Category"] = DataDisksMap["category"]
+
+			if category, ok := DataDisksMap["category"].(string); ok && category != "" {
+				DataDisks[i]["Category"] = category
+			}
+
+			if description, ok := DataDisksMap["description"].(string); ok && description != "" {
+				DataDisks[i]["Description"] = description
+			}
+
+			if name, ok := DataDisksMap["name"].(string); ok && name != "" {
+				DataDisks[i]["DiskName"] = name
+			}
+
+			if performanceLevel, ok := DataDisksMap["performance_level"].(string); ok && performanceLevel != "" {
+				DataDisks[i]["PerformanceLevel"] = performanceLevel
+			}
+
+			if snapshotId, ok := DataDisksMap["snapshot_id"].(string); ok && snapshotId != "" {
+				DataDisks[i]["SnapshotId"] = snapshotId
+			}
+
 			DataDisks[i]["DeleteWithInstance"] = DataDisksMap["delete_with_instance"]
-			DataDisks[i]["Description"] = DataDisksMap["description"]
 			DataDisks[i]["Encrypted"] = fmt.Sprintf("%v", DataDisksMap["encrypted"].(bool))
-			DataDisks[i]["DiskName"] = DataDisksMap["name"]
-			DataDisks[i]["PerformanceLevel"] = DataDisksMap["performance_level"]
 			DataDisks[i]["Size"] = DataDisksMap["size"]
-			DataDisks[i]["SnapshotId"] = DataDisksMap["snapshot_id"]
+
 		}
 		request["DataDisk"] = DataDisks
 
@@ -1178,6 +1216,7 @@ func resourceAlicloudEcsLaunchTemplateUpdate(d *schema.ResourceData, meta interf
 	d.Partial(false)
 	return resourceAlicloudEcsLaunchTemplateRead(d, meta)
 }
+
 func resourceAlicloudEcsLaunchTemplateDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AliyunClient)
 	action := "DeleteLaunchTemplate"
@@ -1212,6 +1251,7 @@ func resourceAlicloudEcsLaunchTemplateDelete(d *schema.ResourceData, meta interf
 	}
 	return nil
 }
+
 func getLaunchTemplateVersions(id string, meta interface{}) ([]interface{}, error) {
 	client := meta.(*connectivity.AliyunClient)
 	action := "DescribeLaunchTemplateVersions"

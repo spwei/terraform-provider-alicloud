@@ -11,11 +11,11 @@ description: |-
 
 Provides an RDS account resource and used to manage databases.
 
--> **DEPRECATED:**  This resource  has been deprecated from version `1.120.0`. Please use new resource [alicloud_rds_account](https://www.terraform.io/docs/providers/alicloud/r/rds_account.html).
+-> **DEPRECATED:**  This resource  has been deprecated from version `1.120.0`. Please use new resource [alicloud_rds_account](https://www.terraform.io/docs/providers/alicloud/r/rds_account).
 
 ## Example Usage
 
-```
+```terraform
 variable "creation" {
   default = "Rds"
 }
@@ -29,15 +29,15 @@ data "alicloud_zones" "default" {
 }
 
 resource "alicloud_vpc" "default" {
-  vpc_name       = var.name
+  vpc_name   = var.name
   cidr_block = "172.16.0.0/16"
 }
 
 resource "alicloud_vswitch" "default" {
-  vpc_id            = alicloud_vpc.default.id
-  cidr_block        = "172.16.0.0/24"
-  zone_id           = data.alicloud_zones.default.zones[0].id
-  vswitch_name      = var.name
+  vpc_id       = alicloud_vpc.default.id
+  cidr_block   = "172.16.0.0/24"
+  zone_id      = data.alicloud_zones.default.zones[0].id
+  vswitch_name = var.name
 }
 
 resource "alicloud_db_instance" "instance" {
@@ -66,7 +66,7 @@ The following arguments are supported:
 * `kms_encrypted_password` - (Optional, Available in 1.57.1+) An KMS encrypts password used to a db account. If the `password` is filled in, this field will be ignored.
 * `kms_encryption_context` - (Optional, MapString, Available in 1.57.1+) An KMS encryption context used to decrypt `kms_encrypted_password` before creating or updating a db account with `kms_encrypted_password`. See [Encryption Context](https://www.alibabacloud.com/help/doc-detail/42975.htm). It is valid when `kms_encrypted_password` is set.
 * `description` - (Optional) Database description. It cannot begin with https://. It must start with a Chinese character or English letter. It can include Chinese and English characters, underlines (_), hyphens (-), and numbers. The length may be 2-256 characters.
-* `type` - (Optional, ForceNew)Privilege type of account.
+* `type` - (Optional, ForceNew)Privilege type of account. The SQLServer engine does not support create high privilege accounts.
     - Normal: Common privilege.
     - Super: High privilege.
     
@@ -82,6 +82,6 @@ The following attributes are exported:
 
 RDS account can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_db_account.example "rm-12345:tf_account"
 ```

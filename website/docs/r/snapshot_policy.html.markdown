@@ -9,7 +9,7 @@ description: |-
 
 # alicloud\_snapshot\_policy
 
--> **DEPRECATED:** This resource has been renamed to [alicloud_ecs_auto_snapshot_policy](https://www.terraform.io/docs/providers/alicloud/r/ecs_auto_snapshot_policy.html) from version 1.117.0.
+-> **DEPRECATED:** This resource has been renamed to [alicloud_ecs_auto_snapshot_policy](https://www.terraform.io/docs/providers/alicloud/r/ecs_auto_snapshot_policy) from version 1.117.0.
 
 Provides an ECS snapshot policy resource.
 
@@ -19,7 +19,7 @@ For information about snapshot policy and how to use it, see [Snapshot](https://
 
 ## Example Usage
 
-```
+```terraform
 resource "alicloud_snapshot_policy" "sp" {
   name            = "tf-testAcc-sp"
   repeat_weekdays = ["1", "2", "3"]
@@ -55,6 +55,6 @@ The following attributes are exported:
 
 Snapshot can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_snapshot_policy.snapshot sp-abc1234567890000
 ```

@@ -88,11 +88,11 @@ type DescribeAlertHistoryListRequest struct {
 // DescribeAlertHistoryListResponse is the response struct for api DescribeAlertHistoryList
 type DescribeAlertHistoryListResponse struct {
 	*responses.BaseResponse
-	Success          bool             `json:"Success" xml:"Success"`
 	Code             string           `json:"Code" xml:"Code"`
 	Message          string           `json:"Message" xml:"Message"`
-	Total            string           `json:"Total" xml:"Total"`
 	RequestId        string           `json:"RequestId" xml:"RequestId"`
+	Total            string           `json:"Total" xml:"Total"`
+	Success          bool             `json:"Success" xml:"Success"`
 	AlarmHistoryList AlarmHistoryList `json:"AlarmHistoryList" xml:"AlarmHistoryList"`
 }
 

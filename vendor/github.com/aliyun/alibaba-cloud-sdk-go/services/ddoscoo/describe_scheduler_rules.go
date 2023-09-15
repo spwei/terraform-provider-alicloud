@@ -83,8 +83,8 @@ type DescribeSchedulerRulesRequest struct {
 // DescribeSchedulerRulesResponse is the response struct for api DescribeSchedulerRules
 type DescribeSchedulerRulesResponse struct {
 	*responses.BaseResponse
-	RequestId      string          `json:"RequestId" xml:"RequestId"`
 	TotalCount     string          `json:"TotalCount" xml:"TotalCount"`
+	RequestId      string          `json:"RequestId" xml:"RequestId"`
 	SchedulerRules []SchedulerRule `json:"SchedulerRules" xml:"SchedulerRules"`
 }
 

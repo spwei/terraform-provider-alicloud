@@ -15,25 +15,40 @@ Provides a resource to put a object(content or file) to a oss bucket.
 
 ### Uploading a file to a bucket
 
-```
-resource "alicloud_oss_bucket_object" "object-source" {
-  bucket = "your_bucket_name"
-  key    = "new_object_key"
-  source = "path/to/file"
+```terraform
+resource "random_integer" "default" {
+  max = 99999
+  min = 10000
+}
+
+resource "alicloud_oss_bucket" "default" {
+  bucket = "terraform-example-${random_integer.default.result}"
+  acl    = "private"
+}
+
+resource "alicloud_oss_bucket_object" "default" {
+  bucket = alicloud_oss_bucket.default.bucket
+  key    = "example_key"
+  source = "./main.tf"
 }
 ```
 
 ### Uploading a content to a bucket
 
-```
-resource "alicloud_oss_bucket" "example" {
-  bucket = "your_bucket_name"
-  acl    = "public-read"
+```terraform
+resource "random_integer" "default" {
+  max = 99999
+  min = 10000
 }
 
-resource "alicloud_oss_bucket_object" "object-content" {
-  bucket  = alicloud_oss_bucket.example.bucket
-  key     = "new_object_key"
+resource "alicloud_oss_bucket" "default" {
+  bucket = "terraform-example-${random_integer.default.result}"
+  acl    = "private"
+}
+
+resource "alicloud_oss_bucket_object" "default" {
+  bucket  = alicloud_oss_bucket.default.bucket
+  key     = "example_key"
   content = "the content that you want to upload."
 }
 ```
@@ -44,8 +59,8 @@ resource "alicloud_oss_bucket_object" "object-content" {
 
 The following arguments are supported:
 
-* `bucket` - (Required) The name of the bucket to put the file in.
-* `key` - (Required) The name of the object once it is in the bucket.
+* `bucket` - (Required, ForceNew) The name of the bucket to put the file in.
+* `key` - (Required, ForceNew) The name of the object once it is in the bucket.
 * `source` - (Optional) The path to the source file being uploaded to the bucket.
 * `content` - (Optional unless `source` given) The literal content being uploaded to the bucket.
 * `acl` - (Optional) The [canned ACL](https://www.alibabacloud.com/help/doc-detail/52284.htm) to apply. Defaults to "private".

@@ -71,13 +71,16 @@ func (client *Client) ModifySiteMonitorWithCallback(request *ModifySiteMonitorRe
 // ModifySiteMonitorRequest is the request struct for api ModifySiteMonitor
 type ModifySiteMonitorRequest struct {
 	*requests.RpcRequest
-	Address     string `position:"Query" name:"Address"`
-	TaskName    string `position:"Query" name:"TaskName"`
-	IspCities   string `position:"Query" name:"IspCities"`
-	OptionsJson string `position:"Query" name:"OptionsJson"`
-	AlertIds    string `position:"Query" name:"AlertIds"`
-	Interval    string `position:"Query" name:"Interval"`
-	TaskId      string `position:"Query" name:"TaskId"`
+	TaskName        string         `position:"Query" name:"TaskName"`
+	AlertIds        string         `position:"Query" name:"AlertIds"`
+	TaskId          string         `position:"Query" name:"TaskId"`
+	Address         string         `position:"Query" name:"Address"`
+	AgentGroup      string         `position:"Query" name:"AgentGroup"`
+	IspCities       string         `position:"Query" name:"IspCities"`
+	OptionsJson     string         `position:"Query" name:"OptionsJson"`
+	IspCityFailRate requests.Float `position:"Query" name:"IspCityFailRate"`
+	IntervalUnit    string         `position:"Query" name:"IntervalUnit"`
+	Interval        string         `position:"Query" name:"Interval"`
 }
 
 // ModifySiteMonitorResponse is the response struct for api ModifySiteMonitor
@@ -85,8 +88,8 @@ type ModifySiteMonitorResponse struct {
 	*responses.BaseResponse
 	Code      string `json:"Code" xml:"Code"`
 	Message   string `json:"Message" xml:"Message"`
-	Success   string `json:"Success" xml:"Success"`
 	RequestId string `json:"RequestId" xml:"RequestId"`
+	Success   string `json:"Success" xml:"Success"`
 	Data      Data   `json:"Data" xml:"Data"`
 }
 

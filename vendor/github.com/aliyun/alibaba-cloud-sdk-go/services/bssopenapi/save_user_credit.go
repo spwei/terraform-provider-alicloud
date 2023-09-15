@@ -85,9 +85,9 @@ type SaveUserCreditRequest struct {
 type SaveUserCreditResponse struct {
 	*responses.BaseResponse
 	Code      string `json:"Code" xml:"Code"`
-	Success   bool   `json:"Success" xml:"Success"`
-	RequestId string `json:"RequestId" xml:"RequestId"`
 	Message   string `json:"Message" xml:"Message"`
+	RequestId string `json:"RequestId" xml:"RequestId"`
+	Success   bool   `json:"Success" xml:"Success"`
 }
 
 // CreateSaveUserCreditRequest creates a request to invoke SaveUserCredit API
@@ -95,7 +95,7 @@ func CreateSaveUserCreditRequest() (request *SaveUserCreditRequest) {
 	request = &SaveUserCreditRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "SaveUserCredit", "", "")
+	request.InitWithApiInfo("BssOpenApi", "2017-12-14", "SaveUserCredit", "bssopenapi", "openAPI")
 	request.Method = requests.POST
 	return
 }

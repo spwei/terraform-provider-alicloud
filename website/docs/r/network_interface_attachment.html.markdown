@@ -9,6 +9,8 @@ description: |-
 
 # alicloud\_network\_interface\_attachment
 
+-> **DEPRECATED:** This resource has been renamed to [alicloud_ecs_network_interface_attachment](https://www.terraform.io/docs/providers/alicloud/r/ecs_network_interface_attachment) from version 1.123.1.
+
 Provides an Alicloud ECS Elastic Network Interface Attachment as a resource to attach ENI to or detach ENI from ECS Instances.
 
 For information about Elastic Network Interface and how to use it, see [Elastic Network Interface](https://www.alibabacloud.com/help/doc-detail/58496.html).
@@ -17,7 +19,7 @@ For information about Elastic Network Interface and how to use it, see [Elastic 
 
 Bacis Usage
 
-```
+```terraform
 variable "name" {
   default = "networkInterfaceAttachment"
 }
@@ -36,10 +38,10 @@ data "alicloud_zones" "default" {
 }
 
 resource "alicloud_vswitch" "vswitch" {
-  vswitch_name      = var.name
-  cidr_block        = "192.168.0.0/24"
-  zone_id           = data.alicloud_zones.default.zones[0].id
-  vpc_id            = alicloud_vpc.vpc.id
+  vswitch_name = var.name
+  cidr_block   = "192.168.0.0/24"
+  zone_id      = data.alicloud_zones.default.zones[0].id
+  vpc_id       = alicloud_vpc.vpc.id
 }
 
 resource "alicloud_security_group" "group" {
@@ -102,6 +104,6 @@ In addition to all arguments above, the following attributes are exported:
 
 Network Interfaces Attachment resource can be imported using the id, e.g.
 
-```
+```shell
 $ terraform import alicloud_network_interface_attachment.eni eni-abc123456789000:i-abc123456789000
 ```

@@ -49,6 +49,11 @@ func dataSourceAlicloudPolarDBNodeClasses() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"category": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"Normal", "Basic", "ArchiveNormal", "NormalMultimaster", "SENormal"}, false),
+			},
 			// Computed values.
 			"classes": {
 				Type:     schema.TypeList,
@@ -107,8 +112,10 @@ func dataSourceAlicloudPolarDBInstanceClassesRead(d *schema.ResourceData, meta i
 		request.DBType = dbType.(string)
 		request.DBVersion = dbVersion.(string)
 	}
+	checkDBNodeClass := ""
 	if dbNodeClass, ok := d.GetOk("db_node_class"); ok {
 		request.DBNodeClass = dbNodeClass.(string)
+		checkDBNodeClass = dbNodeClass.(string)
 	}
 	if regionId, ok := d.GetOk("region_id"); ok {
 		request.RegionId = regionId.(string)
@@ -117,13 +124,18 @@ func dataSourceAlicloudPolarDBInstanceClassesRead(d *schema.ResourceData, meta i
 		request.ZoneId = zoneId.(string)
 	}
 
+	var category string
+	if s, ok := d.GetOk("category"); ok && s.(string) != "" {
+		category = s.(string)
+	}
+
 	var response = &polardb.DescribeDBClusterAvailableResourcesResponse{}
 	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 		raw, err := client.WithPolarDBClient(func(polardbClient *polardb.Client) (interface{}, error) {
 			return polardbClient.DescribeDBClusterAvailableResources(request)
 		})
 		if err != nil {
-			if IsExpectedErrors(err, []string{Throttling}) {
+			if NeedRetry(err) {
 				time.Sleep(time.Duration(5) * time.Second)
 				return resource.RetryableError(err)
 			}
@@ -157,8 +169,26 @@ func dataSourceAlicloudPolarDBInstanceClassesRead(d *schema.ResourceData, meta i
 			}
 			var dbNodeClasses []map[string]string
 			for _, availableResource := range supportedEngine.AvailableResources {
+				if "" != checkDBNodeClass && availableResource.DBNodeClass != checkDBNodeClass {
+					continue
+				}
 				dbNodeClass := map[string]string{"db_node_class": availableResource.DBNodeClass}
-				dbNodeClasses = append(dbNodeClasses, dbNodeClass)
+
+				if "" != category {
+					// 匹配过滤条件，返回符合条件的数据
+					resultCategory := availableResource.Category
+					if category == resultCategory {
+						dbNodeClasses = append(dbNodeClasses, dbNodeClass)
+					}
+				} else {
+					// category是空没有过滤条件返回所有数据
+					dbNodeClasses = append(dbNodeClasses, dbNodeClass)
+				}
+
+			}
+			// 过滤掉不支持的可用区数据
+			if len(dbNodeClasses) == 0 {
+				continue
 			}
 			availableResources := map[string]interface{}{
 				"engine":              supportedEngine.Engine,

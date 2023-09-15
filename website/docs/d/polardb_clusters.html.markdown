@@ -7,19 +7,47 @@ description: |-
     Provides a collection of PolarDB clusters according to the specified filters.
 ---
 
-# alicloud\_polardb\_clusters
+# alicloud_polardb_clusters
 
 The `alicloud_polardb_clusters` data source provides a collection of PolarDB clusters available in Alibaba Cloud account.
 Filters support regular expression for the cluster description, searches by tags, and other filters which are listed below.
 
--> **NOTE:** Available in v1.66.0+.
+-> **NOTE:** Available since v1.66.0+.
 
 ## Example Usage
 
 ```terraform
+data "alicloud_polardb_node_classes" "this" {
+  db_type    = "MySQL"
+  db_version = "8.0"
+  pay_type   = "PostPaid"
+  category   = "Normal"
+}
+
+resource "alicloud_vpc" "default" {
+  vpc_name   = "terraform-example"
+  cidr_block = "172.16.0.0/16"
+}
+
+resource "alicloud_vswitch" "default" {
+  vpc_id       = alicloud_vpc.default.id
+  cidr_block   = "172.16.0.0/24"
+  zone_id      = data.alicloud_polardb_node_classes.this.classes[0].zone_id
+  vswitch_name = "terraform-example"
+}
+
+resource "alicloud_polardb_cluster" "cluster" {
+  db_type       = "MySQL"
+  db_version    = "8.0"
+  pay_type      = "PostPaid"
+  db_node_count = "2"
+  db_node_class = data.alicloud_polardb_node_classes.this.classes.0.supported_engines.0.available_resources.0.db_node_class
+  vswitch_id    = alicloud_vswitch.default.id
+}
+
 data "alicloud_polardb_clusters" "polardb_clusters_ds" {
-  description_regex = "pc-\\w+"
-  status     = "Running"
+  description_regex = alicloud_polardb_cluster.cluster.id
+  status            = "Running"
 }
 
 output "first_polardb_cluster_id" {
@@ -67,6 +95,8 @@ The following attributes are exported in addition to the arguments listed above:
   * `db_node_number` - The DBNodeNumber of the PolarDB cluster.
   * `db_node_class` - The DBNodeClass of the PolarDB cluster.
   * `storage_used` - The StorageUsed of the PolarDB cluster.
+  * `connection_string` - PolarDB cluster connection string. 
+  * `port` - PolarDB cluster connection port. 
   * `db_nodes` - The DBNodes of the PolarDB cluster.
     * `db_node_class` - The db_node_class of the db_nodes.
     * `max_iops` - The max_iops of the db_nodes.

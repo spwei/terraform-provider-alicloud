@@ -71,37 +71,43 @@ func (client *Client) CreateShardingDBInstanceWithCallback(request *CreateShardi
 // CreateShardingDBInstanceRequest is the request struct for api CreateShardingDBInstance
 type CreateShardingDBInstanceRequest struct {
 	*requests.RpcRequest
-	ResourceOwnerId       requests.Integer                        `position:"Query" name:"ResourceOwnerId"`
-	ClientToken           string                                  `position:"Query" name:"ClientToken"`
-	EngineVersion         string                                  `position:"Query" name:"EngineVersion"`
-	NetworkType           string                                  `position:"Query" name:"NetworkType"`
-	ReplicaSet            *[]CreateShardingDBInstanceReplicaSet   `position:"Query" name:"ReplicaSet"  type:"Repeated"`
-	StorageEngine         string                                  `position:"Query" name:"StorageEngine"`
-	SecurityToken         string                                  `position:"Query" name:"SecurityToken"`
-	Engine                string                                  `position:"Query" name:"Engine"`
-	DBInstanceDescription string                                  `position:"Query" name:"DBInstanceDescription"`
-	Period                requests.Integer                        `position:"Query" name:"Period"`
-	RestoreTime           string                                  `position:"Query" name:"RestoreTime"`
-	ResourceOwnerAccount  string                                  `position:"Query" name:"ResourceOwnerAccount"`
-	SrcDBInstanceId       string                                  `position:"Query" name:"SrcDBInstanceId"`
-	OwnerAccount          string                                  `position:"Query" name:"OwnerAccount"`
-	ConfigServer          *[]CreateShardingDBInstanceConfigServer `position:"Query" name:"ConfigServer"  type:"Repeated"`
-	OwnerId               requests.Integer                        `position:"Query" name:"OwnerId"`
-	Mongos                *[]CreateShardingDBInstanceMongos       `position:"Query" name:"Mongos"  type:"Repeated"`
-	SecurityIPList        string                                  `position:"Query" name:"SecurityIPList"`
-	VSwitchId             string                                  `position:"Query" name:"VSwitchId"`
-	AccountPassword       string                                  `position:"Query" name:"AccountPassword"`
-	AutoRenew             string                                  `position:"Query" name:"AutoRenew"`
-	VpcId                 string                                  `position:"Query" name:"VpcId"`
-	ZoneId                string                                  `position:"Query" name:"ZoneId"`
-	ProtocolType          string                                  `position:"Query" name:"ProtocolType"`
-	ChargeType            string                                  `position:"Query" name:"ChargeType"`
+	ResourceOwnerId        requests.Integer                        `position:"Query" name:"ResourceOwnerId"`
+	SecondaryZoneId        string                                  `position:"Query" name:"SecondaryZoneId"`
+	EngineVersion          string                                  `position:"Query" name:"EngineVersion"`
+	NetworkType            string                                  `position:"Query" name:"NetworkType"`
+	ReplicaSet             *[]CreateShardingDBInstanceReplicaSet   `position:"Query" name:"ReplicaSet"  type:"Repeated"`
+	StorageType            string                                  `position:"Query" name:"StorageType"`
+	ResourceGroupId        string                                  `position:"Query" name:"ResourceGroupId"`
+	SecurityToken          string                                  `position:"Query" name:"SecurityToken"`
+	DBInstanceDescription  string                                  `position:"Query" name:"DBInstanceDescription"`
+	GlobalSecurityGroupIds string                                  `position:"Query" name:"GlobalSecurityGroupIds"`
+	Period                 requests.Integer                        `position:"Query" name:"Period"`
+	ConfigServer           *[]CreateShardingDBInstanceConfigServer `position:"Query" name:"ConfigServer"  type:"Repeated"`
+	OwnerId                requests.Integer                        `position:"Query" name:"OwnerId"`
+	SecurityIPList         string                                  `position:"Query" name:"SecurityIPList"`
+	VSwitchId              string                                  `position:"Query" name:"VSwitchId"`
+	Mongos                 *[]CreateShardingDBInstanceMongos       `position:"Query" name:"Mongos"  type:"Repeated"`
+	AutoRenew              string                                  `position:"Query" name:"AutoRenew"`
+	ZoneId                 string                                  `position:"Query" name:"ZoneId"`
+	ClientToken            string                                  `position:"Query" name:"ClientToken"`
+	StorageEngine          string                                  `position:"Query" name:"StorageEngine"`
+	Engine                 string                                  `position:"Query" name:"Engine"`
+	HiddenZoneId           string                                  `position:"Query" name:"HiddenZoneId"`
+	RestoreTime            string                                  `position:"Query" name:"RestoreTime"`
+	ResourceOwnerAccount   string                                  `position:"Query" name:"ResourceOwnerAccount"`
+	SrcDBInstanceId        string                                  `position:"Query" name:"SrcDBInstanceId"`
+	OwnerAccount           string                                  `position:"Query" name:"OwnerAccount"`
+	AccountPassword        string                                  `position:"Query" name:"AccountPassword"`
+	VpcId                  string                                  `position:"Query" name:"VpcId"`
+	ProtocolType           string                                  `position:"Query" name:"ProtocolType"`
+	ChargeType             string                                  `position:"Query" name:"ChargeType"`
 }
 
 // CreateShardingDBInstanceReplicaSet is a repeated param struct in CreateShardingDBInstanceRequest
 type CreateShardingDBInstanceReplicaSet struct {
-	Storage string `name:"Storage"`
-	Class   string `name:"Class"`
+	ReadonlyReplicas string `name:"ReadonlyReplicas"`
+	Storage          string `name:"Storage"`
+	Class            string `name:"Class"`
 }
 
 // CreateShardingDBInstanceConfigServer is a repeated param struct in CreateShardingDBInstanceRequest
@@ -118,9 +124,9 @@ type CreateShardingDBInstanceMongos struct {
 // CreateShardingDBInstanceResponse is the response struct for api CreateShardingDBInstance
 type CreateShardingDBInstanceResponse struct {
 	*responses.BaseResponse
+	RequestId    string `json:"RequestId" xml:"RequestId"`
 	DBInstanceId string `json:"DBInstanceId" xml:"DBInstanceId"`
 	OrderId      string `json:"OrderId" xml:"OrderId"`
-	RequestId    string `json:"RequestId" xml:"RequestId"`
 }
 
 // CreateCreateShardingDBInstanceRequest creates a request to invoke CreateShardingDBInstance API
@@ -128,7 +134,7 @@ func CreateCreateShardingDBInstanceRequest() (request *CreateShardingDBInstanceR
 	request = &CreateShardingDBInstanceRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("Dds", "2015-12-01", "CreateShardingDBInstance", "Dds", "openAPI")
+	request.InitWithApiInfo("Dds", "2015-12-01", "CreateShardingDBInstance", "dds", "openAPI")
 	request.Method = requests.POST
 	return
 }

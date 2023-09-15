@@ -77,10 +77,10 @@ type DescribeMonitorGroupDynamicRulesRequest struct {
 // DescribeMonitorGroupDynamicRulesResponse is the response struct for api DescribeMonitorGroupDynamicRules
 type DescribeMonitorGroupDynamicRulesResponse struct {
 	*responses.BaseResponse
-	RequestId string                                     `json:"RequestId" xml:"RequestId"`
-	Success   bool                                       `json:"Success" xml:"Success"`
 	Code      int                                        `json:"Code" xml:"Code"`
 	Message   string                                     `json:"Message" xml:"Message"`
+	RequestId string                                     `json:"RequestId" xml:"RequestId"`
+	Success   bool                                       `json:"Success" xml:"Success"`
 	Resource  ResourceInDescribeMonitorGroupDynamicRules `json:"Resource" xml:"Resource"`
 }
 

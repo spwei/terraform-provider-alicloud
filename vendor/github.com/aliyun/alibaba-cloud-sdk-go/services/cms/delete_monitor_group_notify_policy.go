@@ -80,9 +80,9 @@ type DeleteMonitorGroupNotifyPolicyResponse struct {
 	*responses.BaseResponse
 	Code      string `json:"Code" xml:"Code"`
 	Message   string `json:"Message" xml:"Message"`
-	Success   string `json:"Success" xml:"Success"`
 	RequestId string `json:"RequestId" xml:"RequestId"`
 	Result    int    `json:"Result" xml:"Result"`
+	Success   string `json:"Success" xml:"Success"`
 }
 
 // CreateDeleteMonitorGroupNotifyPolicyRequest creates a request to invoke DeleteMonitorGroupNotifyPolicy API

@@ -10,7 +10,6 @@ import (
 
 	"log"
 	"strings"
-	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/drds"
 	"github.com/aliyun/terraform-provider-alicloud/alicloud/connectivity"
@@ -35,8 +34,8 @@ func testSweepDRDSInstances(region string) error {
 	client := rawClient.(*connectivity.AliyunClient)
 
 	prefixes := []string{
-		fmt.Sprintf("tf-testAcc%s", region),
-		fmt.Sprintf("tf_testAcc%s", region),
+		"tf-testAcc",
+		"tf_testAcc",
 	}
 
 	request := drds.CreateDescribeDrdsInstancesRequest()
@@ -48,43 +47,42 @@ func testSweepDRDSInstances(region string) error {
 	}
 	response, _ := raw.(*drds.DescribeDrdsInstancesResponse)
 
-	sweeped := false
 	vpcService := VpcService{client}
-	for _, v := range response.Data.Instance {
+	for _, v := range response.Instances.Instance {
 		name := v.Description
 		id := v.DrdsInstanceId
 		skip := true
-		for _, prefix := range prefixes {
-			if strings.HasPrefix(strings.ToLower(name), strings.ToLower(prefix)) {
-				skip = false
-				break
-			}
-		}
-		// If a slb name is set by other service, it should be fetched by vswitch name and deleted.
-		if skip {
-			instanceDetailRequest := drds.CreateDescribeDrdsInstanceRequest()
-			instanceDetailRequest.DrdsInstanceId = id
-			raw, err := client.WithDrdsClient(func(drdsClient *drds.Client) (interface{}, error) {
-				return drdsClient.DescribeDrdsInstance(instanceDetailRequest)
-			})
-			if err != nil {
-				log.Printf("[ERROR] Error retrieving DRDS Instance: %s. %s", id, WrapError(err))
-			}
-			instanceDetailResponse, _ := raw.(*drds.DescribeDrdsInstanceResponse)
-			for _, vip := range instanceDetailResponse.Data.Vips.Vip {
-				if need, err := vpcService.needSweepVpc(vip.VpcId, ""); err == nil {
-					skip = !need
+		if !sweepAll() {
+			for _, prefix := range prefixes {
+				if strings.HasPrefix(strings.ToLower(name), strings.ToLower(prefix)) {
+					skip = false
 					break
 				}
 			}
+			// If a slb name is set by other service, it should be fetched by vswitch name and deleted.
+			if skip {
+				instanceDetailRequest := drds.CreateDescribeDrdsInstanceRequest()
+				instanceDetailRequest.DrdsInstanceId = id
+				raw, err := client.WithDrdsClient(func(drdsClient *drds.Client) (interface{}, error) {
+					return drdsClient.DescribeDrdsInstance(instanceDetailRequest)
+				})
+				if err != nil {
+					log.Printf("[ERROR] Error retrieving DRDS Instance: %s. %s", id, WrapError(err))
+				}
+				instanceDetailResponse, _ := raw.(*drds.DescribeDrdsInstanceResponse)
+				for _, vip := range instanceDetailResponse.Data.Vips.Vip {
+					if need, err := vpcService.needSweepVpc(vip.VpcId, ""); err == nil {
+						skip = !need
+						break
+					}
+				}
 
+			}
+			if skip {
+				log.Printf("[INFO] Skipping DRDS Instance: %s (%s)", name, id)
+				continue
+			}
 		}
-		if skip {
-			log.Printf("[INFO] Skipping DRDS Instance: %s (%s)", name, id)
-			continue
-		}
-
-		sweeped = true
 		log.Printf("[INFO] Deleting DRDS Instance: %s (%s)", name, id)
 		req := drds.CreateRemoveDrdsInstanceRequest()
 		req.DrdsInstanceId = id
@@ -94,10 +92,6 @@ func testSweepDRDSInstances(region string) error {
 		if err != nil {
 			log.Printf("[ERROR] Failed to delete DRDS Instance (%s (%s)): %s", name, id, err)
 		}
-	}
-	if sweeped {
-		// Waiting 30 seconds to ensure these DB instances have been deleted.
-		time.Sleep(30 * time.Second)
 	}
 	return nil
 }
@@ -124,7 +118,6 @@ func TestAccAlicloudDRDSInstance_Vpc(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckWithRegions(t, true, connectivity.DrdsSupportedRegions)
-			testAccPreCheckWithNoDefaultVpc(t)
 		},
 		// module name
 		IDRefreshName: resourceId,
@@ -142,7 +135,8 @@ func TestAccAlicloudDRDSInstance_Vpc(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"description": name,
+						"description":   name,
+						"mysql_version": "5",
 					}),
 				),
 			},
@@ -198,7 +192,6 @@ func TestAccAlicloudDRDSInstance_Multi(t *testing.T) {
 			testAccPreCheck(t)
 			testAccPreCheckWithRegions(t, true, connectivity.DrdsSupportedRegions)
 			testAccPreCheckWithRegions(t, false, connectivity.DrdsClassicNoSupportedRegions)
-			testAccPreCheckWithNoDefaultVpc(t)
 		},
 		// module name
 		IDRefreshName: resourceId,
@@ -214,12 +207,122 @@ func TestAccAlicloudDRDSInstance_Multi(t *testing.T) {
 					"specification":        "drds.sn1.4c8g.8C16G",
 					"vswitch_id":           "${data.alicloud_vswitches.default.vswitches.0.id}",
 					"count":                "3",
+					"mysql_version":        "5",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"description": name,
 					}),
 				),
+			},
+		},
+	})
+}
+
+func TestAccAlicloudDRDSInstance_VpcId(t *testing.T) {
+	var v *drds.DescribeDrdsInstanceResponse
+
+	resourceId := "alicloud_drds_instance.default"
+	ra := resourceAttrInit(resourceId, drdsInstancebasicMap)
+
+	serviceFunc := func() interface{} {
+		return &DrdsService{testAccProvider.Meta().(*connectivity.AliyunClient)}
+	}
+	rc := resourceCheckInit(resourceId, &v, serviceFunc)
+
+	rac := resourceAttrCheckInit(rc, ra)
+
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := acctest.RandInt()
+	name := fmt.Sprintf("tf-testacc%sDrdsdatabase-%d", defaultRegionToTest, rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceDRDSInstanceConfigDependence)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckWithRegions(t, true, connectivity.DrdsSupportedRegions)
+		},
+		// module name
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
+		CheckDestroy:  rac.checkResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"description":          "${var.name}",
+					"zone_id":              "${data.alicloud_vswitches.default.vswitches.0.zone_id}",
+					"instance_series":      "${var.instance_series}",
+					"instance_charge_type": "PostPaid",
+					"vswitch_id":           "${data.alicloud_vswitches.default.vswitches.0.id}",
+					"specification":        "drds.sn1.4c8g.8C16G",
+					"vpc_id":               "${data.alicloud_vpcs.default.ids.0}",
+					"mysql_version":        "5",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"description": name,
+						"vpc_id":      CHECKSET,
+					}),
+				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: false,
+			},
+		},
+	})
+}
+
+func TestAccAlicloudDRDSInstance_MySQLVersion(t *testing.T) {
+	var v *drds.DescribeDrdsInstanceResponse
+
+	resourceId := "alicloud_drds_instance.default"
+	ra := resourceAttrInit(resourceId, drdsInstancebasicMap)
+
+	serviceFunc := func() interface{} {
+		return &DrdsService{testAccProvider.Meta().(*connectivity.AliyunClient)}
+	}
+	rc := resourceCheckInit(resourceId, &v, serviceFunc)
+
+	rac := resourceAttrCheckInit(rc, ra)
+
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := acctest.RandInt()
+	name := fmt.Sprintf("tf-testacc%sDrdsdatabase-%d", defaultRegionToTest, rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceDRDSInstanceConfigDependence)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccPreCheckWithRegions(t, true, connectivity.DrdsSupportedRegions)
+		},
+		// module name
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
+		CheckDestroy:  rac.checkResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"description":          "${var.name}",
+					"zone_id":              "${data.alicloud_vswitches.default.vswitches.0.zone_id}",
+					"instance_series":      "${var.instance_series}",
+					"instance_charge_type": "PostPaid",
+					"vswitch_id":           "${data.alicloud_vswitches.default.vswitches.0.id}",
+					"specification":        "drds.sn1.4c8g.8C16G",
+					"mysql_version":        "5",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"description":   name,
+						"mysql_version": "5",
+					}),
+				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: false,
 			},
 		},
 	})
@@ -239,7 +342,7 @@ func resourceDRDSInstanceConfigDependence(name string) string {
 	}
 	
 	data "alicloud_vpcs" "default"	{
-        is_default = "true"
+        name_regex = "default-NODELETING"
 	}
 	data "alicloud_vswitches" "default" {
 	  vpc_id = "${data.alicloud_vpcs.default.ids.0}"
@@ -253,4 +356,6 @@ var drdsInstancebasicMap = map[string]string{
 	"instance_series":      "drds.sn1.4c8g",
 	"instance_charge_type": "PostPaid",
 	"specification":        "drds.sn1.4c8g.8C16G",
+	"connection_string":    CHECKSET,
+	"port":                 CHECKSET,
 }
